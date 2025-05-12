@@ -143,30 +143,32 @@ class PresetManager {
     private func applyFactoryPreset(_ presetNumber: Int) {
         guard let parameterTree = parameterTree else { return }
 
+        // Start by applying default settings to reset everything
+        applyDefaultSettings()
+
         switch presetNumber {
         case 0: // Default
-            // Apply default settings
-            applyDefaultSettings()
+            // Already handled by applyDefaultSettings() above
+            break
 
         case 1: // Vintage Tape
-            // Apply vintage tape settings
+            // Apply vintage tape settings using macros and new params
+            setParameterValue(.tape_wear_macro, value: 0.65) // Moderate wear
             setParameterValue(.feedback, value: 0.68)
-            setParameterValue(.wow, value: 0.7)
-            setParameterValue(.wow_intensity, value: 0.4)
-            setParameterValue(.noise_amount, value: 0.2)
             setParameterValue(.highpass, value: 320)
             setParameterValue(.lowpass, value: 6500)
             setParameterValue(.delay_ms, value: 350)
             setParameterValue(.mix, value: 45)
+            setParameterValue(.diffusion_amount, value: 0.1) // Subtle diffusion
 
         case 2: // Glitchy Repeat
-            // Apply glitchy repeat settings
+            // Apply glitchy repeat settings using macros
+            setParameterValue(.glitch_macro, value: 0.70) // Significant glitch
+            setParameterValue(.tape_wear_macro, value: 0.15) // Low wear for clarity
             setParameterValue(.delay_ms, value: 220)
-            setParameterValue(.glitch_rate, value: 1.1)
-            setParameterValue(.glitch_amount, value: 0.65)
             setParameterValue(.pitch_shift, value: -3)
             setParameterValue(.feedback, value: 0.72)
-            setParameterValue(.flutter_intensity, value: 0.3)
+            setParameterValue(.mix, value: 55) // Slightly wetter mix
 
         case 3: // Ambience
             // Apply ambience settings
@@ -176,10 +178,12 @@ class PresetManager {
             setParameterValue(.lowpass, value: 8000)
             setParameterValue(.mix, value: 38)
             setParameterValue(.spread_amount, value: 0.8)
+            setParameterValue(.diffusion_amount, value: 0.45) // More diffusion
+            setParameterValue(.tape_wear_macro, value: 0.1) // Low wear
 
         default:
-            // Unknown preset, apply defaults
-            applyDefaultSettings()
+            // Unknown preset, defaults already applied
+            break
         }
     }
 
@@ -204,30 +208,24 @@ class PresetManager {
         }
     }
 
-    /// Apply default parameter settings
+    /// Apply default parameter settings based on ParameterSpec definitions
     private func applyDefaultSettings() {
-        // Set all parameters to their default values
-        setParameterValue(.gain, value: 1.0)
+        // Use defaults defined in Parameters.swift
         setParameterValue(.spread_amount, value: 0.0)
         setParameterValue(.output_gain, value: 0.0)
         setParameterValue(.delay_ms, value: 300.0)
         setParameterValue(.feedback, value: 0.5)
-        setParameterValue(.noise_amount, value: 0.0)
         setParameterValue(.pitch_shift, value: 0.0)
         setParameterValue(.highpass, value: 250.0)
         setParameterValue(.lowpass, value: 10000.0)
-        setParameterValue(.random_mod, value: 0.002)
-        setParameterValue(.wow, value: 0.5)
-        setParameterValue(.wow_intensity, value: 0.3)
-        setParameterValue(.flutter, value: 8.0)
-        setParameterValue(.flutter_intensity, value: 0.1)
-        setParameterValue(.ducking, value: -30.0)
-        setParameterValue(.attack, value: 10.0)
-        setParameterValue(.release, value: 200.0)
-        setParameterValue(.ratio, value: 4.0)
-        setParameterValue(.glitch_rate, value: 0.5)
-        setParameterValue(.glitch_amount, value: 0.0)
+        setParameterValue(.diffusion_amount, value: 0.0)
+        setParameterValue(.tape_wear_macro, value: 0.1) // Default from ParamSpec
+        setParameterValue(.glitch_macro, value: 0.0)
+        setParameterValue(.ducking_macro, value: 0.0)
+        setParameterValue(.duck_attack, value: 10.0)
+        setParameterValue(.duck_release, value: 200.0)
         setParameterValue(.mix, value: 50.0)
+        // Note: Removed settings for old hidden parameters
     }
 
     // MARK: - Helper Methods

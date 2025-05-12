@@ -1,1 +1,1 @@
-faust -i -a faustMinimal.h $1.dsp -o $1.h -cn $1 -clang
+faust -i -a faustMinimal.h $1.dsp -o $1.h -cn $1 -clang -vec

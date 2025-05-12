@@ -12,7 +12,7 @@
 #include <vector>
 #include <span>
 
-#include "LunaExtensionParameterAddresses.h"
+#include "../Parameters/LunaExtensionParameterAddresses.h"
 #include "FaustWrapper.h"
 #include "Macalla.h" // Include your Faust-generated DSP header
 
@@ -23,8 +23,8 @@
 class LunaExtensionDSPKernel
 {
   public:
-    void initialize(int inputChannelCount,
-                    int outputChannelCount,
+    void initialize(int /*inputChannelCount*/,
+                    int /*outputChannelCount*/,
                     double inSampleRate)
     {
         mSampleRate   = inSampleRate;
@@ -38,26 +38,23 @@ class LunaExtensionDSPKernel
             mFaustWrapper->setParameter("output_gain", mOutputGain);
             mFaustWrapper->setParameter("delay(ms)", mDelayMs);
             mFaustWrapper->setParameter("feedback", mFeedback);
-            mFaustWrapper->setParameter("noise_amount", mNoiseAmount);
             mFaustWrapper->setParameter("pitch_shift", mPitchShift);
             mFaustWrapper->setParameter("highpass", mHighpass);
             mFaustWrapper->setParameter("lowpass", mLowpass);
-            mFaustWrapper->setParameter("random_mod", mRandomMod);
-            mFaustWrapper->setParameter("wow", mWow);
-            mFaustWrapper->setParameter("wow_intensity", mWowIntensity);
-            mFaustWrapper->setParameter("flutter", mFlutter);
-            mFaustWrapper->setParameter("flutter_intensity", mFlutterIntensity);
-            mFaustWrapper->setParameter("ducking", mDucking);
-            mFaustWrapper->setParameter("attack", mAttack);
-            mFaustWrapper->setParameter("release", mRelease);
-            mFaustWrapper->setParameter("ratio", mRatio);
-            mFaustWrapper->setParameter("glitch_rate", mGlitchRate);
-            mFaustWrapper->setParameter("glitch_amount", mGlitchAmount);
+            mFaustWrapper->setParameter("diffusion", mDiffusionAmount);
+            mFaustWrapper->setParameter("Tape Wear", mTapeWearMacro);
+            mFaustWrapper->setParameter("Glitch", mGlitchMacro);
+            mFaustWrapper->setParameter("Ducking Amount", mDuckingMacro);
+            mFaustWrapper->setParameter("att", mDuckAttack);
+            mFaustWrapper->setParameter("rel", mDuckRelease);
             mFaustWrapper->setParameter("mix", mMix);
         }
     }
 
-    void deInitialize() {}
+    void deInitialize()
+    {
+        mFaustWrapper.reset(); // Clean up Faust instance
+    }
 
     // MARK: - Bypass
     bool isBypassed() { return mBypassed; }
@@ -72,12 +69,6 @@ class LunaExtensionDSPKernel
 
         switch (address)
         {
-            // Legacy parameter
-            case LunaExtensionParameterAddress::gain:
-                mGain = value;
-                break;
-
-            // Macalla parameters
             case LunaExtensionParameterAddress::spread_amount:
                 mSpreadAmount = value;
                 mFaustWrapper->setParameter("spread_amount", value);
@@ -98,11 +89,6 @@ class LunaExtensionDSPKernel
                 mFaustWrapper->setParameter("feedback", value);
                 break;
 
-            case LunaExtensionParameterAddress::noise_amount:
-                mNoiseAmount = value;
-                mFaustWrapper->setParameter("noise_amount", value);
-                break;
-
             case LunaExtensionParameterAddress::pitch_shift:
                 mPitchShift = value;
                 mFaustWrapper->setParameter("pitch_shift", value);
@@ -118,65 +104,54 @@ class LunaExtensionDSPKernel
                 mFaustWrapper->setParameter("lowpass", value);
                 break;
 
-            case LunaExtensionParameterAddress::random_mod:
-                mRandomMod = value;
-                mFaustWrapper->setParameter("random_mod", value);
+            case LunaExtensionParameterAddress::diffusion_amount:
+                mDiffusionAmount = value;
+                mFaustWrapper->setParameter("diffusion", value);
                 break;
 
-            case LunaExtensionParameterAddress::wow:
-                mWow = value;
-                mFaustWrapper->setParameter("wow", value);
+            case LunaExtensionParameterAddress::tape_wear_macro:
+                mTapeWearMacro = value;
+                mFaustWrapper->setParameter("Tape Wear", value);
                 break;
 
-            case LunaExtensionParameterAddress::wow_intensity:
-                mWowIntensity = value;
-                mFaustWrapper->setParameter("wow_intensity", value);
+            case LunaExtensionParameterAddress::glitch_macro:
+                mGlitchMacro = value;
+                mFaustWrapper->setParameter("Glitch", value);
                 break;
 
-            case LunaExtensionParameterAddress::flutter:
-                mFlutter = value;
-                mFaustWrapper->setParameter("flutter", value);
+            case LunaExtensionParameterAddress::ducking_macro:
+                mDuckingMacro = value;
+                mFaustWrapper->setParameter("Ducking Amount", value);
                 break;
 
-            case LunaExtensionParameterAddress::flutter_intensity:
-                mFlutterIntensity = value;
-                mFaustWrapper->setParameter("flutter_intensity", value);
+            case LunaExtensionParameterAddress::duck_attack:
+                mDuckAttack = value;
+                mFaustWrapper->setParameter("att", value);
                 break;
 
-            case LunaExtensionParameterAddress::ducking:
-                mDucking = value;
-                mFaustWrapper->setParameter("ducking", value);
-                break;
-
-            case LunaExtensionParameterAddress::attack:
-                mAttack = value;
-                mFaustWrapper->setParameter("attack", value);
-                break;
-
-            case LunaExtensionParameterAddress::release:
-                mRelease = value;
-                mFaustWrapper->setParameter("release", value);
-                break;
-
-            case LunaExtensionParameterAddress::ratio:
-                mRatio = value;
-                mFaustWrapper->setParameter("ratio", value);
-                break;
-
-            case LunaExtensionParameterAddress::glitch_rate:
-                mGlitchRate = value;
-                mFaustWrapper->setParameter("glitch_rate", value);
-                break;
-
-            case LunaExtensionParameterAddress::glitch_amount:
-                mGlitchAmount = value;
-                mFaustWrapper->setParameter("glitch_amount", value);
+            case LunaExtensionParameterAddress::duck_release:
+                mDuckRelease = value;
+                mFaustWrapper->setParameter("rel", value);
                 break;
 
             case LunaExtensionParameterAddress::mix:
                 mMix = value;
                 mFaustWrapper->setParameter("mix", value);
                 break;
+
+            // --- Sync Parameters ---
+            case LunaExtensionParameterAddress::delayTimeSync:
+                mDelayTimeSync = static_cast<int>(value);
+                updateDelayTime(); // Update Faust delay when sync setting
+                                   // changes
+                break;
+            case LunaExtensionParameterAddress::syncEnabled:
+                mSyncEnabled = static_cast<bool>(value);
+                updateDelayTime(); // Update Faust delay when sync
+                                   // enabled/disabled
+                break;
+
+                // Note: Removed cases for hidden parameters
         }
     }
 
@@ -184,71 +159,42 @@ class LunaExtensionDSPKernel
     {
         switch (address)
         {
-            // Legacy parameter
-            case LunaExtensionParameterAddress::gain:
-                return (AUValue)mGain;
-
-            // Macalla parameters
             case LunaExtensionParameterAddress::spread_amount:
                 return (AUValue)mSpreadAmount;
-
             case LunaExtensionParameterAddress::output_gain:
                 return (AUValue)mOutputGain;
-
             case LunaExtensionParameterAddress::delay_ms:
                 return (AUValue)mDelayMs;
-
             case LunaExtensionParameterAddress::feedback:
                 return (AUValue)mFeedback;
-
-            case LunaExtensionParameterAddress::noise_amount:
-                return (AUValue)mNoiseAmount;
-
             case LunaExtensionParameterAddress::pitch_shift:
                 return (AUValue)mPitchShift;
-
             case LunaExtensionParameterAddress::highpass:
                 return (AUValue)mHighpass;
-
             case LunaExtensionParameterAddress::lowpass:
                 return (AUValue)mLowpass;
-
-            case LunaExtensionParameterAddress::random_mod:
-                return (AUValue)mRandomMod;
-
-            case LunaExtensionParameterAddress::wow:
-                return (AUValue)mWow;
-
-            case LunaExtensionParameterAddress::wow_intensity:
-                return (AUValue)mWowIntensity;
-
-            case LunaExtensionParameterAddress::flutter:
-                return (AUValue)mFlutter;
-
-            case LunaExtensionParameterAddress::flutter_intensity:
-                return (AUValue)mFlutterIntensity;
-
-            case LunaExtensionParameterAddress::ducking:
-                return (AUValue)mDucking;
-
-            case LunaExtensionParameterAddress::attack:
-                return (AUValue)mAttack;
-
-            case LunaExtensionParameterAddress::release:
-                return (AUValue)mRelease;
-
-            case LunaExtensionParameterAddress::ratio:
-                return (AUValue)mRatio;
-
-            case LunaExtensionParameterAddress::glitch_rate:
-                return (AUValue)mGlitchRate;
-
-            case LunaExtensionParameterAddress::glitch_amount:
-                return (AUValue)mGlitchAmount;
-
+            case LunaExtensionParameterAddress::diffusion_amount:
+                return (AUValue)mDiffusionAmount;
+            case LunaExtensionParameterAddress::tape_wear_macro:
+                return (AUValue)mTapeWearMacro;
+            case LunaExtensionParameterAddress::glitch_macro:
+                return (AUValue)mGlitchMacro;
+            case LunaExtensionParameterAddress::ducking_macro:
+                return (AUValue)mDuckingMacro;
+            case LunaExtensionParameterAddress::duck_attack:
+                return (AUValue)mDuckAttack;
+            case LunaExtensionParameterAddress::duck_release:
+                return (AUValue)mDuckRelease;
             case LunaExtensionParameterAddress::mix:
                 return (AUValue)mMix;
 
+            // --- Sync Parameters ---
+            case LunaExtensionParameterAddress::delayTimeSync:
+                return (AUValue)mDelayTimeSync;
+            case LunaExtensionParameterAddress::syncEnabled:
+                return (AUValue)mSyncEnabled;
+
+            // Note: Removed cases for hidden parameters
             default:
                 return 0.f;
         }
@@ -282,43 +228,50 @@ class LunaExtensionDSPKernel
                  AUEventSampleTime bufferStartTime,
                  AUAudioFrameCount frameCount)
     {
-        /*
-         Note: For an Audio Unit with 'n' input channels to 'n' output channels,
-         remove the assert below and modify the check in [LunaExtensionAudioUnit
-         allocateRenderResourcesAndReturnError]
-         */
-        assert(inputBuffers.size() == outputBuffers.size());
-
-        if (mBypassed)
+        // Get Musical Context (Tempo)
+        double hostTempo = mCurrentTempo;
+        if (mMusicalContextBlock)
         {
-            // Pass the samples through
-            for (UInt32 channel = 0; channel < inputBuffers.size(); ++channel)
+            double tempo = 0.0;
+            if (mMusicalContextBlock(
+                  &tempo, nullptr, nullptr, nullptr, nullptr, nullptr))
             {
-                std::copy_n(
-                  inputBuffers[channel], frameCount, outputBuffers[channel]);
+                hostTempo = tempo;
+            }
+        }
+
+        // Check if tempo changed and update delay if sync enabled
+        if (hostTempo != mCurrentTempo)
+        {
+            mCurrentTempo = hostTempo;
+            if (mSyncEnabled)
+            {
+                updateDelayTime();
+            }
+        }
+
+        assert(inputBuffers.data() != nullptr &&
+               outputBuffers.data() != nullptr); // Basic check
+        const int channelCount = 2; // Assuming stereo, adjust if dynamic
+
+        if (mBypassed || !mFaustWrapper)
+        {
+            // Pass the samples through if bypassed or Faust not ready
+            for (UInt32 channel = 0; channel < channelCount; ++channel)
+            {
+                if (inputBuffers[channel] != outputBuffers[channel])
+                {
+                    std::copy_n(inputBuffers[channel],
+                                frameCount,
+                                outputBuffers[channel]);
+                }
             }
             return;
         }
 
         // Process with Faust DSP
-        if (mFaustWrapper)
-        {
-            mFaustWrapper->process(inputBuffers, outputBuffers, frameCount);
-        }
-        else
-        {
-            // Fallback if Faust DSP is not initialized
-            for (UInt32 channel = 0; channel < inputBuffers.size(); ++channel)
-            {
-                for (UInt32 frameIndex = 0; frameIndex < frameCount;
-                     ++frameIndex)
-                {
-                    // Do your sample by sample dsp here...
-                    outputBuffers[channel][frameIndex] =
-                      inputBuffers[channel][frameIndex] * mGain;
-                }
-            }
-        }
+        mFaustWrapper->process(
+          inputBuffers, outputBuffers, static_cast<int>(frameCount));
     }
 
     void handleOneEvent(AUEventSampleTime now, AURenderEvent const* event)
@@ -336,41 +289,96 @@ class LunaExtensionDSPKernel
         }
     }
 
-    void handleParameterEvent(AUEventSampleTime now,
+    void handleParameterEvent(AUEventSampleTime /*now*/,
                               AUParameterEvent const& parameterEvent)
     {
         setParameter(parameterEvent.parameterAddress, parameterEvent.value);
     }
 
+    // --- Helper to Calculate and Set Delay Time ---
+    void updateDelayTime()
+    {
+        if (!mFaustWrapper)
+            return;
+
+        double delayMsToSend = mDelayMs; // Default to manual delay time
+
+        if (mSyncEnabled && mCurrentTempo > 0)
+        {
+            // Sync is enabled, calculate based on tempo and sync division
+            double beatsPerSecond        = mCurrentTempo / 60.0;
+            double quarterNoteDurationMs = (1.0 / beatsPerSecond) * 1000.0;
+
+            // Map mDelayTimeSync index (0-17) to note duration multipliers
+            // Matches valueStrings in Parameters.swift
+            double multipliers[] = {
+                1.0 / 24.0, // 1/64T (1/16 * 2/3)
+                1.0 / 16.0, // 1/64
+                1.0 / 16.0, // 1/32T (1/8 * 2/3)
+                1.0 / 8.0,  // 1/32
+                1.0 / 8.0,  // 1/16T (1/4 * 2/3)
+                1.0 / 4.0,  // 1/16
+                1.0 / 4.0,  // 1/8T (1/2 * 2/3)
+                1.0 / 2.0,  // 1/8
+                1.0 / 2.0,  // 1/4T (1 * 2/3)
+                1.0,        // 1/4
+                1.0 * 1.5,  // 1/2T (2 * 2/3)
+                2.0,        // 1/2
+                2.0 * 1.5,  // 1/1T (4 * 2/3)
+                4.0,        // 1/1
+                4.0 * 1.5,  // 2/1T (8 * 2/3)
+                8.0,        // 2/1
+                8.0 * 1.5,  // 4/1T (16 * 2/3)
+                16.0        // 4/1
+            };
+
+            if (mDelayTimeSync >= 0 && mDelayTimeSync < std::size(multipliers))
+            {
+                delayMsToSend =
+                  quarterNoteDurationMs * multipliers[mDelayTimeSync];
+            }
+        }
+
+        // Ensure delay is within Faust's expected range (e.g., 1-1000ms)
+        // Clamp the value before sending it.
+        // TODO: Read the actual range from Faust declaration if possible or
+        // define constants.
+        delayMsToSend = std::max(1.0, std::min(delayMsToSend, 2000.0));
+
+        mFaustWrapper->setParameter("delay(ms)", delayMsToSend);
+    }
+
     // MARK: Member Variables
-    AUHostMusicalContextBlock mMusicalContextBlock;
+    AUHostMusicalContextBlock mMusicalContextBlock = nullptr;
 
     std::unique_ptr<FaustWrapper<Macalla>> mFaustWrapper;
 
     double mSampleRate                   = 44100.0;
-    double mGain                         = 1.0;
     bool mBypassed                       = false;
     AUAudioFrameCount mMaxFramesToRender = 1024;
 
-    // Macalla parameters
-    double mSpreadAmount     = 0.0;
-    double mOutputGain       = 0.0;
-    double mDelayMs          = 300.0;
-    double mFeedback         = 0.5;
-    double mNoiseAmount      = 0.0;
-    double mPitchShift       = 0.0;
-    double mHighpass         = 250.0;
-    double mLowpass          = 10000.0;
-    double mRandomMod        = 0.002;
-    double mWow              = 0.5;
-    double mWowIntensity     = 0.3;
-    double mFlutter          = 8.0;
-    double mFlutterIntensity = 0.1;
-    double mDucking          = -30.0;
-    double mAttack           = 10.0;
-    double mRelease          = 200.0;
-    double mRatio            = 4.0;
-    double mGlitchRate       = 0.5;
-    double mGlitchAmount     = 0.0;
-    double mMix              = 50.0;
+    // --- Visible Parameters ---
+    // Keep only the parameters defined in the updated
+    // LunaExtensionParameterAddresses.h
+    double mSpreadAmount    = 0.0;
+    double mOutputGain      = 0.0;
+    double mDelayMs         = 300.0;
+    double mFeedback        = 0.5;
+    double mPitchShift      = 0.0;
+    double mHighpass        = 250.0;
+    double mLowpass         = 10000.0;
+    double mDiffusionAmount = 0.0;
+    double mTapeWearMacro   = 0.1;
+    double mGlitchMacro     = 0.0;
+    double mDuckingMacro    = 0.0;
+    double mDuckAttack      = 10.0;
+    double mDuckRelease     = 200.0;
+    double mMix             = 50.0;
+
+    // --- Sync Parameters ---
+    int mDelayTimeSync   = 4;     // Default matches Faust
+    bool mSyncEnabled    = false; // Default off
+    double mCurrentTempo = 120.0; // Store current tempo
+
+    // Note: Removed member variables for hidden parameters
 };

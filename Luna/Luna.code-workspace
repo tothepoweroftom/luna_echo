@@ -1,0 +1,61 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../faustlibraries-master"
+		},
+		{
+			"path": "../../WildSurmise/Moon Delay/Moon DelayExtension"
+		},
+		{
+			"path": "../../../faust_nice_tings"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"span": "cpp",
+			"__bit_reference": "cpp",
+			"__locale": "cpp",
+			"__split_buffer": "cpp",
+			"__verbose_abort": "cpp",
+			"cmath": "cpp",
+			"cstdint": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"initializer_list": "cpp",
+			"iosfwd": "cpp",
+			"limits": "cpp",
+			"locale": "cpp",
+			"new": "cpp",
+			"stdexcept": "cpp",
+			"typeinfo": "cpp",
+			"vector": "cpp",
+			"__hash_table": "cpp",
+			"__node_handle": "cpp",
+			"__tree": "cpp",
+			"array": "cpp",
+			"cctype": "cpp",
+			"clocale": "cpp",
+			"cstdarg": "cpp",
+			"cstddef": "cpp",
+			"cstdio": "cpp",
+			"ctime": "cpp",
+			"cwchar": "cpp",
+			"cwctype": "cpp",
+			"execution": "cpp",
+			"ios": "cpp",
+			"map": "cpp",
+			"mutex": "cpp",
+			"optional": "cpp",
+			"ratio": "cpp",
+			"streambuf": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"unordered_map": "cpp",
+			"variant": "cpp",
+			"algorithm": "cpp"
+		}
+	}
+}

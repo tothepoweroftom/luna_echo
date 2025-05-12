@@ -1,11 +1,12 @@
 /* ------------------------------------------------------------
 name: "Macalla "
 Code generated with Faust 2.38.8 (https://faust.grame.fr)
-Compilation options: -a faustMinimal.h -lang cpp -es 1 -single -ftz 0
+Compilation options: -a faustMinimal.h -lang cpp -es 1 -vec -lv 0 -vs 32 -single
+-ftz 0 -mcd 16
 ------------------------------------------------------------ */
 
-#ifndef  __Macalla_H__
-#define  __Macalla_H__
+#ifndef __Macalla_H__
+#define __Macalla_H__
 
 #include <cmath>
 #include <cstring>
@@ -19,15 +20,15 @@ Compilation options: -a faustMinimal.h -lang cpp -es 1 -single -ftz 0
  and/or modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 3 of
  the License, or (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; If not, see <http://www.gnu.org/licenses/>.
- 
+
  EXCEPTION : As a special exception, you may create a larger work
  that contains this FAUST architecture section and distribute
  that work under terms of your choice, so long as this FAUST
@@ -51,15 +52,15 @@ Compilation options: -a faustMinimal.h -lang cpp -es 1 -single -ftz 0
  and/or modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 3 of
  the License, or (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; If not, see <http://www.gnu.org/licenses/>.
- 
+
  EXCEPTION : As a special exception, you may create a larger work
  that contains this FAUST architecture section and distribute
  that work under terms of your choice, so long as this FAUST
@@ -82,40 +83,63 @@ Compilation options: -a faustMinimal.h -lang cpp -es 1 -single -ftz 0
 
 struct Soundfile;
 
-template <typename REAL>
+template<typename REAL>
 struct UIReal
 {
     UIReal() {}
     virtual ~UIReal() {}
-    
+
     // -- widget's layouts
-    
-    virtual void openTabBox(const char* label) = 0;
+
+    virtual void openTabBox(const char* label)        = 0;
     virtual void openHorizontalBox(const char* label) = 0;
-    virtual void openVerticalBox(const char* label) = 0;
-    virtual void closeBox() = 0;
-    
+    virtual void openVerticalBox(const char* label)   = 0;
+    virtual void closeBox()                           = 0;
+
     // -- active widgets
-    
-    virtual void addButton(const char* label, REAL* zone) = 0;
+
+    virtual void addButton(const char* label, REAL* zone)      = 0;
     virtual void addCheckButton(const char* label, REAL* zone) = 0;
-    virtual void addVerticalSlider(const char* label, REAL* zone, REAL init, REAL min, REAL max, REAL step) = 0;
-    virtual void addHorizontalSlider(const char* label, REAL* zone, REAL init, REAL min, REAL max, REAL step) = 0;
-    virtual void addNumEntry(const char* label, REAL* zone, REAL init, REAL min, REAL max, REAL step) = 0;
-    
+    virtual void addVerticalSlider(const char* label,
+                                   REAL* zone,
+                                   REAL init,
+                                   REAL min,
+                                   REAL max,
+                                   REAL step)                  = 0;
+    virtual void addHorizontalSlider(const char* label,
+                                     REAL* zone,
+                                     REAL init,
+                                     REAL min,
+                                     REAL max,
+                                     REAL step)                = 0;
+    virtual void addNumEntry(const char* label,
+                             REAL* zone,
+                             REAL init,
+                             REAL min,
+                             REAL max,
+                             REAL step)                        = 0;
+
     // -- passive widgets
-    
-    virtual void addHorizontalBargraph(const char* label, REAL* zone, REAL min, REAL max) = 0;
-    virtual void addVerticalBargraph(const char* label, REAL* zone, REAL min, REAL max) = 0;
-    
+
+    virtual void addHorizontalBargraph(const char* label,
+                                       REAL* zone,
+                                       REAL min,
+                                       REAL max) = 0;
+    virtual void addVerticalBargraph(const char* label,
+                                     REAL* zone,
+                                     REAL min,
+                                     REAL max)   = 0;
+
     // -- soundfiles
-    
-    virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) = 0;
-    
+
+    virtual void addSoundfile(const char* label,
+                              const char* filename,
+                              Soundfile** sf_zone) = 0;
+
     // -- metadata declarations
-    
+
     virtual void declare(REAL* zone, const char* key, const char* val) {}
-    
+
     // To be used by LLVM client
     virtual int sizeOfFAUSTFLOAT() { return sizeof(FAUSTFLOAT); }
 };
@@ -137,15 +161,15 @@ struct UI : public UIReal<FAUSTFLOAT>
  and/or modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 3 of
  the License, or (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; If not, see <http://www.gnu.org/licenses/>.
- 
+
  EXCEPTION : As a special exception, you may create a larger work
  that contains this FAUST architecture section and distribute
  that work under terms of your choice, so long as this FAUST
@@ -167,46 +191,52 @@ struct UI : public UIReal<FAUSTFLOAT>
 class PathBuilder
 {
 
-    protected:
-    
-        std::vector<std::string> fControlsLevel;
-       
-    public:
-    
-        PathBuilder() {}
-        virtual ~PathBuilder() {}
-    
-        std::string replaceCharList(std::string str, const std::vector<char>& ch1, char ch2)
+  protected:
+    std::vector<std::string> fControlsLevel;
+
+  public:
+    PathBuilder() {}
+    virtual ~PathBuilder() {}
+
+    std::string replaceCharList(std::string str,
+                                const std::vector<char>& ch1,
+                                char ch2)
+    {
+        std::vector<char>::const_iterator beg = ch1.begin();
+        std::vector<char>::const_iterator end = ch1.end();
+        for (size_t i = 0; i < str.length(); ++i)
         {
-            std::vector<char>::const_iterator beg = ch1.begin();
-            std::vector<char>::const_iterator end = ch1.end();
-            for (size_t i = 0; i < str.length(); ++i) {
-                if (std::find(beg, end, str[i]) != end) {
-                    str[i] = ch2;
-                }
+            if (std::find(beg, end, str[i]) != end)
+            {
+                str[i] = ch2;
             }
-            return str;
         }
-    
-        std::string buildPath(const std::string& label) 
+        return str;
+    }
+
+    std::string buildPath(const std::string& label)
+    {
+        std::string res = "/";
+        for (size_t i = 0; i < fControlsLevel.size(); i++)
         {
-            std::string res = "/";
-            for (size_t i = 0; i < fControlsLevel.size(); i++) {
-                res += fControlsLevel[i];
-                res += "/";
-            }
-            res += label;
-            std::vector<char> rep = {' ', '#', '*', ',', '/', '?', '[', ']', '{', '}', '(', ')'};
-            replaceCharList(res, rep, '_');
-            return res;
+            res += fControlsLevel[i];
+            res += "/";
         }
-    
-        void pushLabel(const std::string& label) { fControlsLevel.push_back(label); }
-        void popLabel() { fControlsLevel.pop_back(); }
-    
+        res += label;
+        std::vector<char> rep = { ' ', '#', '*', ',', '/', '?',
+                                  '[', ']', '{', '}', '(', ')' };
+        replaceCharList(res, rep, '_');
+        return res;
+    }
+
+    void pushLabel(const std::string& label)
+    {
+        fControlsLevel.push_back(label);
+    }
+    void popLabel() { fControlsLevel.pop_back(); }
 };
 
-#endif  // FAUST_PATHBUILDER_H
+#endif // FAUST_PATHBUILDER_H
 /**************************  END  PathBuilder.h **************************/
 
 /*******************************************************************************
@@ -216,176 +246,221 @@ class PathBuilder
  * - a map of 'labels' and zones for each UI item.
  * - a map of complete hierarchical 'paths' and zones for each UI item.
  *
- * Simple 'labels' and complete 'paths' (to fully discriminate between possible same
- * 'labels' at different location in the UI hierachy) can be used to access a given parameter.
+ * Simple 'labels' and complete 'paths' (to fully discriminate between possible
+ *same 'labels' at different location in the UI hierachy) can be used to access
+ *a given parameter.
  ******************************************************************************/
 
-class MapUI : public UI, public PathBuilder
+class MapUI
+  : public UI
+  , public PathBuilder
 {
-    
-    protected:
-    
-        // Complete path map
-        std::map<std::string, FAUSTFLOAT*> fPathZoneMap;
-    
-        // Label zone map
-        std::map<std::string, FAUSTFLOAT*> fLabelZoneMap;
-    
-    public:
-        
-        MapUI() {}
-        virtual ~MapUI() {}
-        
-        // -- widget's layouts
-        void openTabBox(const char* label)
+
+  protected:
+    // Complete path map
+    std::map<std::string, FAUSTFLOAT*> fPathZoneMap;
+
+    // Label zone map
+    std::map<std::string, FAUSTFLOAT*> fLabelZoneMap;
+
+  public:
+    MapUI() {}
+    virtual ~MapUI() {}
+
+    // -- widget's layouts
+    void openTabBox(const char* label) { pushLabel(label); }
+    void openHorizontalBox(const char* label) { pushLabel(label); }
+    void openVerticalBox(const char* label) { pushLabel(label); }
+    void closeBox() { popLabel(); }
+
+    // -- active widgets
+    void addButton(const char* label, FAUSTFLOAT* zone)
+    {
+        fPathZoneMap[buildPath(label)] = zone;
+        fLabelZoneMap[label]           = zone;
+    }
+    void addCheckButton(const char* label, FAUSTFLOAT* zone)
+    {
+        fPathZoneMap[buildPath(label)] = zone;
+        fLabelZoneMap[label]           = zone;
+    }
+    void addVerticalSlider(const char* label,
+                           FAUSTFLOAT* zone,
+                           FAUSTFLOAT init,
+                           FAUSTFLOAT fmin,
+                           FAUSTFLOAT fmax,
+                           FAUSTFLOAT step)
+    {
+        fPathZoneMap[buildPath(label)] = zone;
+        fLabelZoneMap[label]           = zone;
+    }
+    void addHorizontalSlider(const char* label,
+                             FAUSTFLOAT* zone,
+                             FAUSTFLOAT init,
+                             FAUSTFLOAT fmin,
+                             FAUSTFLOAT fmax,
+                             FAUSTFLOAT step)
+    {
+        fPathZoneMap[buildPath(label)] = zone;
+        fLabelZoneMap[label]           = zone;
+    }
+    void addNumEntry(const char* label,
+                     FAUSTFLOAT* zone,
+                     FAUSTFLOAT init,
+                     FAUSTFLOAT fmin,
+                     FAUSTFLOAT fmax,
+                     FAUSTFLOAT step)
+    {
+        fPathZoneMap[buildPath(label)] = zone;
+        fLabelZoneMap[label]           = zone;
+    }
+
+    // -- passive widgets
+    void addHorizontalBargraph(const char* label,
+                               FAUSTFLOAT* zone,
+                               FAUSTFLOAT fmin,
+                               FAUSTFLOAT fmax)
+    {
+        fPathZoneMap[buildPath(label)] = zone;
+        fLabelZoneMap[label]           = zone;
+    }
+    void addVerticalBargraph(const char* label,
+                             FAUSTFLOAT* zone,
+                             FAUSTFLOAT fmin,
+                             FAUSTFLOAT fmax)
+    {
+        fPathZoneMap[buildPath(label)] = zone;
+        fLabelZoneMap[label]           = zone;
+    }
+
+    // -- soundfiles
+    virtual void addSoundfile(const char* label,
+                              const char* filename,
+                              Soundfile** sf_zone)
+    {
+    }
+
+    // -- metadata declarations
+    virtual void declare(FAUSTFLOAT* zone, const char* key, const char* val) {}
+
+    // setParamValue/getParamValue
+    void setParamValue(const std::string& path, FAUSTFLOAT value)
+    {
+        if (fPathZoneMap.find(path) != fPathZoneMap.end())
         {
-            pushLabel(label);
+            *fPathZoneMap[path] = value;
         }
-        void openHorizontalBox(const char* label)
+        else if (fLabelZoneMap.find(path) != fLabelZoneMap.end())
         {
-            pushLabel(label);
+            *fLabelZoneMap[path] = value;
         }
-        void openVerticalBox(const char* label)
+        else
         {
-            pushLabel(label);
+            fprintf(
+              stderr, "ERROR : setParamValue '%s' not found\n", path.c_str());
         }
-        void closeBox()
+    }
+
+    FAUSTFLOAT getParamValue(const std::string& path)
+    {
+        if (fPathZoneMap.find(path) != fPathZoneMap.end())
         {
-            popLabel();
+            return *fPathZoneMap[path];
         }
-        
-        // -- active widgets
-        void addButton(const char* label, FAUSTFLOAT* zone)
+        else if (fLabelZoneMap.find(path) != fLabelZoneMap.end())
         {
-            fPathZoneMap[buildPath(label)] = zone;
-            fLabelZoneMap[label] = zone;
+            return *fLabelZoneMap[path];
         }
-        void addCheckButton(const char* label, FAUSTFLOAT* zone)
+        else
         {
-            fPathZoneMap[buildPath(label)] = zone;
-            fLabelZoneMap[label] = zone;
+            fprintf(
+              stderr, "ERROR : getParamValue '%s' not found\n", path.c_str());
+            return 0;
         }
-        void addVerticalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT fmin, FAUSTFLOAT fmax, FAUSTFLOAT step)
+    }
+
+    // map access
+    std::map<std::string, FAUSTFLOAT*>& getMap() { return fPathZoneMap; }
+
+    int getParamsCount() { return int(fPathZoneMap.size()); }
+
+    std::string getParamAddress(int index)
+    {
+        if (index < 0 || index > int(fPathZoneMap.size()))
         {
-            fPathZoneMap[buildPath(label)] = zone;
-            fLabelZoneMap[label] = zone;
-        }
-        void addHorizontalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT fmin, FAUSTFLOAT fmax, FAUSTFLOAT step)
-        {
-            fPathZoneMap[buildPath(label)] = zone;
-            fLabelZoneMap[label] = zone;
-        }
-        void addNumEntry(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT fmin, FAUSTFLOAT fmax, FAUSTFLOAT step)
-        {
-            fPathZoneMap[buildPath(label)] = zone;
-            fLabelZoneMap[label] = zone;
-        }
-        
-        // -- passive widgets
-        void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT fmin, FAUSTFLOAT fmax)
-        {
-            fPathZoneMap[buildPath(label)] = zone;
-            fLabelZoneMap[label] = zone;
-        }
-        void addVerticalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT fmin, FAUSTFLOAT fmax)
-        {
-            fPathZoneMap[buildPath(label)] = zone;
-            fLabelZoneMap[label] = zone;
-        }
-    
-        // -- soundfiles
-        virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) {}
-        
-        // -- metadata declarations
-        virtual void declare(FAUSTFLOAT* zone, const char* key, const char* val)
-        {}
-        
-        // setParamValue/getParamValue
-        void setParamValue(const std::string& path, FAUSTFLOAT value)
-        {
-            if (fPathZoneMap.find(path) != fPathZoneMap.end()) {
-                *fPathZoneMap[path] = value;
-            } else if (fLabelZoneMap.find(path) != fLabelZoneMap.end()) {
-                *fLabelZoneMap[path] = value;
-            } else {
-                fprintf(stderr, "ERROR : setParamValue '%s' not found\n", path.c_str());
-            }
-        }
-        
-        FAUSTFLOAT getParamValue(const std::string& path)
-        {
-            if (fPathZoneMap.find(path) != fPathZoneMap.end()) {
-                return *fPathZoneMap[path];
-            } else if (fLabelZoneMap.find(path) != fLabelZoneMap.end()) {
-                return *fLabelZoneMap[path];
-            } else {
-                fprintf(stderr, "ERROR : getParamValue '%s' not found\n", path.c_str());
-                return 0;
-            }
-        }
-    
-        // map access 
-        std::map<std::string, FAUSTFLOAT*>& getMap() { return fPathZoneMap; }
-        
-        int getParamsCount() { return int(fPathZoneMap.size()); }
-        
-        std::string getParamAddress(int index)
-        {
-            if (index < 0 || index > int(fPathZoneMap.size())) {
-                return "";
-            } else {
-                auto it = fPathZoneMap.begin();
-                while (index-- > 0 && it++ != fPathZoneMap.end()) {}
-                return it->first;
-            }
-        }
-        
-        const char* getParamAddress1(int index)
-        {
-            if (index < 0 || index > int(fPathZoneMap.size())) {
-                return nullptr;
-            } else {
-                auto it = fPathZoneMap.begin();
-                while (index-- > 0 && it++ != fPathZoneMap.end()) {}
-                return it->first.c_str();
-            }
-        }
-    
-        std::string getParamAddress(FAUSTFLOAT* zone)
-        {
-            for (const auto& it : fPathZoneMap) {
-                if (it.second == zone) return it.first;
-            }
             return "";
         }
-    
-        FAUSTFLOAT* getParamZone(const std::string& str)
+        else
         {
-            if (fPathZoneMap.find(str) != fPathZoneMap.end()) {
-                return fPathZoneMap[str];
-            } else if (fLabelZoneMap.find(str) != fLabelZoneMap.end()) {
-                return fLabelZoneMap[str];
+            auto it = fPathZoneMap.begin();
+            while (index-- > 0 && it++ != fPathZoneMap.end())
+            {
             }
+            return it->first;
+        }
+    }
+
+    const char* getParamAddress1(int index)
+    {
+        if (index < 0 || index > int(fPathZoneMap.size()))
+        {
             return nullptr;
         }
-    
-        FAUSTFLOAT* getParamZone(int index)
+        else
         {
-            if (index < 0 || index > int(fPathZoneMap.size())) {
-                return nullptr;
-            } else {
-                auto it = fPathZoneMap.begin();
-                while (index-- > 0 && it++ != fPathZoneMap.end()) {}
-                return it->second;
+            auto it = fPathZoneMap.begin();
+            while (index-- > 0 && it++ != fPathZoneMap.end())
+            {
             }
+            return it->first.c_str();
         }
-    
-        static bool endsWith(const std::string& str, const std::string& end)
+    }
+
+    std::string getParamAddress(FAUSTFLOAT* zone)
+    {
+        for (const auto& it : fPathZoneMap)
         {
-            size_t l1 = str.length();
-            size_t l2 = end.length();
-            return (l1 >= l2) && (0 == str.compare(l1 - l2, l2, end));
+            if (it.second == zone)
+                return it.first;
         }
+        return "";
+    }
+
+    FAUSTFLOAT* getParamZone(const std::string& str)
+    {
+        if (fPathZoneMap.find(str) != fPathZoneMap.end())
+        {
+            return fPathZoneMap[str];
+        }
+        else if (fLabelZoneMap.find(str) != fLabelZoneMap.end())
+        {
+            return fLabelZoneMap[str];
+        }
+        return nullptr;
+    }
+
+    FAUSTFLOAT* getParamZone(int index)
+    {
+        if (index < 0 || index > int(fPathZoneMap.size()))
+        {
+            return nullptr;
+        }
+        else
+        {
+            auto it = fPathZoneMap.begin();
+            while (index-- > 0 && it++ != fPathZoneMap.end())
+            {
+            }
+            return it->second;
+        }
+    }
+
+    static bool endsWith(const std::string& str, const std::string& end)
+    {
+        size_t l1 = str.length();
+        size_t l2 = end.length();
+        return (l1 >= l2) && (0 == str.compare(l1 - l2, l2, end));
+    }
 };
 
 #endif // FAUST_MAPUI_H
@@ -399,15 +474,15 @@ class MapUI : public UI, public PathBuilder
  and/or modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 3 of
  the License, or (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; If not, see <http://www.gnu.org/licenses/>.
- 
+
  EXCEPTION : As a special exception, you may create a larger work
  that contains this FAUST architecture section and distribute
  that work under terms of your choice, so long as this FAUST
@@ -418,7 +493,8 @@ class MapUI : public UI, public PathBuilder
 #define __meta__
 
 /**
- The base class of Meta handler to be used in dsp::metadata(Meta* m) method to retrieve (key, value) metadata.
+ The base class of Meta handler to be used in dsp::metadata(Meta* m) method to
+ retrieve (key, value) metadata.
  */
 struct Meta
 {
@@ -437,15 +513,15 @@ struct Meta
  and/or modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 3 of
  the License, or (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; If not, see <http://www.gnu.org/licenses/>.
- 
+
  EXCEPTION : As a special exception, you may create a larger work
  that contains this FAUST architecture section and distribute
  that work under terms of your choice, so long as this FAUST
@@ -469,139 +545,176 @@ struct Meta;
  * DSP memory manager.
  */
 
-struct dsp_memory_manager {
-    
+struct dsp_memory_manager
+{
+
     virtual ~dsp_memory_manager() {}
-    
+
     virtual void* allocate(size_t size) = 0;
-    virtual void destroy(void* ptr) = 0;
-    
+    virtual void destroy(void* ptr)     = 0;
 };
 
 /**
-* Signal processor definition.
-*/
+ * Signal processor definition.
+ */
 
-class dsp {
+class dsp
+{
 
-    public:
+  public:
+    dsp() {}
+    virtual ~dsp() {}
 
-        dsp() {}
-        virtual ~dsp() {}
+    /* Return instance number of audio inputs */
+    virtual int getNumInputs() = 0;
 
-        /* Return instance number of audio inputs */
-        virtual int getNumInputs() = 0;
-    
-        /* Return instance number of audio outputs */
-        virtual int getNumOutputs() = 0;
-    
-        /**
-         * Trigger the ui_interface parameter with instance specific calls
-         * to 'openTabBox', 'addButton', 'addVerticalSlider'... in order to build the UI.
-         *
-         * @param ui_interface - the user interface builder
-         */
-        virtual void buildUserInterface(UI* ui_interface) = 0;
-    
-        /* Return the sample rate currently used by the instance */
-        virtual int getSampleRate() = 0;
-    
-        /**
-         * Global init, calls the following methods:
-         * - static class 'classInit': static tables initialization
-         * - 'instanceInit': constants and instance state initialization
-         *
-         * @param sample_rate - the sampling rate in Hz
-         */
-        virtual void init(int sample_rate) = 0;
+    /* Return instance number of audio outputs */
+    virtual int getNumOutputs() = 0;
 
-        /**
-         * Init instance state
-         *
-         * @param sample_rate - the sampling rate in Hz
-         */
-        virtual void instanceInit(int sample_rate) = 0;
-    
-        /**
-         * Init instance constant state
-         *
-         * @param sample_rate - the sampling rate in Hz
-         */
-        virtual void instanceConstants(int sample_rate) = 0;
-    
-        /* Init default control parameters values */
-        virtual void instanceResetUserInterface() = 0;
-    
-        /* Init instance state (like delay lines...) but keep the control parameter values */
-        virtual void instanceClear() = 0;
- 
-        /**
-         * Return a clone of the instance.
-         *
-         * @return a copy of the instance on success, otherwise a null pointer.
-         */
-        virtual dsp* clone() = 0;
-    
-        /**
-         * Trigger the Meta* parameter with instance specific calls to 'declare' (key, value) metadata.
-         *
-         * @param m - the Meta* meta user
-         */
-        virtual void metadata(Meta* m) = 0;
-    
-        /**
-         * DSP instance computation, to be called with successive in/out audio buffers.
-         *
-         * @param count - the number of frames to compute
-         * @param inputs - the input audio buffers as an array of non-interleaved FAUSTFLOAT samples (eiher float, double or quad)
-         * @param outputs - the output audio buffers as an array of non-interleaved FAUSTFLOAT samples (eiher float, double or quad)
-         *
-         */
-        virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) = 0;
-    
-        /**
-         * DSP instance computation: alternative method to be used by subclasses.
-         *
-         * @param date_usec - the timestamp in microsec given by audio driver.
-         * @param count - the number of frames to compute
-         * @param inputs - the input audio buffers as an array of non-interleaved FAUSTFLOAT samples (either float, double or quad)
-         * @param outputs - the output audio buffers as an array of non-interleaved FAUSTFLOAT samples (either float, double or quad)
-         *
-         */
-        virtual void compute(double /*date_usec*/, int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) { compute(count, inputs, outputs); }
-       
+    /**
+     * Trigger the ui_interface parameter with instance specific calls
+     * to 'openTabBox', 'addButton', 'addVerticalSlider'... in order to build
+     * the UI.
+     *
+     * @param ui_interface - the user interface builder
+     */
+    virtual void buildUserInterface(UI* ui_interface) = 0;
+
+    /* Return the sample rate currently used by the instance */
+    virtual int getSampleRate() = 0;
+
+    /**
+     * Global init, calls the following methods:
+     * - static class 'classInit': static tables initialization
+     * - 'instanceInit': constants and instance state initialization
+     *
+     * @param sample_rate - the sampling rate in Hz
+     */
+    virtual void init(int sample_rate) = 0;
+
+    /**
+     * Init instance state
+     *
+     * @param sample_rate - the sampling rate in Hz
+     */
+    virtual void instanceInit(int sample_rate) = 0;
+
+    /**
+     * Init instance constant state
+     *
+     * @param sample_rate - the sampling rate in Hz
+     */
+    virtual void instanceConstants(int sample_rate) = 0;
+
+    /* Init default control parameters values */
+    virtual void instanceResetUserInterface() = 0;
+
+    /* Init instance state (like delay lines...) but keep the control parameter
+     * values */
+    virtual void instanceClear() = 0;
+
+    /**
+     * Return a clone of the instance.
+     *
+     * @return a copy of the instance on success, otherwise a null pointer.
+     */
+    virtual dsp* clone() = 0;
+
+    /**
+     * Trigger the Meta* parameter with instance specific calls to 'declare'
+     * (key, value) metadata.
+     *
+     * @param m - the Meta* meta user
+     */
+    virtual void metadata(Meta* m) = 0;
+
+    /**
+     * DSP instance computation, to be called with successive in/out audio
+     * buffers.
+     *
+     * @param count - the number of frames to compute
+     * @param inputs - the input audio buffers as an array of non-interleaved
+     * FAUSTFLOAT samples (eiher float, double or quad)
+     * @param outputs - the output audio buffers as an array of non-interleaved
+     * FAUSTFLOAT samples (eiher float, double or quad)
+     *
+     */
+    virtual void compute(int count,
+                         FAUSTFLOAT** inputs,
+                         FAUSTFLOAT** outputs) = 0;
+
+    /**
+     * DSP instance computation: alternative method to be used by subclasses.
+     *
+     * @param date_usec - the timestamp in microsec given by audio driver.
+     * @param count - the number of frames to compute
+     * @param inputs - the input audio buffers as an array of non-interleaved
+     * FAUSTFLOAT samples (either float, double or quad)
+     * @param outputs - the output audio buffers as an array of non-interleaved
+     * FAUSTFLOAT samples (either float, double or quad)
+     *
+     */
+    virtual void compute(double /*date_usec*/,
+                         int count,
+                         FAUSTFLOAT** inputs,
+                         FAUSTFLOAT** outputs)
+    {
+        compute(count, inputs, outputs);
+    }
 };
 
 /**
  * Generic DSP decorator.
  */
 
-class decorator_dsp : public dsp {
+class decorator_dsp : public dsp
+{
 
-    protected:
+  protected:
+    dsp* fDSP;
 
-        dsp* fDSP;
+  public:
+    decorator_dsp(dsp* dsp = nullptr)
+      : fDSP(dsp)
+    {
+    }
+    virtual ~decorator_dsp() { delete fDSP; }
 
-    public:
-
-        decorator_dsp(dsp* dsp = nullptr):fDSP(dsp) {}
-        virtual ~decorator_dsp() { delete fDSP; }
-
-        virtual int getNumInputs() { return fDSP->getNumInputs(); }
-        virtual int getNumOutputs() { return fDSP->getNumOutputs(); }
-        virtual void buildUserInterface(UI* ui_interface) { fDSP->buildUserInterface(ui_interface); }
-        virtual int getSampleRate() { return fDSP->getSampleRate(); }
-        virtual void init(int sample_rate) { fDSP->init(sample_rate); }
-        virtual void instanceInit(int sample_rate) { fDSP->instanceInit(sample_rate); }
-        virtual void instanceConstants(int sample_rate) { fDSP->instanceConstants(sample_rate); }
-        virtual void instanceResetUserInterface() { fDSP->instanceResetUserInterface(); }
-        virtual void instanceClear() { fDSP->instanceClear(); }
-        virtual decorator_dsp* clone() { return new decorator_dsp(fDSP->clone()); }
-        virtual void metadata(Meta* m) { fDSP->metadata(m); }
-        // Beware: subclasses usually have to overload the two 'compute' methods
-        virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) { fDSP->compute(count, inputs, outputs); }
-        virtual void compute(double date_usec, int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) { fDSP->compute(date_usec, count, inputs, outputs); }
-    
+    virtual int getNumInputs() { return fDSP->getNumInputs(); }
+    virtual int getNumOutputs() { return fDSP->getNumOutputs(); }
+    virtual void buildUserInterface(UI* ui_interface)
+    {
+        fDSP->buildUserInterface(ui_interface);
+    }
+    virtual int getSampleRate() { return fDSP->getSampleRate(); }
+    virtual void init(int sample_rate) { fDSP->init(sample_rate); }
+    virtual void instanceInit(int sample_rate)
+    {
+        fDSP->instanceInit(sample_rate);
+    }
+    virtual void instanceConstants(int sample_rate)
+    {
+        fDSP->instanceConstants(sample_rate);
+    }
+    virtual void instanceResetUserInterface()
+    {
+        fDSP->instanceResetUserInterface();
+    }
+    virtual void instanceClear() { fDSP->instanceClear(); }
+    virtual decorator_dsp* clone() { return new decorator_dsp(fDSP->clone()); }
+    virtual void metadata(Meta* m) { fDSP->metadata(m); }
+    // Beware: subclasses usually have to overload the two 'compute' methods
+    virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs)
+    {
+        fDSP->compute(count, inputs, outputs);
+    }
+    virtual void compute(double date_usec,
+                         int count,
+                         FAUSTFLOAT** inputs,
+                         FAUSTFLOAT** outputs)
+    {
+        fDSP->compute(date_usec, count, inputs, outputs);
+    }
 };
 
 /**
@@ -609,85 +722,78 @@ class decorator_dsp : public dsp {
  * to create DSP instances from a compiled DSP program.
  */
 
-class dsp_factory {
-    
-    protected:
-    
-        // So that to force sub-classes to use deleteDSPFactory(dsp_factory* factory);
-        virtual ~dsp_factory() {}
-    
-    public:
-    
-        virtual std::string getName() = 0;
-        virtual std::string getSHAKey() = 0;
-        virtual std::string getDSPCode() = 0;
-        virtual std::string getCompileOptions() = 0;
-        virtual std::vector<std::string> getLibraryList() = 0;
-        virtual std::vector<std::string> getIncludePathnames() = 0;
-    
-        virtual dsp* createDSPInstance() = 0;
-    
-        virtual void setMemoryManager(dsp_memory_manager* manager) = 0;
-        virtual dsp_memory_manager* getMemoryManager() = 0;
-    
+class dsp_factory
+{
+
+  protected:
+    // So that to force sub-classes to use deleteDSPFactory(dsp_factory*
+    // factory);
+    virtual ~dsp_factory() {}
+
+  public:
+    virtual std::string getName()                          = 0;
+    virtual std::string getSHAKey()                        = 0;
+    virtual std::string getDSPCode()                       = 0;
+    virtual std::string getCompileOptions()                = 0;
+    virtual std::vector<std::string> getLibraryList()      = 0;
+    virtual std::vector<std::string> getIncludePathnames() = 0;
+
+    virtual dsp* createDSPInstance() = 0;
+
+    virtual void setMemoryManager(dsp_memory_manager* manager) = 0;
+    virtual dsp_memory_manager* getMemoryManager()             = 0;
 };
 
 // Denormal handling
 
-#if defined (__SSE__)
+#if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
 
 class ScopedNoDenormals
 {
-    private:
-    
-        intptr_t fpsr;
-        
-        void setFpStatusRegister(intptr_t fpsr_aux) noexcept
-        {
-        #if defined (__arm64__) || defined (__aarch64__)
-           asm volatile("msr fpcr, %0" : : "ri" (fpsr_aux));
-        #elif defined (__SSE__)
-            _mm_setcsr(static_cast<uint32_t>(fpsr_aux));
-        #endif
-        }
-        
-        void getFpStatusRegister() noexcept
-        {
-        #if defined (__arm64__) || defined (__aarch64__)
-            asm volatile("mrs %0, fpcr" : "=r" (fpsr));
-        #elif defined ( __SSE__)
-            fpsr = static_cast<intptr_t>(_mm_getcsr());
-        #endif
-        }
-    
-    public:
-    
-        ScopedNoDenormals() noexcept
-        {
-        #if defined (__arm64__) || defined (__aarch64__)
-            intptr_t mask = (1 << 24 /* FZ */);
-        #else
-            #if defined(__SSE__)
-            #if defined(__SSE2__)
-                intptr_t mask = 0x8040;
-            #else
-                intptr_t mask = 0x8000;
-            #endif
-            #else
-                intptr_t mask = 0x0000;
-            #endif
-        #endif
-            getFpStatusRegister();
-            setFpStatusRegister(fpsr | mask);
-        }
-        
-        ~ScopedNoDenormals() noexcept
-        {
-            setFpStatusRegister(fpsr);
-        }
+  private:
+    intptr_t fpsr;
 
+    void setFpStatusRegister(intptr_t fpsr_aux) noexcept
+    {
+#if defined(__arm64__) || defined(__aarch64__)
+        asm volatile("msr fpcr, %0" : : "ri"(fpsr_aux));
+#elif defined(__SSE__)
+        _mm_setcsr(static_cast<uint32_t>(fpsr_aux));
+#endif
+    }
+
+    void getFpStatusRegister() noexcept
+    {
+#if defined(__arm64__) || defined(__aarch64__)
+        asm volatile("mrs %0, fpcr" : "=r"(fpsr));
+#elif defined(__SSE__)
+        fpsr = static_cast<intptr_t>(_mm_getcsr());
+#endif
+    }
+
+  public:
+    ScopedNoDenormals() noexcept
+    {
+#if defined(__arm64__) || defined(__aarch64__)
+        intptr_t mask = (1 << 24 /* FZ */);
+#else
+#if defined(__SSE__)
+#if defined(__SSE2__)
+        intptr_t mask = 0x8040;
+#else
+        intptr_t mask = 0x8000;
+#endif
+#else
+        intptr_t mask = 0x0000;
+#endif
+#endif
+        getFpStatusRegister();
+        setFpStatusRegister(fpsr | mask);
+    }
+
+    ~ScopedNoDenormals() noexcept { setFpStatusRegister(fpsr); }
 };
 
 #define AVOIDDENORMALS ScopedNoDenormals();
@@ -698,69 +804,77 @@ class ScopedNoDenormals
 
 // BEGIN-FAUSTDSP
 
-
 #ifndef FAUSTFLOAT
 #define FAUSTFLOAT float
-#endif 
+#endif
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <math.h>
 
-class MacallaSIG0 {
-	
-  private:
-	
-	int iVec3[2];
-	int iRec13[2];
-	
-  public:
-	
-	int getNumInputsMacallaSIG0() {
-		return 0;
-	}
-	int getNumOutputsMacallaSIG0() {
-		return 1;
-	}
-	
-	void instanceInitMacallaSIG0(int sample_rate) {
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l10 = 0; (l10 < 2); l10 = (l10 + 1)) {
-			iVec3[l10] = 0;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l11 = 0; (l11 < 2); l11 = (l11 + 1)) {
-			iRec13[l11] = 0;
-		}
-	}
-	
-	void fillMacallaSIG0(int count, float* table) {
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int i1 = 0; (i1 < count); i1 = (i1 + 1)) {
-			iVec3[0] = 1;
-			iRec13[0] = ((iVec3[1] + iRec13[1]) % 65536);
-			table[i1] = std::sin((9.58738019e-05f * float(iRec13[0])));
-			iVec3[1] = iVec3[0];
-			iRec13[1] = iRec13[0];
-		}
-	}
+class MacallaSIG0
+{
 
+  private:
+    int iVec1[2];
+    int iRec19[2];
+
+  public:
+    int getNumInputsMacallaSIG0() { return 0; }
+    int getNumOutputsMacallaSIG0() { return 1; }
+
+    void instanceInitMacallaSIG0(int sample_rate)
+    {
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l11 = 0; (l11 < 2); l11 = (l11 + 1))
+        {
+            iVec1[l11] = 0;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l12 = 0; (l12 < 2); l12 = (l12 + 1))
+        {
+            iRec19[l12] = 0;
+        }
+    }
+
+    void fillMacallaSIG0(int count, float* table)
+    {
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int i1 = 0; (i1 < count); i1 = (i1 + 1))
+        {
+            iVec1[0]  = 1;
+            iRec19[0] = ((iVec1[1] + iRec19[1]) % 65536);
+            table[i1] = std::sin((9.58738019e-05f * float(iRec19[0])));
+            iVec1[1]  = iVec1[0];
+            iRec19[1] = iRec19[0];
+        }
+    }
 };
 
-static MacallaSIG0* newMacallaSIG0() { return (MacallaSIG0*)new MacallaSIG0(); }
-static void deleteMacallaSIG0(MacallaSIG0* dsp) { delete dsp; }
-
-static float ftbl0MacallaSIG0[65536];
-static float Macalla_faustpower2_f(float value) {
-	return (value * value);
+static MacallaSIG0*
+newMacallaSIG0()
+{
+    return (MacallaSIG0*)new MacallaSIG0();
+}
+static void
+deleteMacallaSIG0(MacallaSIG0* dsp)
+{
+    delete dsp;
 }
 
-#ifndef FAUSTCLASS 
+static float ftbl0MacallaSIG0[65536];
+static float
+Macalla_faustpower2_f(float value)
+{
+    return (value * value);
+}
+
+#ifndef FAUSTCLASS
 #define FAUSTCLASS Macalla
 #endif
 
-#ifdef __APPLE__ 
+#ifdef __APPLE__
 #define exp10f __exp10f
 #define exp10 __exp10
 #endif
@@ -771,1016 +885,5966 @@ static float Macalla_faustpower2_f(float value) {
 #define RESTRICT __restrict__
 #endif
 
-class Macalla : public dsp {
-	
- private:
-	
-	FAUSTFLOAT fVslider0;
-	int IOTA;
-	float fVec0[131072];
-	int iVec1[2];
-	FAUSTFLOAT fHslider0;
-	float fRec1[2];
-	int fSampleRate;
-	float fConst0;
-	float fConst4;
-	float fConst5;
-	FAUSTFLOAT fVslider1;
-	float fConst6;
-	float fRec2[2];
-	float fConst9;
-	FAUSTFLOAT fHslider1;
-	int iRec8[2];
-	float fVec2[2];
-	float fConst10;
-	FAUSTFLOAT fHslider2;
-	float fRec9[2];
-	float fRec7[2];
-	FAUSTFLOAT fHslider3;
-	float fRec10[2];
-	FAUSTFLOAT fHslider4;
-	float fRec12[2];
-	float fConst11;
-	float fRec14[2];
-	float fRec11[2];
-	FAUSTFLOAT fHslider5;
-	float fRec15[2];
-	float fConst12;
-	float fConst13;
-	float fRec6[3];
-	float fConst14;
-	float fConst15;
-	float fConst16;
-	float fConst17;
-	float fRec17[2];
-	float fRec16[2];
-	float fConst18;
-	float fConst19;
-	float fConst20;
-	float fRec18[2];
-	FAUSTFLOAT fHslider6;
-	float fRec19[2];
-	float fConst28;
-	float fRec21[4];
-	float fRec22[2];
-	float fVec4[2];
-	float fRec23[2];
-	float fConst29;
-	float fConst30;
-	float fConst31;
-	float fRec25[2];
-	float fVec5[2];
-	float fVec6[2048];
-	float fConst34;
-	int iConst35;
-	float fConst36;
-	int iConst37;
-	float fRec24[2];
-	float fConst38;
-	float fRec26[2];
-	float fConst39;
-	float fRec27[2];
-	float fConst40;
-	float fConst41;
-	float fConst42;
-	float fRec20[3];
-	float fConst43;
-	float fConst44;
-	FAUSTFLOAT fHslider7;
-	float fRec28[2];
-	float fRec5[3];
-	FAUSTFLOAT fHslider8;
-	float fRec29[2];
-	float fRec4[3];
-	float fConst45;
-	float fConst46;
-	float fConst47;
-	float fRec3[3];
-	float fVec7[1048576];
-	float fConst49;
-	float fConst50;
-	float fConst51;
-	FAUSTFLOAT fHslider9;
-	float fVec8[2];
-	float fRec34[2];
-	float fConst52;
-	float fRec35[2];
-	FAUSTFLOAT fVslider2;
-	float fRec36[2];
-	FAUSTFLOAT fVslider3;
-	float fRec38[2];
-	float fRec37[2];
-	float fRec30[2];
-	float fRec31[2];
-	float fRec32[2];
-	float fRec33[2];
-	float fRec0[262144];
-	FAUSTFLOAT fHslider10;
-	float fRec39[2];
-	float fRec40[2];
-	float fRec42[2];
-	float fRec41[2];
-	FAUSTFLOAT fHslider11;
-	FAUSTFLOAT fHslider12;
-	FAUSTFLOAT fHslider13;
-	float fRec43[2];
-	FAUSTFLOAT fHslider14;
-	float fVec9[131072];
-	FAUSTFLOAT fHslider15;
-	float fRec51[2];
-	float fRec50[2];
-	float fRec49[2];
-	float fRec53[2];
-	float fRec52[2];
-	float fRec48[3];
-	float fRec55[2];
-	float fRec54[2];
-	float fRec56[2];
-	float fRec47[3];
-	float fRec46[3];
-	float fRec45[3];
-	float fVec10[1048576];
-	float fRec61[2];
-	float fRec57[2];
-	float fRec58[2];
-	float fRec59[2];
-	float fRec60[2];
-	float fRec44[262144];
-	float fRec62[2];
-	float fRec64[2];
-	float fRec63[2];
-	float fRec65[2];
-	
- public:
-	
-	void metadata(Meta* m) { 
-		m->declare("analyzers.lib/amp_follower_ar:author", "Jonatan Liljedahl, revised by Romain Michon");
-		m->declare("analyzers.lib/name", "Faust Analyzer Library");
-		m->declare("analyzers.lib/version", "1.2.0");
-		m->declare("basics.lib/bypass1:author", "Julius Smith");
-		m->declare("basics.lib/name", "Faust Basic Element Library");
-		m->declare("basics.lib/tabulateNd", "Copyright (C) 2023 Bart Brouns <bart@magnetophon.nl>");
-		m->declare("basics.lib/version", "1.18.0");
-		m->declare("category", "Echo / Delay");
-		m->declare("compile_options", "-a faustMinimal.h -lang cpp -es 1 -single -ftz 0");
-		m->declare("compressors.lib/compression_gain_mono:author", "Julius O. Smith III");
-		m->declare("compressors.lib/compression_gain_mono:copyright", "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("compressors.lib/compression_gain_mono:license", "MIT-style STK-4.3 license");
-		m->declare("compressors.lib/compressor_lad_mono:author", "Julius O. Smith III");
-		m->declare("compressors.lib/compressor_lad_mono:copyright", "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("compressors.lib/compressor_lad_mono:license", "MIT-style STK-4.3 license");
-		m->declare("compressors.lib/compressor_mono:author", "Julius O. Smith III");
-		m->declare("compressors.lib/compressor_mono:copyright", "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("compressors.lib/compressor_mono:license", "MIT-style STK-4.3 license");
-		m->declare("compressors.lib/limiter_1176_R4_mono:author", "Julius O. Smith III");
-		m->declare("compressors.lib/limiter_1176_R4_mono:copyright", "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("compressors.lib/limiter_1176_R4_mono:license", "MIT-style STK-4.3 license");
-		m->declare("compressors.lib/name", "Faust Compressor Effect Library");
-		m->declare("compressors.lib/peak_compression_gain_mono_db:author", "Bart Brouns");
-		m->declare("compressors.lib/peak_compression_gain_mono_db:license", "GPLv3");
-		m->declare("compressors.lib/ratio2strength:author", "Bart Brouns");
-		m->declare("compressors.lib/ratio2strength:license", "GPLv3");
-		m->declare("compressors.lib/version", "1.6.0");
-		m->declare("delays.lib/fdelay1:author", "Julius O. Smith III");
-		m->declare("delays.lib/fdelayltv:author", "Julius O. Smith III");
-		m->declare("delays.lib/name", "Faust Delay Library");
-		m->declare("delays.lib/version", "1.1.0");
-		m->declare("filename", "Macalla.dsp");
-		m->declare("filters.lib/bandpass0_bandstop1:author", "Julius O. Smith III");
-		m->declare("filters.lib/bandpass0_bandstop1:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/bandpass0_bandstop1:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/bandpass:author", "Julius O. Smith III");
-		m->declare("filters.lib/bandpass:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/bandpass:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/fir:author", "Julius O. Smith III");
-		m->declare("filters.lib/fir:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/fir:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/highpass:author", "Julius O. Smith III");
-		m->declare("filters.lib/highpass:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/iir:author", "Julius O. Smith III");
-		m->declare("filters.lib/iir:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/iir:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/lowpass0_highpass1", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/lowpass0_highpass1:author", "Julius O. Smith III");
-		m->declare("filters.lib/lowpass:author", "Julius O. Smith III");
-		m->declare("filters.lib/lowpass:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/lowpass:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/name", "Faust Filters Library");
-		m->declare("filters.lib/pole:author", "Julius O. Smith III");
-		m->declare("filters.lib/pole:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/pole:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/tf1:author", "Julius O. Smith III");
-		m->declare("filters.lib/tf1:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/tf1:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/tf1s:author", "Julius O. Smith III");
-		m->declare("filters.lib/tf1s:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/tf1s:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/tf1sb:author", "Julius O. Smith III");
-		m->declare("filters.lib/tf1sb:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/tf1sb:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/tf2:author", "Julius O. Smith III");
-		m->declare("filters.lib/tf2:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/tf2:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/tf2s:author", "Julius O. Smith III");
-		m->declare("filters.lib/tf2s:copyright", "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>");
-		m->declare("filters.lib/tf2s:license", "MIT-style STK-4.3 license");
-		m->declare("filters.lib/version", "1.3.0");
-		m->declare("maths.lib/author", "GRAME");
-		m->declare("maths.lib/copyright", "GRAME");
-		m->declare("maths.lib/license", "LGPL with exception");
-		m->declare("maths.lib/name", "Faust Math Library");
-		m->declare("maths.lib/version", "2.8.0");
-		m->declare("misceffects.lib/name", "Misc Effects Library");
-		m->declare("misceffects.lib/version", "2.5.0");
-		m->declare("name", "Macalla ");
-		m->declare("noises.lib/name", "Faust Noise Generator Library");
-		m->declare("noises.lib/version", "1.4.1");
-		m->declare("oscillators.lib/lf_sawpos:author", "Bart Brouns, revised by Stéphane Letz");
-		m->declare("oscillators.lib/lf_sawpos:licence", "STK-4.3");
-		m->declare("oscillators.lib/lf_triangle:author", "Bart Brouns");
-		m->declare("oscillators.lib/lf_triangle:licence", "STK-4.3");
-		m->declare("oscillators.lib/name", "Faust Oscillator Library");
-		m->declare("oscillators.lib/saw1:author", "Bart Brouns");
-		m->declare("oscillators.lib/saw1:licence", "STK-4.3");
-		m->declare("oscillators.lib/sawN:author", "Julius O. Smith III");
-		m->declare("oscillators.lib/sawN:license", "STK-4.3");
-		m->declare("oscillators.lib/version", "1.5.1");
-		m->declare("platform.lib/name", "Generic Platform Library");
-		m->declare("platform.lib/version", "1.3.0");
-		m->declare("signals.lib/name", "Faust Signal Routing Library");
-		m->declare("signals.lib/onePoleSwitching:author", "Jonatan Liljedahl, revised by Dario Sanfilippo");
-		m->declare("signals.lib/onePoleSwitching:licence", "STK-4.3");
-		m->declare("signals.lib/version", "1.5.0");
-	}
+class Macalla : public dsp
+{
 
-	virtual int getNumInputs() {
-		return 2;
-	}
-	virtual int getNumOutputs() {
-		return 2;
-	}
-	
-	static void classInit(int sample_rate) {
-		MacallaSIG0* sig0 = newMacallaSIG0();
-		sig0->instanceInitMacallaSIG0(sample_rate);
-		sig0->fillMacallaSIG0(65536, ftbl0MacallaSIG0);
-		deleteMacallaSIG0(sig0);
-	}
-	
-	virtual void instanceConstants(int sample_rate) {
-		fSampleRate = sample_rate;
-		fConst0 = std::min<float>(192000.0f, std::max<float>(1.0f, float(fSampleRate)));
-		float fConst1 = std::tan((21991.1484f / fConst0));
-		float fConst2 = (1.0f / fConst1);
-		float fConst3 = (((fConst2 + 1.41421354f) / fConst1) + 1.0f);
-		fConst4 = (0.959999979f / fConst3);
-		fConst5 = (44.0999985f / fConst0);
-		fConst6 = (1.0f - fConst5);
-		float fConst7 = std::tan((25132.7422f / fConst0));
-		float fConst8 = (1.0f / fConst7);
-		fConst9 = (1.0f / (((fConst8 + 1.41421354f) / fConst7) + 1.0f));
-		fConst10 = (1.0f / fConst0);
-		fConst11 = (0.100000001f / fConst0);
-		fConst12 = (((fConst8 + -1.41421354f) / fConst7) + 1.0f);
-		fConst13 = (2.0f * (1.0f - (1.0f / Macalla_faustpower2_f(fConst7))));
-		fConst14 = std::exp((0.0f - (2500.0f / fConst0)));
-		fConst15 = (1.0f - fConst14);
-		fConst16 = std::exp((0.0f - (2.0f / fConst0)));
-		fConst17 = std::exp((0.0f - (1250.0f / fConst0)));
-		fConst18 = (20.0f / fConst0);
-		fConst19 = (0.0f - fConst18);
-		fConst20 = std::exp(fConst19);
-		float fConst21 = std::tan((31415.9258f / fConst0));
-		float fConst22 = (fConst0 * fConst21);
-		float fConst23 = Macalla_faustpower2_f(std::sqrt((4.0f * ((Macalla_faustpower2_f(fConst0) * fConst21) * std::tan((1570.79639f / fConst0))))));
-		float fConst24 = ((2.0f * fConst22) - (0.5f * (fConst23 / fConst22)));
-		float fConst25 = (Macalla_faustpower2_f(fConst10) * fConst23);
-		float fConst26 = (2.0f * (fConst24 / fConst0));
-		float fConst27 = ((fConst25 + fConst26) + 4.0f);
-		fConst28 = (2.0f * (fConst24 / (fConst0 * fConst27)));
-		fConst29 = (48.0f / fConst0);
-		fConst30 = (0.00416666688f * fConst0);
-		fConst31 = (60.0f / fConst0);
-		float fConst32 = std::max<float>(0.0f, std::min<float>(2047.0f, (0.00833333377f * fConst0)));
-		float fConst33 = std::floor(fConst32);
-		fConst34 = (fConst33 + (1.0f - fConst32));
-		iConst35 = int(fConst32);
-		fConst36 = (fConst32 - fConst33);
-		iConst37 = (iConst35 + 1);
-		fConst38 = (528.0f / fConst0);
-		fConst39 = (110.0f / fConst0);
-		fConst40 = (1.0f / fConst27);
-		fConst41 = ((2.0f * fConst25) + -8.0f);
-		fConst42 = (fConst25 + (4.0f - fConst26));
-		fConst43 = (0.0f - fConst28);
-		fConst44 = (3.14159274f / fConst0);
-		fConst45 = (1.0f / fConst3);
-		fConst46 = (((fConst2 + -1.41421354f) / fConst1) + 1.0f);
-		fConst47 = (2.0f * (1.0f - (1.0f / Macalla_faustpower2_f(fConst1))));
-		float fConst48 = (1.0f / std::tan((219.911484f / fConst0)));
-		fConst49 = (1.0f / (fConst48 + 1.0f));
-		fConst50 = (1.0f - fConst48);
-		fConst51 = (3.49245978e-16f * fConst0);
-		fConst52 = (0.00100000005f * fConst0);
-	}
-	
-	virtual void instanceResetUserInterface() {
-		fVslider0 = FAUSTFLOAT(50.0f);
-		fHslider0 = FAUSTFLOAT(0.0f);
-		fVslider1 = FAUSTFLOAT(0.5f);
-		fHslider1 = FAUSTFLOAT(0.002f);
-		fHslider2 = FAUSTFLOAT(0.5f);
-		fHslider3 = FAUSTFLOAT(0.29999999999999999f);
-		fHslider4 = FAUSTFLOAT(8.0f);
-		fHslider5 = FAUSTFLOAT(0.10000000000000001f);
-		fHslider6 = FAUSTFLOAT(0.0f);
-		fHslider7 = FAUSTFLOAT(250.0f);
-		fHslider8 = FAUSTFLOAT(10000.0f);
-		fHslider9 = FAUSTFLOAT(300.0f);
-		fVslider2 = FAUSTFLOAT(0.0f);
-		fVslider3 = FAUSTFLOAT(0.5f);
-		fHslider10 = FAUSTFLOAT(0.0f);
-		fHslider11 = FAUSTFLOAT(4.0f);
-		fHslider12 = FAUSTFLOAT(200.0f);
-		fHslider13 = FAUSTFLOAT(10.0f);
-		fHslider14 = FAUSTFLOAT(-30.0f);
-		fHslider15 = FAUSTFLOAT(0.0f);
-	}
-	
-	virtual void instanceClear() {
-		IOTA = 0;
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l0 = 0; (l0 < 131072); l0 = (l0 + 1)) {
-			fVec0[l0] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l1 = 0; (l1 < 2); l1 = (l1 + 1)) {
-			iVec1[l1] = 0;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l2 = 0; (l2 < 2); l2 = (l2 + 1)) {
-			fRec1[l2] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l3 = 0; (l3 < 2); l3 = (l3 + 1)) {
-			fRec2[l3] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l4 = 0; (l4 < 2); l4 = (l4 + 1)) {
-			iRec8[l4] = 0;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l5 = 0; (l5 < 2); l5 = (l5 + 1)) {
-			fVec2[l5] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l6 = 0; (l6 < 2); l6 = (l6 + 1)) {
-			fRec9[l6] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l7 = 0; (l7 < 2); l7 = (l7 + 1)) {
-			fRec7[l7] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l8 = 0; (l8 < 2); l8 = (l8 + 1)) {
-			fRec10[l8] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l9 = 0; (l9 < 2); l9 = (l9 + 1)) {
-			fRec12[l9] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l12 = 0; (l12 < 2); l12 = (l12 + 1)) {
-			fRec14[l12] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l13 = 0; (l13 < 2); l13 = (l13 + 1)) {
-			fRec11[l13] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l14 = 0; (l14 < 2); l14 = (l14 + 1)) {
-			fRec15[l14] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l15 = 0; (l15 < 3); l15 = (l15 + 1)) {
-			fRec6[l15] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l16 = 0; (l16 < 2); l16 = (l16 + 1)) {
-			fRec17[l16] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l17 = 0; (l17 < 2); l17 = (l17 + 1)) {
-			fRec16[l17] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l18 = 0; (l18 < 2); l18 = (l18 + 1)) {
-			fRec18[l18] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l19 = 0; (l19 < 2); l19 = (l19 + 1)) {
-			fRec19[l19] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l20 = 0; (l20 < 4); l20 = (l20 + 1)) {
-			fRec21[l20] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l21 = 0; (l21 < 2); l21 = (l21 + 1)) {
-			fRec22[l21] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l22 = 0; (l22 < 2); l22 = (l22 + 1)) {
-			fVec4[l22] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l23 = 0; (l23 < 2); l23 = (l23 + 1)) {
-			fRec23[l23] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l24 = 0; (l24 < 2); l24 = (l24 + 1)) {
-			fRec25[l24] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l25 = 0; (l25 < 2); l25 = (l25 + 1)) {
-			fVec5[l25] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l26 = 0; (l26 < 2048); l26 = (l26 + 1)) {
-			fVec6[l26] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l27 = 0; (l27 < 2); l27 = (l27 + 1)) {
-			fRec24[l27] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l28 = 0; (l28 < 2); l28 = (l28 + 1)) {
-			fRec26[l28] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l29 = 0; (l29 < 2); l29 = (l29 + 1)) {
-			fRec27[l29] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l30 = 0; (l30 < 3); l30 = (l30 + 1)) {
-			fRec20[l30] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l31 = 0; (l31 < 2); l31 = (l31 + 1)) {
-			fRec28[l31] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l32 = 0; (l32 < 3); l32 = (l32 + 1)) {
-			fRec5[l32] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l33 = 0; (l33 < 2); l33 = (l33 + 1)) {
-			fRec29[l33] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l34 = 0; (l34 < 3); l34 = (l34 + 1)) {
-			fRec4[l34] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l35 = 0; (l35 < 3); l35 = (l35 + 1)) {
-			fRec3[l35] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l36 = 0; (l36 < 1048576); l36 = (l36 + 1)) {
-			fVec7[l36] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l37 = 0; (l37 < 2); l37 = (l37 + 1)) {
-			fVec8[l37] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l38 = 0; (l38 < 2); l38 = (l38 + 1)) {
-			fRec34[l38] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l39 = 0; (l39 < 2); l39 = (l39 + 1)) {
-			fRec35[l39] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l40 = 0; (l40 < 2); l40 = (l40 + 1)) {
-			fRec36[l40] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l41 = 0; (l41 < 2); l41 = (l41 + 1)) {
-			fRec38[l41] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l42 = 0; (l42 < 2); l42 = (l42 + 1)) {
-			fRec37[l42] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l43 = 0; (l43 < 2); l43 = (l43 + 1)) {
-			fRec30[l43] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l44 = 0; (l44 < 2); l44 = (l44 + 1)) {
-			fRec31[l44] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l45 = 0; (l45 < 2); l45 = (l45 + 1)) {
-			fRec32[l45] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l46 = 0; (l46 < 2); l46 = (l46 + 1)) {
-			fRec33[l46] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l47 = 0; (l47 < 262144); l47 = (l47 + 1)) {
-			fRec0[l47] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l48 = 0; (l48 < 2); l48 = (l48 + 1)) {
-			fRec39[l48] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l49 = 0; (l49 < 2); l49 = (l49 + 1)) {
-			fRec40[l49] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l50 = 0; (l50 < 2); l50 = (l50 + 1)) {
-			fRec42[l50] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l51 = 0; (l51 < 2); l51 = (l51 + 1)) {
-			fRec41[l51] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l52 = 0; (l52 < 2); l52 = (l52 + 1)) {
-			fRec43[l52] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l53 = 0; (l53 < 131072); l53 = (l53 + 1)) {
-			fVec9[l53] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l54 = 0; (l54 < 2); l54 = (l54 + 1)) {
-			fRec51[l54] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l55 = 0; (l55 < 2); l55 = (l55 + 1)) {
-			fRec50[l55] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l56 = 0; (l56 < 2); l56 = (l56 + 1)) {
-			fRec49[l56] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l57 = 0; (l57 < 2); l57 = (l57 + 1)) {
-			fRec53[l57] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l58 = 0; (l58 < 2); l58 = (l58 + 1)) {
-			fRec52[l58] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l59 = 0; (l59 < 3); l59 = (l59 + 1)) {
-			fRec48[l59] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l60 = 0; (l60 < 2); l60 = (l60 + 1)) {
-			fRec55[l60] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l61 = 0; (l61 < 2); l61 = (l61 + 1)) {
-			fRec54[l61] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l62 = 0; (l62 < 2); l62 = (l62 + 1)) {
-			fRec56[l62] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l63 = 0; (l63 < 3); l63 = (l63 + 1)) {
-			fRec47[l63] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l64 = 0; (l64 < 3); l64 = (l64 + 1)) {
-			fRec46[l64] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l65 = 0; (l65 < 3); l65 = (l65 + 1)) {
-			fRec45[l65] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l66 = 0; (l66 < 1048576); l66 = (l66 + 1)) {
-			fVec10[l66] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l67 = 0; (l67 < 2); l67 = (l67 + 1)) {
-			fRec61[l67] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l68 = 0; (l68 < 2); l68 = (l68 + 1)) {
-			fRec57[l68] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l69 = 0; (l69 < 2); l69 = (l69 + 1)) {
-			fRec58[l69] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l70 = 0; (l70 < 2); l70 = (l70 + 1)) {
-			fRec59[l70] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l71 = 0; (l71 < 2); l71 = (l71 + 1)) {
-			fRec60[l71] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l72 = 0; (l72 < 262144); l72 = (l72 + 1)) {
-			fRec44[l72] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l73 = 0; (l73 < 2); l73 = (l73 + 1)) {
-			fRec62[l73] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l74 = 0; (l74 < 2); l74 = (l74 + 1)) {
-			fRec64[l74] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l75 = 0; (l75 < 2); l75 = (l75 + 1)) {
-			fRec63[l75] = 0.0f;
-		}
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int l76 = 0; (l76 < 2); l76 = (l76 + 1)) {
-			fRec65[l76] = 0.0f;
-		}
-	}
-	
-	virtual void init(int sample_rate) {
-		classInit(sample_rate);
-		instanceInit(sample_rate);
-	}
-	virtual void instanceInit(int sample_rate) {
-		instanceConstants(sample_rate);
-		instanceResetUserInterface();
-		instanceClear();
-	}
-	
-	virtual Macalla* clone() {
-		return new Macalla();
-	}
-	
-	virtual int getSampleRate() {
-		return fSampleRate;
-	}
-	
-	virtual void buildUserInterface(UI* ui_interface) {
-		ui_interface->openVerticalBox("Macalla ");
-		ui_interface->addHorizontalSlider("attack", &fHslider13, FAUSTFLOAT(10.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(100.0f), FAUSTFLOAT(1.0f));
-		ui_interface->addHorizontalSlider("delay(ms)", &fHslider9, FAUSTFLOAT(300.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(1000.0f), FAUSTFLOAT(1.0f));
-		ui_interface->addHorizontalSlider("ducking", &fHslider14, FAUSTFLOAT(-30.0f), FAUSTFLOAT(-60.0f), FAUSTFLOAT(0.0f), FAUSTFLOAT(0.100000001f));
-		ui_interface->addVerticalSlider("feedback", &fVslider1, FAUSTFLOAT(0.5f), FAUSTFLOAT(0.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addHorizontalSlider("flutter", &fHslider4, FAUSTFLOAT(8.0f), FAUSTFLOAT(2.0f), FAUSTFLOAT(20.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addHorizontalSlider("flutter_intensity", &fHslider5, FAUSTFLOAT(0.100000001f), FAUSTFLOAT(0.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addVerticalSlider("glitch_amount", &fVslider2, FAUSTFLOAT(0.0f), FAUSTFLOAT(0.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addVerticalSlider("glitch_rate", &fVslider3, FAUSTFLOAT(0.5f), FAUSTFLOAT(0.00999999978f), FAUSTFLOAT(5.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addHorizontalSlider("highpass", &fHslider7, FAUSTFLOAT(250.0f), FAUSTFLOAT(20.0f), FAUSTFLOAT(20000.0f), FAUSTFLOAT(1.0f));
-		ui_interface->addHorizontalSlider("lowpass", &fHslider8, FAUSTFLOAT(10000.0f), FAUSTFLOAT(20.0f), FAUSTFLOAT(20000.0f), FAUSTFLOAT(1.0f));
-		ui_interface->addVerticalSlider("mix", &fVslider0, FAUSTFLOAT(50.0f), FAUSTFLOAT(0.0f), FAUSTFLOAT(100.0f), FAUSTFLOAT(1.0f));
-		ui_interface->addHorizontalSlider("noise_amount", &fHslider6, FAUSTFLOAT(0.0f), FAUSTFLOAT(0.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addHorizontalSlider("output_gain", &fHslider10, FAUSTFLOAT(0.0f), FAUSTFLOAT(-96.0f), FAUSTFLOAT(12.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addHorizontalSlider("pitch_shift", &fHslider0, FAUSTFLOAT(0.0f), FAUSTFLOAT(-12.0f), FAUSTFLOAT(12.0f), FAUSTFLOAT(1.0f));
-		ui_interface->addHorizontalSlider("random_mod", &fHslider1, FAUSTFLOAT(0.00200000009f), FAUSTFLOAT(0.0f), FAUSTFLOAT(0.00999999978f), FAUSTFLOAT(9.99999975e-05f));
-		ui_interface->addHorizontalSlider("ratio", &fHslider11, FAUSTFLOAT(4.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(20.0f), FAUSTFLOAT(0.100000001f));
-		ui_interface->addHorizontalSlider("release", &fHslider12, FAUSTFLOAT(200.0f), FAUSTFLOAT(50.0f), FAUSTFLOAT(1000.0f), FAUSTFLOAT(1.0f));
-		ui_interface->addHorizontalSlider("spread_amount", &fHslider15, FAUSTFLOAT(0.0f), FAUSTFLOAT(0.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addHorizontalSlider("wow", &fHslider2, FAUSTFLOAT(0.5f), FAUSTFLOAT(0.0f), FAUSTFLOAT(2.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->addHorizontalSlider("wow_intensity", &fHslider3, FAUSTFLOAT(0.300000012f), FAUSTFLOAT(0.0f), FAUSTFLOAT(1.0f), FAUSTFLOAT(0.00999999978f));
-		ui_interface->closeBox();
-	}
-	
-	virtual void compute(int count, FAUSTFLOAT** RESTRICT inputs, FAUSTFLOAT** RESTRICT outputs) {
-		FAUSTFLOAT* input0 = inputs[0];
-		FAUSTFLOAT* input1 = inputs[1];
-		FAUSTFLOAT* output0 = outputs[0];
-		FAUSTFLOAT* output1 = outputs[1];
-		float fSlow0 = (0.00999999978f * float(fVslider0));
-		float fSlow1 = (1.0f - fSlow0);
-		float fSlow2 = std::pow(2.0f, (0.0833333358f * float(fHslider0)));
-		float fSlow3 = (fConst5 * float(fVslider1));
-		float fSlow4 = (4.65661287e-10f * float(fHslider1));
-		float fSlow5 = float(fHslider2);
-		float fSlow6 = (fConst10 * fSlow5);
-		float fSlow7 = (9.99999975e-05f * float(fHslider3));
-		float fSlow8 = float(fHslider4);
-		float fSlow9 = (fConst10 * fSlow8);
-		float fSlow10 = (9.99999975e-05f * float(fHslider5));
-		float fSlow11 = (fConst5 * float(fHslider6));
-		float fSlow12 = (fConst5 * float(fHslider7));
-		float fSlow13 = (fConst5 * float(fHslider8));
-		float fSlow14 = float(fHslider9);
-		float fSlow15 = (fConst51 * fSlow14);
-		float fSlow16 = (fConst52 * fSlow14);
-		float fSlow17 = (0.00100000005f * float(fVslider2));
-		float fSlow18 = (0.00100000005f * float(fVslider3));
-		float fSlow19 = (fConst5 * float(fHslider10));
-		float fSlow20 = (1.0f - (1.0f / float(fHslider11)));
-		float fSlow21 = (0.00100000005f * float(fHslider12));
-		int iSlow22 = (std::fabs(fSlow21) < 1.1920929e-07f);
-		float fThen19 = std::exp((0.0f - (fConst10 / (iSlow22 ? 1.0f : fSlow21))));
-		float fSlow23 = (iSlow22 ? 0.0f : fThen19);
-		float fSlow24 = (0.00100000005f * float(fHslider13));
-		int iSlow25 = (std::fabs(fSlow24) < 1.1920929e-07f);
-		float fThen21 = std::exp((0.0f - (fConst10 / (iSlow25 ? 1.0f : fSlow24))));
-		float fSlow26 = (iSlow25 ? 0.0f : fThen21);
-		float fSlow27 = float(fHslider14);
-		float fSlow28 = (fSlow27 + -1.5f);
-		float fSlow29 = (fSlow27 + 1.5f);
-		float fSlow30 = (fConst5 * float(fHslider15));
-		#pragma clang loop vectorize(enable) interleave(enable)
-		for (int i0 = 0; (i0 < count); i0 = (i0 + 1)) {
-			float fTemp0 = float(input0[i0]);
-			fVec0[(IOTA & 131071)] = fTemp0;
-			iVec1[0] = 1;
-			fRec1[0] = std::fmod(((fRec1[1] + 4097.0f) - fSlow2), 4096.0f);
-			float fTemp1 = (fRec1[0] + 4096.0f);
-			int iTemp2 = int(fTemp1);
-			int iTemp3 = std::min<int>(65537, std::max<int>(0, iTemp2));
-			float fTemp4 = std::floor(fTemp1);
-			float fTemp5 = (fTemp4 + (-4095.0f - fRec1[0]));
-			int iTemp6 = std::min<int>(65537, std::max<int>(0, (iTemp2 + 1)));
-			float fTemp7 = (fRec1[0] + (4096.0f - fTemp4));
-			float fTemp8 = std::min<float>((0.001953125f * fRec1[0]), 1.0f);
-			float fTemp9 = (1.0f - fTemp8);
-			fRec2[0] = (fSlow3 + (fConst6 * fRec2[1]));
-			iRec8[0] = ((1103515245 * iRec8[1]) + 12345);
-			float fTemp10 = float(iRec8[0]);
-			fVec2[0] = fTemp10;
-			float fTemp11 = (fSlow4 * fTemp10);
-			int iTemp12 = (1 - iVec1[1]);
-			float fThen0 = (fSlow6 + fRec9[1]);
-			float fTemp13 = (iTemp12 ? 0.0f : fThen0);
-			fRec9[0] = (fTemp13 - std::floor(fTemp13));
-			fRec7[0] = ((9.99999975e-05f * (fTemp11 + (1.0f - std::fabs(((2.0f * fRec9[0]) + -1.0f))))) + (0.999899983f * fRec7[1]));
-			fRec10[0] = (fSlow7 + (0.999899983f * fRec10[1]));
-			float fThen1 = (fSlow9 + fRec12[1]);
-			float fTemp14 = (iTemp12 ? 0.0f : fThen1);
-			fRec12[0] = (fTemp14 - std::floor(fTemp14));
-			float fThen2 = (fConst11 + fRec14[1]);
-			float fTemp15 = (iTemp12 ? 0.0f : fThen2);
-			fRec14[0] = (fTemp15 - std::floor(fTemp15));
-			float fTemp16 = ((0.200000003f * ftbl0MacallaSIG0[int((65536.0f * fRec14[0]))]) + 0.800000012f);
-			fRec11[0] = ((9.99999975e-05f * ((fTemp11 + (1.0f - std::fabs(((2.0f * fRec12[0]) + -1.0f)))) * fTemp16)) + (0.999899983f * fRec11[1]));
-			fRec15[0] = (fSlow10 + (0.999899983f * fRec15[1]));
-			float fTemp17 = ((1000.0f * (fRec7[0] * fRec10[0])) + (200.0f * (fRec11[0] * fRec15[0])));
-			float fTemp18 = (fTemp17 + 100.000008f);
-			int iTemp19 = int(fTemp18);
-			float fTemp20 = std::floor(fTemp18);
-			fRec6[0] = (((fRec0[((IOTA - (int(std::min<float>(fConst0, float(std::max<int>(0, iTemp19)))) + 1)) & 262143)] * (0.0f - (fTemp17 + (99.0f - fTemp20)))) + ((fTemp17 + (100.0f - fTemp20)) * fRec0[((IOTA - (int(std::min<float>(fConst0, float(std::max<int>(0, (iTemp19 + 1))))) + 1)) & 262143)])) - (fConst9 * ((fConst12 * fRec6[2]) + (fConst13 * fRec6[1]))));
-			float fTemp21 = (fRec6[2] + (fRec6[0] + (2.0f * fRec6[1])));
-			float fTemp22 = std::fabs((fConst9 * fTemp21));
-			float fTemp23 = ((fTemp22 > fRec17[1]) ? fConst17 : fConst16);
-			fRec17[0] = ((fTemp22 * (1.0f - fTemp23)) + (fRec17[1] * fTemp23));
-			fRec16[0] = ((fConst15 * (0.0f - (0.75f * std::max<float>(((20.0f * std::log10(std::max<float>(1.17549435e-38f, fRec17[0]))) + 6.0f), 0.0f)))) + (fConst14 * fRec16[1]));
-			float fTemp24 = (fConst9 * (fTemp21 * std::pow(10.0f, (0.0500000007f * fRec16[0]))));
-			float fTemp25 = std::fabs((fTemp24 + 9.99999975e-05f));
-			float fTemp26 = ((fTemp25 > fRec18[1]) ? fConst20 : fConst16);
-			fRec18[0] = ((fTemp25 * (1.0f - fTemp26)) + (fRec18[1] * fTemp26));
-			fRec19[0] = (fSlow11 + (fConst6 * fRec19[1]));
-			fRec21[0] = (((0.522189379f * fRec21[3]) + ((4.65661287e-10f * fTemp10) + (2.49495602f * fRec21[1]))) - (2.0172658f * fRec21[2]));
-			float fThen5 = (fConst18 + fRec22[1]);
-			float fTemp27 = (iTemp12 ? 0.0f : fThen5);
-			fRec22[0] = (fTemp27 - std::floor(fTemp27));
-			float fTemp28 = (fRec22[0] - fRec22[1]);
-			fVec4[0] = fTemp28;
-			int iTemp29 = ((fVec4[1] <= 0.0f) & (fTemp28 > 0.0f));
-			fRec23[0] = ((fRec23[1] * float((1 - iTemp29))) + (4.65661287e-10f * (fTemp10 * float(iTemp29))));
-			float fTemp30 = (0.5f * (fRec23[0] + 1.0f));
-			float fThen6 = (fConst31 + fRec25[1]);
-			float fTemp31 = (iTemp12 ? 0.0f : fThen6);
-			fRec25[0] = (fTemp31 - std::floor(fTemp31));
-			float fTemp32 = Macalla_faustpower2_f(((2.0f * fRec25[0]) + -1.0f));
-			fVec5[0] = fTemp32;
-			float fTemp33 = (float(iVec1[1]) * (fTemp32 - fVec5[1]));
-			fVec6[(IOTA & 2047)] = fTemp33;
-			fRec24[0] = ((0.999000013f * fRec24[1]) + (fConst30 * ((fTemp33 - (fConst34 * fVec6[((IOTA - iConst35) & 2047)])) - (fConst36 * fVec6[((IOTA - iConst37) & 2047)]))));
-			float fThen7 = (fConst38 + fRec26[1]);
-			float fTemp34 = (iTemp12 ? 0.0f : fThen7);
-			fRec26[0] = (fTemp34 - std::floor(fTemp34));
-			float fThen8 = (fConst39 + fRec27[1]);
-			float fTemp35 = (iTemp12 ? 0.0f : fThen8);
-			fRec27[0] = (fTemp35 - std::floor(fTemp35));
-			fRec20[0] = (((((1.5f * (((0.0499220341f * fRec21[0]) + (0.0506126992f * fRec21[2])) - ((0.0959935337f * fRec21[1]) + (0.00440878607f * fRec21[3])))) + (2.32830644e-10f * (fVec2[1] * float(((fRec22[0] >= fTemp30) * (fRec22[1] < fTemp30)))))) + (fConst29 * fRec24[0])) + (0.00999999978f * (ftbl0MacallaSIG0[int((65536.0f * fRec26[0]))] + ftbl0MacallaSIG0[int((65536.0f * fRec27[0]))]))) - (fConst40 * ((fConst41 * fRec20[1]) + (fConst42 * fRec20[2]))));
-			float fTemp36 = ((fConst28 * fRec20[0]) + (fConst43 * fRec20[2]));
-			fRec28[0] = (fSlow12 + (fConst6 * fRec28[1]));
-			float fTemp37 = std::tan((fConst44 * fRec28[0]));
-			float fTemp38 = (1.0f / fTemp37);
-			float fTemp39 = (((fTemp38 + -1.41421354f) / fTemp37) + 1.0f);
-			float fTemp40 = Macalla_faustpower2_f(fTemp37);
-			float fTemp41 = (1.0f - (1.0f / fTemp40));
-			float fTemp42 = (((fTemp38 + 1.41421354f) / fTemp37) + 1.0f);
-			fRec5[0] = ((fTemp24 + (1.5f * ((fRec18[0] * fRec19[0]) * fTemp36))) - (((fRec5[2] * fTemp39) + (2.0f * (fRec5[1] * fTemp41))) / fTemp42));
-			float fTemp43 = (0.0f - (2.0f / fTemp40));
-			fRec29[0] = (fSlow13 + (fConst6 * fRec29[1]));
-			float fTemp44 = std::tan((fConst44 * fRec29[0]));
-			float fTemp45 = (1.0f / fTemp44);
-			float fTemp46 = (((fTemp45 + -1.41421354f) / fTemp44) + 1.0f);
-			float fTemp47 = (1.0f - (1.0f / Macalla_faustpower2_f(fTemp44)));
-			float fTemp48 = (((fTemp45 + 1.41421354f) / fTemp44) + 1.0f);
-			fRec4[0] = (((((fRec5[1] * fTemp43) + (fRec5[0] / fTemp40)) + (fRec5[2] / fTemp40)) / fTemp42) - (((fRec4[2] * fTemp46) + (2.0f * (fRec4[1] * fTemp47))) / fTemp48));
-			fRec3[0] = (((fRec4[2] + (fRec4[0] + (2.0f * fRec4[1]))) / fTemp48) - (fConst45 * ((fConst46 * fRec3[2]) + (fConst47 * fRec3[1]))));
-			int iTemp49 = int(fRec1[0]);
-			int iTemp50 = std::min<int>(65537, std::max<int>(0, iTemp49));
-			float fTemp51 = std::floor(fRec1[0]);
-			float fTemp52 = (fTemp51 + (1.0f - fRec1[0]));
-			float fTemp53 = (fRec1[0] - fTemp51);
-			int iTemp54 = std::min<int>(65537, std::max<int>(0, (iTemp49 + 1)));
-			float fTemp55 = ((((fVec0[((IOTA - iTemp3) & 131071)] * fTemp5) + (fVec0[((IOTA - iTemp6) & 131071)] * fTemp7)) * fTemp9) + ((fConst4 * (fRec2[0] * (fRec3[2] + (fRec3[0] + (2.0f * fRec3[1]))))) + (((fVec0[((IOTA - iTemp50) & 131071)] * fTemp52) + (fTemp53 * fVec0[((IOTA - iTemp54) & 131071)])) * fTemp8)));
-			fVec7[(IOTA & 1048575)] = fTemp55;
-			float fTemp56 = (fSlow15 * (fRec19[0] * fTemp10));
-			fVec8[0] = fTemp56;
-			fRec34[0] = (0.0f - (fConst49 * ((fConst50 * fRec34[1]) - (fTemp56 + fVec8[1]))));
-			fRec35[0] = (fSlow16 + (0.998000026f * fRec35[1]));
-			float fTemp57 = (fRec34[0] + (0.00200000009f * fRec35[0]));
-			fRec36[0] = (fSlow17 + (0.999000013f * fRec36[1]));
-			fRec38[0] = (fSlow18 + (0.999000013f * fRec38[1]));
-			float fThen9 = (fRec37[1] + (fConst10 * fRec38[0]));
-			float fTemp58 = (iTemp12 ? 0.0f : fThen9);
-			fRec37[0] = (fTemp58 - std::floor(fTemp58));
-			float fTemp59 = std::min<float>(524288.0f, std::max<float>(0.0f, (fTemp57 + (fConst0 * (fRec36[0] * std::fabs(((2.0f * (1.0f - std::fabs(((2.0f * fRec37[0]) + -1.0f)))) + -1.0f)))))));
-			float fThen11 = (((fRec31[1] == 1.0f) & (fTemp59 != fRec33[1])) ? fConst19 : 0.0f);
-			float fThen13 = (((fRec31[1] == 0.0f) & (fTemp59 != fRec32[1])) ? fConst18 : fThen11);
-			float fElse13 = (((fRec31[1] > 0.0f) & (fRec31[1] < 1.0f)) ? fRec30[1] : 0.0f);
-			float fTemp60 = ((fRec30[1] != 0.0f) ? fElse13 : fThen13);
-			fRec30[0] = fTemp60;
-			fRec31[0] = std::max<float>(0.0f, std::min<float>(1.0f, (fRec31[1] + fTemp60)));
-			fRec32[0] = (((fRec31[1] >= 1.0f) & (fRec33[1] != fTemp59)) ? fTemp59 : fRec32[1]);
-			fRec33[0] = (((fRec31[1] <= 0.0f) & (fRec32[1] != fTemp59)) ? fTemp59 : fRec33[1]);
-			float fTemp61 = fVec7[((IOTA - int(std::min<float>(524288.0f, std::max<float>(0.0f, fRec32[0])))) & 1048575)];
-			fRec0[(IOTA & 262143)] = (fTemp61 + (fRec31[0] * (fVec7[((IOTA - int(std::min<float>(524288.0f, std::max<float>(0.0f, fRec33[0])))) & 1048575)] - fTemp61)));
-			fRec39[0] = (fSlow19 + (fConst6 * fRec39[1]));
-			float fTemp62 = std::pow(10.0f, (0.0500000007f * fRec39[0]));
-			float fTemp63 = (fRec0[((IOTA - 0) & 262143)] * fTemp62);
-			float fTemp64 = std::fabs((fTemp63 + 9.99999975e-05f));
-			float fTemp65 = ((fTemp64 > fRec40[1]) ? fConst20 : fConst16);
-			fRec40[0] = ((fTemp64 * (1.0f - fTemp65)) + (fRec40[1] * fTemp65));
-			float fTemp66 = (fTemp63 + (1.5f * ((fRec19[0] * fRec40[0]) * fTemp36)));
-			float fTemp67 = std::fabs(fTemp66);
-			float fTemp68 = ((fTemp67 > fRec42[1]) ? fConst17 : fConst16);
-			fRec42[0] = ((fTemp67 * (1.0f - fTemp68)) + (fRec42[1] * fTemp68));
-			fRec41[0] = ((fConst15 * (0.0f - (0.75f * std::max<float>(((20.0f * std::log10(std::max<float>(1.17549435e-38f, fRec42[0]))) + 6.0f), 0.0f)))) + (fConst14 * fRec41[1]));
-			float fTemp69 = std::fabs(fTemp0);
-			float fTemp70 = ((fTemp69 > fRec43[1]) ? fSlow26 : fSlow23);
-			fRec43[0] = ((fTemp69 * (1.0f - fTemp70)) + (fRec43[1] * fTemp70));
-			float fTemp71 = (20.0f * std::log10(std::max<float>(1.17549435e-38f, fRec43[0])));
-			int iTemp72 = ((fTemp71 > fSlow28) + (fTemp71 > fSlow29));
-			float fThen23 = (fTemp71 - fSlow27);
-			float fElse23 = (0.166666672f * Macalla_faustpower2_f(((fTemp71 + 1.5f) - fSlow27)));
-			float fThen24 = ((iTemp72 == 1) ? fElse23 : fThen23);
-			output0[i0] = FAUSTFLOAT(((fSlow1 * fTemp0) + (fSlow0 * ((fTemp66 * std::pow(10.0f, (0.0500000007f * fRec41[0]))) * std::pow(10.0f, (0.0500000007f * (0.0f - (fSlow20 * std::max<float>(0.0f, ((iTemp72 == 0) ? 0.0f : fThen24))))))))));
-			float fTemp73 = float(input1[i0]);
-			fVec9[(IOTA & 131071)] = fTemp73;
-			fRec51[0] = (fSlow30 + (fConst6 * fRec51[1]));
-			float fThen25 = (fRec50[1] + (fConst10 * (fSlow5 + (0.100000001f * fRec51[0]))));
-			float fTemp74 = (iTemp12 ? 0.0f : fThen25);
-			fRec50[0] = (fTemp74 - std::floor(fTemp74));
-			fRec49[0] = ((9.99999975e-05f * (fTemp11 + (1.0f - std::fabs(((2.0f * fRec50[0]) + -1.0f))))) + (0.999899983f * fRec49[1]));
-			float fThen26 = (fRec53[1] + (fConst10 * (fSlow8 + (0.200000003f * fRec51[0]))));
-			float fTemp75 = (iTemp12 ? 0.0f : fThen26);
-			fRec53[0] = (fTemp75 - std::floor(fTemp75));
-			fRec52[0] = ((9.99999975e-05f * (fTemp16 * (fTemp11 + (1.0f - std::fabs(((2.0f * fRec53[0]) + -1.0f)))))) + (0.999899983f * fRec52[1]));
-			float fTemp76 = ((1000.0f * (fRec10[0] * fRec49[0])) + (200.0f * (fRec15[0] * fRec52[0])));
-			float fTemp77 = (fTemp76 + 100.000008f);
-			int iTemp78 = int(fTemp77);
-			float fTemp79 = std::floor(fTemp77);
-			fRec48[0] = (((fRec44[((IOTA - (int(std::min<float>(fConst0, float(std::max<int>(0, iTemp78)))) + 1)) & 262143)] * (0.0f - (fTemp76 + (99.0f - fTemp79)))) + ((fTemp76 + (100.0f - fTemp79)) * fRec44[((IOTA - (int(std::min<float>(fConst0, float(std::max<int>(0, (iTemp78 + 1))))) + 1)) & 262143)])) - (fConst9 * ((fConst12 * fRec48[2]) + (fConst13 * fRec48[1]))));
-			float fTemp80 = (fRec48[2] + (fRec48[0] + (2.0f * fRec48[1])));
-			float fTemp81 = std::fabs((fConst9 * fTemp80));
-			float fTemp82 = ((fTemp81 > fRec55[1]) ? fConst17 : fConst16);
-			fRec55[0] = ((fTemp81 * (1.0f - fTemp82)) + (fRec55[1] * fTemp82));
-			fRec54[0] = ((fConst15 * (0.0f - (0.75f * std::max<float>(((20.0f * std::log10(std::max<float>(1.17549435e-38f, fRec55[0]))) + 6.0f), 0.0f)))) + (fConst14 * fRec54[1]));
-			float fTemp83 = (fConst9 * (fTemp80 * std::pow(10.0f, (0.0500000007f * fRec54[0]))));
-			float fTemp84 = std::fabs((fTemp83 + 9.99999975e-05f));
-			float fTemp85 = ((fTemp84 > fRec56[1]) ? fConst20 : fConst16);
-			fRec56[0] = ((fTemp84 * (1.0f - fTemp85)) + (fRec56[1] * fTemp85));
-			fRec47[0] = ((fTemp83 + (1.5f * ((fRec19[0] * fRec56[0]) * fTemp36))) - (((fTemp39 * fRec47[2]) + (2.0f * (fTemp41 * fRec47[1]))) / fTemp42));
-			fRec46[0] = (((((fTemp43 * fRec47[1]) + (fRec47[0] / fTemp40)) + (fRec47[2] / fTemp40)) / fTemp42) - (((fTemp46 * fRec46[2]) + (2.0f * (fTemp47 * fRec46[1]))) / fTemp48));
-			fRec45[0] = (((fRec46[2] + (fRec46[0] + (2.0f * fRec46[1]))) / fTemp48) - (fConst45 * ((fConst46 * fRec45[2]) + (fConst47 * fRec45[1]))));
-			float fTemp86 = ((fTemp9 * ((fVec9[((IOTA - iTemp3) & 131071)] * fTemp5) + (fVec9[((IOTA - iTemp6) & 131071)] * fTemp7))) + ((fConst4 * (fRec2[0] * (fRec45[2] + (fRec45[0] + (2.0f * fRec45[1]))))) + (fTemp8 * ((fVec9[((IOTA - iTemp50) & 131071)] * fTemp52) + (fTemp53 * fVec9[((IOTA - iTemp54) & 131071)])))));
-			fVec10[(IOTA & 1048575)] = fTemp86;
-			float fThen29 = (fRec61[1] + (fConst10 * (fRec38[0] + (2.0f * fRec51[0]))));
-			float fTemp87 = (iTemp12 ? 0.0f : fThen29);
-			fRec61[0] = (fTemp87 - std::floor(fTemp87));
-			float fTemp88 = std::min<float>(524288.0f, std::max<float>(0.0f, (fTemp57 + ((fRec36[0] * (fConst0 + (1000.0f * fRec51[0]))) * std::fabs(((2.0f * (1.0f - std::fabs(((2.0f * fRec61[0]) + -1.0f)))) + -1.0f))))));
-			float fThen31 = (((fRec58[1] == 1.0f) & (fTemp88 != fRec60[1])) ? fConst19 : 0.0f);
-			float fThen33 = (((fRec58[1] == 0.0f) & (fTemp88 != fRec59[1])) ? fConst18 : fThen31);
-			float fElse33 = (((fRec58[1] > 0.0f) & (fRec58[1] < 1.0f)) ? fRec57[1] : 0.0f);
-			float fTemp89 = ((fRec57[1] != 0.0f) ? fElse33 : fThen33);
-			fRec57[0] = fTemp89;
-			fRec58[0] = std::max<float>(0.0f, std::min<float>(1.0f, (fRec58[1] + fTemp89)));
-			fRec59[0] = (((fRec58[1] >= 1.0f) & (fRec60[1] != fTemp88)) ? fTemp88 : fRec59[1]);
-			fRec60[0] = (((fRec58[1] <= 0.0f) & (fRec59[1] != fTemp88)) ? fTemp88 : fRec60[1]);
-			float fTemp90 = fVec10[((IOTA - int(std::min<float>(524288.0f, std::max<float>(0.0f, fRec59[0])))) & 1048575)];
-			fRec44[(IOTA & 262143)] = (fTemp90 + (fRec58[0] * (fVec10[((IOTA - int(std::min<float>(524288.0f, std::max<float>(0.0f, fRec60[0])))) & 1048575)] - fTemp90)));
-			float fTemp91 = (fRec44[((IOTA - 0) & 262143)] * fTemp62);
-			float fTemp92 = std::fabs((fTemp91 + 9.99999975e-05f));
-			float fTemp93 = ((fTemp92 > fRec62[1]) ? fConst20 : fConst16);
-			fRec62[0] = ((fTemp92 * (1.0f - fTemp93)) + (fRec62[1] * fTemp93));
-			float fTemp94 = (fTemp91 + (1.5f * ((fRec19[0] * fRec62[0]) * fTemp36)));
-			float fTemp95 = std::fabs(fTemp94);
-			float fTemp96 = ((fTemp95 > fRec64[1]) ? fConst17 : fConst16);
-			fRec64[0] = ((fTemp95 * (1.0f - fTemp96)) + (fRec64[1] * fTemp96));
-			fRec63[0] = ((fConst15 * (0.0f - (0.75f * std::max<float>(((20.0f * std::log10(std::max<float>(1.17549435e-38f, fRec64[0]))) + 6.0f), 0.0f)))) + (fConst14 * fRec63[1]));
-			float fTemp97 = std::fabs(fTemp73);
-			float fTemp98 = ((fTemp97 > fRec65[1]) ? fSlow26 : fSlow23);
-			fRec65[0] = ((fTemp97 * (1.0f - fTemp98)) + (fRec65[1] * fTemp98));
-			float fTemp99 = (20.0f * std::log10(std::max<float>(1.17549435e-38f, fRec65[0])));
-			int iTemp100 = ((fTemp99 > fSlow28) + (fTemp99 > fSlow29));
-			float fThen39 = (fTemp99 - fSlow27);
-			float fElse39 = (0.166666672f * Macalla_faustpower2_f(((fTemp99 + 1.5f) - fSlow27)));
-			float fThen40 = ((iTemp100 == 1) ? fElse39 : fThen39);
-			output1[i0] = FAUSTFLOAT(((fSlow1 * fTemp73) + (fSlow0 * ((fTemp94 * std::pow(10.0f, (0.0500000007f * fRec63[0]))) * std::pow(10.0f, (0.0500000007f * (0.0f - (fSlow20 * std::max<float>(0.0f, ((iTemp100 == 0) ? 0.0f : fThen40))))))))));
-			IOTA = (IOTA + 1);
-			iVec1[1] = iVec1[0];
-			fRec1[1] = fRec1[0];
-			fRec2[1] = fRec2[0];
-			iRec8[1] = iRec8[0];
-			fVec2[1] = fVec2[0];
-			fRec9[1] = fRec9[0];
-			fRec7[1] = fRec7[0];
-			fRec10[1] = fRec10[0];
-			fRec12[1] = fRec12[0];
-			fRec14[1] = fRec14[0];
-			fRec11[1] = fRec11[0];
-			fRec15[1] = fRec15[0];
-			fRec6[2] = fRec6[1];
-			fRec6[1] = fRec6[0];
-			fRec17[1] = fRec17[0];
-			fRec16[1] = fRec16[0];
-			fRec18[1] = fRec18[0];
-			fRec19[1] = fRec19[0];
-			#pragma clang loop vectorize(enable) interleave(enable)
-			for (int j0 = 3; (j0 > 0); j0 = (j0 - 1)) {
-				fRec21[j0] = fRec21[(j0 - 1)];
-			}
-			fRec22[1] = fRec22[0];
-			fVec4[1] = fVec4[0];
-			fRec23[1] = fRec23[0];
-			fRec25[1] = fRec25[0];
-			fVec5[1] = fVec5[0];
-			fRec24[1] = fRec24[0];
-			fRec26[1] = fRec26[0];
-			fRec27[1] = fRec27[0];
-			fRec20[2] = fRec20[1];
-			fRec20[1] = fRec20[0];
-			fRec28[1] = fRec28[0];
-			fRec5[2] = fRec5[1];
-			fRec5[1] = fRec5[0];
-			fRec29[1] = fRec29[0];
-			fRec4[2] = fRec4[1];
-			fRec4[1] = fRec4[0];
-			fRec3[2] = fRec3[1];
-			fRec3[1] = fRec3[0];
-			fVec8[1] = fVec8[0];
-			fRec34[1] = fRec34[0];
-			fRec35[1] = fRec35[0];
-			fRec36[1] = fRec36[0];
-			fRec38[1] = fRec38[0];
-			fRec37[1] = fRec37[0];
-			fRec30[1] = fRec30[0];
-			fRec31[1] = fRec31[0];
-			fRec32[1] = fRec32[0];
-			fRec33[1] = fRec33[0];
-			fRec39[1] = fRec39[0];
-			fRec40[1] = fRec40[0];
-			fRec42[1] = fRec42[0];
-			fRec41[1] = fRec41[0];
-			fRec43[1] = fRec43[0];
-			fRec51[1] = fRec51[0];
-			fRec50[1] = fRec50[0];
-			fRec49[1] = fRec49[0];
-			fRec53[1] = fRec53[0];
-			fRec52[1] = fRec52[0];
-			fRec48[2] = fRec48[1];
-			fRec48[1] = fRec48[0];
-			fRec55[1] = fRec55[0];
-			fRec54[1] = fRec54[0];
-			fRec56[1] = fRec56[0];
-			fRec47[2] = fRec47[1];
-			fRec47[1] = fRec47[0];
-			fRec46[2] = fRec46[1];
-			fRec46[1] = fRec46[0];
-			fRec45[2] = fRec45[1];
-			fRec45[1] = fRec45[0];
-			fRec61[1] = fRec61[0];
-			fRec57[1] = fRec57[0];
-			fRec58[1] = fRec58[0];
-			fRec59[1] = fRec59[0];
-			fRec60[1] = fRec60[0];
-			fRec62[1] = fRec62[0];
-			fRec64[1] = fRec64[0];
-			fRec63[1] = fRec63[0];
-			fRec65[1] = fRec65[0];
-		}
-	}
+  private:
+    int fSampleRate;
+    float fConst0;
+    float fConst1;
+    FAUSTFLOAT fHslider0;
+    float fConst2;
+    float fRec1_perm[4];
+    FAUSTFLOAT fHslider1;
+    float fRec2_perm[4];
+    FAUSTFLOAT fHslider2;
+    float fRec3_perm[4];
+    FAUSTFLOAT fHslider3;
+    float fRec12_perm[4];
+    int iRec14_perm[4];
+    int iVec0_perm[4];
+    float fConst3;
+    float fRec15_perm[4];
+    float fYec0_perm[4];
+    float fRec13_perm[4];
+    float fRec17_perm[4];
+    float fConst4;
+    float fRec18_perm[4];
+    float fRec16_perm[4];
+    float fConst8;
+    float fConst9;
+    float fConst10;
+    float fRec11_perm[4];
+    int iRec21_perm[4];
+    int iConst11;
+    float fRec20_perm[4];
+    FAUSTFLOAT fCheckbox0;
+    float fConst12;
+    float fConst13;
+    float fRec23_perm[4];
+    float fConst14;
+    float fConst15;
+    float fRec22_perm[4];
+    float fConst16;
+    float fConst17;
+    float fConst18;
+    float fRec24_perm[4];
+    float fRec26_perm[4];
+    float fRec27_perm[4];
+    float fYec1_perm[4];
+    float fRec28_perm[4];
+    float fConst19;
+    float fRec30_perm[4];
+    float fConst20;
+    float fYec2_perm[4];
+    float fYec3[2048];
+    int fYec3_idx;
+    int fYec3_idx_save;
+    float fConst23;
+    int iConst24;
+    float fConst25;
+    int iConst26;
+    float fRec29_perm[4];
+    float fConst27;
+    float fRec31_perm[4];
+    float fConst28;
+    float fRec32_perm[4];
+    float fConst29;
+    float fConst37;
+    float fConst38;
+    float fConst39;
+    float fRec25_perm[4];
+    FAUSTFLOAT fHslider4;
+    float fRec33_perm[4];
+    float fConst40;
+    float fConst41;
+    float fConst42;
+    float fRec10_perm[4];
+    FAUSTFLOAT fHslider5;
+    float fRec34_perm[4];
+    float fRec9_perm[4];
+    float fRec8_perm[4];
+    float fConst43;
+    FAUSTFLOAT fHslider6;
+    float fRec35_perm[4];
+    float fConst44;
+    float fRec36_perm[4];
+    float fConst45;
+    float fYec4[2048];
+    int fYec4_idx;
+    int fYec4_idx_save;
+    int iConst47;
+    float fConst48;
+    float fConst49;
+    float fRec6_perm[4];
+    float fConst50;
+    float fRec37_perm[4];
+    float fYec5[4096];
+    int fYec5_idx;
+    int fYec5_idx_save;
+    float fRec4_perm[4];
+    FAUSTFLOAT fHslider7;
+    float fRec42_perm[4];
+    float fRec43_perm[4];
+    FAUSTFLOAT fHslider8;
+    float fRec38_perm[4];
+    float fRec39_perm[4];
+    float fRec40_perm[4];
+    float fRec41_perm[4];
+    float fYec6[131072];
+    int fYec6_idx;
+    int fYec6_idx_save;
+    float fYec7[1048576];
+    int fYec7_idx;
+    int fYec7_idx_save;
+    float fRec0[262144];
+    int fRec0_idx;
+    int fRec0_idx_save;
+    float fRec44_perm[4];
+    float fRec46_perm[4];
+    float fRec45_perm[4];
+    FAUSTFLOAT fHslider9;
+    FAUSTFLOAT fHslider10;
+    float fRec47_perm[4];
+    FAUSTFLOAT fHslider11;
+    float fRec48_perm[4];
+    FAUSTFLOAT fHslider12;
+    FAUSTFLOAT fHslider13;
+    float fRec60_perm[4];
+    float fRec59_perm[4];
+    float fRec58_perm[4];
+    float fRec62_perm[4];
+    float fRec61_perm[4];
+    float fRec57_perm[4];
+    float fRec63_perm[4];
+    float fRec65_perm[4];
+    float fRec64_perm[4];
+    float fRec66_perm[4];
+    float fRec56_perm[4];
+    float fRec55_perm[4];
+    float fRec54_perm[4];
+    float fRec67_perm[4];
+    float fYec8[16384];
+    int fYec8_idx;
+    int fYec8_idx_save;
+    float fRec52_perm[4];
+    float fRec68_perm[4];
+    float fYec9[16384];
+    int fYec9_idx;
+    int fYec9_idx_save;
+    float fRec50_perm[4];
+    float fRec73_perm[4];
+    float fRec69_perm[4];
+    float fRec70_perm[4];
+    float fRec71_perm[4];
+    float fRec72_perm[4];
+    float fYec10[131072];
+    int fYec10_idx;
+    int fYec10_idx_save;
+    float fYec11[1048576];
+    int fYec11_idx;
+    int fYec11_idx_save;
+    float fRec49[262144];
+    int fRec49_idx;
+    int fRec49_idx_save;
+    float fRec74_perm[4];
+    float fRec76_perm[4];
+    float fRec75_perm[4];
+    float fRec77_perm[4];
 
+  public:
+    void metadata(Meta* m)
+    {
+        m->declare("analyzers.lib/amp_follower_ar:author",
+                   "Jonatan Liljedahl, revised by Romain Michon");
+        m->declare("analyzers.lib/name", "Faust Analyzer Library");
+        m->declare("analyzers.lib/version", "1.2.0");
+        m->declare("basics.lib/bypass1:author", "Julius Smith");
+        m->declare("basics.lib/downSample:author", "Romain Michon");
+        m->declare("basics.lib/name", "Faust Basic Element Library");
+        m->declare("basics.lib/sAndH:author", "Romain Michon");
+        m->declare("basics.lib/tabulateNd",
+                   "Copyright (C) 2023 Bart Brouns <bart@magnetophon.nl>");
+        m->declare("basics.lib/version", "1.18.0");
+        m->declare("category", "Echo / Delay");
+        m->declare("compile_options",
+                   "-a faustMinimal.h -lang cpp -es 1 -vec -lv 0 -vs 32 "
+                   "-single -ftz 0 -mcd 16");
+        m->declare("compressors.lib/compression_gain_mono:author",
+                   "Julius O. Smith III");
+        m->declare("compressors.lib/compression_gain_mono:copyright",
+                   "Copyright (C) 2014-2020 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("compressors.lib/compression_gain_mono:license",
+                   "MIT-style STK-4.3 license");
+        m->declare("compressors.lib/compressor_lad_mono:author",
+                   "Julius O. Smith III");
+        m->declare("compressors.lib/compressor_lad_mono:copyright",
+                   "Copyright (C) 2014-2020 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("compressors.lib/compressor_lad_mono:license",
+                   "MIT-style STK-4.3 license");
+        m->declare("compressors.lib/compressor_mono:author",
+                   "Julius O. Smith III");
+        m->declare("compressors.lib/compressor_mono:copyright",
+                   "Copyright (C) 2014-2020 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("compressors.lib/compressor_mono:license",
+                   "MIT-style STK-4.3 license");
+        m->declare("compressors.lib/limiter_1176_R4_mono:author",
+                   "Julius O. Smith III");
+        m->declare("compressors.lib/limiter_1176_R4_mono:copyright",
+                   "Copyright (C) 2014-2020 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("compressors.lib/limiter_1176_R4_mono:license",
+                   "MIT-style STK-4.3 license");
+        m->declare("compressors.lib/name", "Faust Compressor Effect Library");
+        m->declare("compressors.lib/peak_compression_gain_mono_db:author",
+                   "Bart Brouns");
+        m->declare("compressors.lib/peak_compression_gain_mono_db:license",
+                   "GPLv3");
+        m->declare("compressors.lib/ratio2strength:author", "Bart Brouns");
+        m->declare("compressors.lib/ratio2strength:license", "GPLv3");
+        m->declare("compressors.lib/version", "1.6.0");
+        m->declare("delays.lib/fdelay1:author", "Julius O. Smith III");
+        m->declare("delays.lib/fdelayltv:author", "Julius O. Smith III");
+        m->declare("delays.lib/name", "Faust Delay Library");
+        m->declare("delays.lib/version", "1.1.0");
+        m->declare("filename", "Macalla.dsp");
+        m->declare("filters.lib/allpass_fcomb:author", "Julius O. Smith III");
+        m->declare("filters.lib/allpass_fcomb:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/allpass_fcomb:license",
+                   "MIT-style STK-4.3 license");
+        m->declare("filters.lib/bandpass0_bandstop1:author",
+                   "Julius O. Smith III");
+        m->declare("filters.lib/bandpass0_bandstop1:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/bandpass0_bandstop1:license",
+                   "MIT-style STK-4.3 license");
+        m->declare("filters.lib/bandpass:author", "Julius O. Smith III");
+        m->declare("filters.lib/bandpass:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/bandpass:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/fir:author", "Julius O. Smith III");
+        m->declare("filters.lib/fir:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/fir:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/highpass:author", "Julius O. Smith III");
+        m->declare("filters.lib/highpass:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/iir:author", "Julius O. Smith III");
+        m->declare("filters.lib/iir:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/iir:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/lowpass0_highpass1",
+                   "MIT-style STK-4.3 license");
+        m->declare("filters.lib/lowpass0_highpass1:author",
+                   "Julius O. Smith III");
+        m->declare("filters.lib/lowpass:author", "Julius O. Smith III");
+        m->declare("filters.lib/lowpass:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/lowpass:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/name", "Faust Filters Library");
+        m->declare("filters.lib/pole:author", "Julius O. Smith III");
+        m->declare("filters.lib/pole:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/pole:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/tf1sb:author", "Julius O. Smith III");
+        m->declare("filters.lib/tf1sb:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/tf1sb:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/tf2:author", "Julius O. Smith III");
+        m->declare("filters.lib/tf2:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/tf2:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/tf2s:author", "Julius O. Smith III");
+        m->declare("filters.lib/tf2s:copyright",
+                   "Copyright (C) 2003-2019 by Julius O. Smith III "
+                   "<jos@ccrma.stanford.edu>");
+        m->declare("filters.lib/tf2s:license", "MIT-style STK-4.3 license");
+        m->declare("filters.lib/version", "1.3.0");
+        m->declare("maths.lib/author", "GRAME");
+        m->declare("maths.lib/copyright", "GRAME");
+        m->declare("maths.lib/license", "LGPL with exception");
+        m->declare("maths.lib/name", "Faust Math Library");
+        m->declare("maths.lib/version", "2.8.0");
+        m->declare("misceffects.lib/name", "Misc Effects Library");
+        m->declare("misceffects.lib/version", "2.5.0");
+        m->declare("name", "Macalla ");
+        m->declare("noises.lib/name", "Faust Noise Generator Library");
+        m->declare("noises.lib/version", "1.4.1");
+        m->declare("oscillators.lib/lf_sawpos:author",
+                   "Bart Brouns, revised by Stéphane Letz");
+        m->declare("oscillators.lib/lf_sawpos:licence", "STK-4.3");
+        m->declare("oscillators.lib/lf_triangle:author", "Bart Brouns");
+        m->declare("oscillators.lib/lf_triangle:licence", "STK-4.3");
+        m->declare("oscillators.lib/name", "Faust Oscillator Library");
+        m->declare("oscillators.lib/saw1:author", "Bart Brouns");
+        m->declare("oscillators.lib/saw1:licence", "STK-4.3");
+        m->declare("oscillators.lib/sawN:author", "Julius O. Smith III");
+        m->declare("oscillators.lib/sawN:license", "STK-4.3");
+        m->declare("oscillators.lib/version", "1.5.1");
+        m->declare("platform.lib/name", "Generic Platform Library");
+        m->declare("platform.lib/version", "1.3.0");
+        m->declare("signals.lib/name", "Faust Signal Routing Library");
+        m->declare("signals.lib/onePoleSwitching:author",
+                   "Jonatan Liljedahl, revised by Dario Sanfilippo");
+        m->declare("signals.lib/onePoleSwitching:licence", "STK-4.3");
+        m->declare("signals.lib/version", "1.5.0");
+    }
+
+    virtual int getNumInputs() { return 2; }
+    virtual int getNumOutputs() { return 2; }
+
+    static void classInit(int sample_rate)
+    {
+        MacallaSIG0* sig0 = newMacallaSIG0();
+        sig0->instanceInitMacallaSIG0(sample_rate);
+        sig0->fillMacallaSIG0(65536, ftbl0MacallaSIG0);
+        deleteMacallaSIG0(sig0);
+    }
+
+    virtual void instanceConstants(int sample_rate)
+    {
+        fSampleRate = sample_rate;
+        fConst0 =
+          std::min<float>(192000.0f, std::max<float>(1.0f, float(fSampleRate)));
+        fConst1       = (44.0999985f / fConst0);
+        fConst2       = (1.0f - fConst1);
+        fConst3       = (1.0f / fConst0);
+        fConst4       = (0.100000001f / fConst0);
+        float fConst5 = std::tan((25132.7422f / fConst0));
+        float fConst6 = (1.0f / fConst5);
+        float fConst7 = (((fConst6 + 1.41421354f) / fConst5) + 1.0f);
+        fConst8       = (1.0f / fConst7);
+        fConst9       = (((fConst6 + -1.41421354f) / fConst5) + 1.0f);
+        fConst10 = (2.0f * (1.0f - (1.0f / Macalla_faustpower2_f(fConst5))));
+        iConst11 = int((0.000166666665f * fConst0));
+        fConst12 = std::exp((0.0f - (2.0f / fConst0)));
+        fConst13 = std::exp((0.0f - (1250.0f / fConst0)));
+        fConst14 = std::exp((0.0f - (2500.0f / fConst0)));
+        fConst15 = (1.0f - fConst14);
+        fConst16 = (20.0f / fConst0);
+        fConst17 = (0.0f - fConst16);
+        fConst18 = std::exp(fConst17);
+        fConst19 = (60.0f / fConst0);
+        fConst20 = (0.00416666688f * fConst0);
+        float fConst21 = std::max<float>(
+          0.0f, std::min<float>(2047.0f, (0.00833333377f * fConst0)));
+        float fConst22 = std::floor(fConst21);
+        fConst23       = (fConst22 + (1.0f - fConst21));
+        iConst24       = int(fConst21);
+        fConst25       = (fConst21 - fConst22);
+        iConst26       = (iConst24 + 1);
+        fConst27       = (528.0f / fConst0);
+        fConst28       = (110.0f / fConst0);
+        fConst29       = (48.0f / fConst0);
+        float fConst30 = std::tan((31415.9258f / fConst0));
+        float fConst31 = Macalla_faustpower2_f(
+          std::sqrt((4.0f * ((Macalla_faustpower2_f(fConst0) * fConst30) *
+                             std::tan((1570.79639f / fConst0))))));
+        float fConst32 = (Macalla_faustpower2_f(fConst3) * fConst31);
+        float fConst33 = (fConst0 * fConst30);
+        float fConst34 = ((2.0f * fConst33) - (0.5f * (fConst31 / fConst33)));
+        float fConst35 = (2.0f * (fConst34 / fConst0));
+        float fConst36 = ((fConst32 + fConst35) + 4.0f);
+        fConst37       = (1.0f / fConst36);
+        fConst38       = ((2.0f * fConst32) + -8.0f);
+        fConst39       = (fConst32 + (4.0f - fConst35));
+        fConst40       = (2.0f * (fConst34 / (fConst0 * fConst36)));
+        fConst41       = (0.0f - fConst40);
+        fConst42       = (3.14159274f / fConst0);
+        fConst43       = (41.8950005f / fConst0);
+        fConst44       = (0.150000006f / fConst0);
+        fConst45       = (0.959999979f / fConst7);
+        int iConst46   = int((0.0500000007f * fConst0));
+        iConst47       = (iConst46 + 2);
+        fConst48       = float(iConst46);
+        fConst49       = (0.00100000005f * fConst0);
+        fConst50       = (0.230000004f / fConst0);
+    }
+
+    virtual void instanceResetUserInterface()
+    {
+        fHslider0  = FAUSTFLOAT(0.0f);
+        fHslider1  = FAUSTFLOAT(0.0f);
+        fHslider2  = FAUSTFLOAT(0.5f);
+        fHslider3  = FAUSTFLOAT(0.10000000000000001f);
+        fCheckbox0 = FAUSTFLOAT(0.0f);
+        fHslider4  = FAUSTFLOAT(250.0f);
+        fHslider5  = FAUSTFLOAT(10000.0f);
+        fHslider6  = FAUSTFLOAT(0.0f);
+        fHslider7  = FAUSTFLOAT(0.0f);
+        fHslider8  = FAUSTFLOAT(500.0f);
+        fHslider9  = FAUSTFLOAT(200.0f);
+        fHslider10 = FAUSTFLOAT(10.0f);
+        fHslider11 = FAUSTFLOAT(0.0f);
+        fHslider12 = FAUSTFLOAT(50.0f);
+        fHslider13 = FAUSTFLOAT(0.0f);
+    }
+
+    virtual void instanceClear()
+    {
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l0 = 0; (l0 < 4); l0 = (l0 + 1))
+        {
+            fRec1_perm[l0] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l1 = 0; (l1 < 4); l1 = (l1 + 1))
+        {
+            fRec2_perm[l1] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l2 = 0; (l2 < 4); l2 = (l2 + 1))
+        {
+            fRec3_perm[l2] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l3 = 0; (l3 < 4); l3 = (l3 + 1))
+        {
+            fRec12_perm[l3] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l4 = 0; (l4 < 4); l4 = (l4 + 1))
+        {
+            iRec14_perm[l4] = 0;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l5 = 0; (l5 < 4); l5 = (l5 + 1))
+        {
+            iVec0_perm[l5] = 0;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l6 = 0; (l6 < 4); l6 = (l6 + 1))
+        {
+            fRec15_perm[l6] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l7 = 0; (l7 < 4); l7 = (l7 + 1))
+        {
+            fYec0_perm[l7] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l8 = 0; (l8 < 4); l8 = (l8 + 1))
+        {
+            fRec13_perm[l8] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l9 = 0; (l9 < 4); l9 = (l9 + 1))
+        {
+            fRec17_perm[l9] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l10 = 0; (l10 < 4); l10 = (l10 + 1))
+        {
+            fRec18_perm[l10] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l13 = 0; (l13 < 4); l13 = (l13 + 1))
+        {
+            fRec16_perm[l13] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l14 = 0; (l14 < 4); l14 = (l14 + 1))
+        {
+            fRec11_perm[l14] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l15 = 0; (l15 < 4); l15 = (l15 + 1))
+        {
+            iRec21_perm[l15] = 0;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l16 = 0; (l16 < 4); l16 = (l16 + 1))
+        {
+            fRec20_perm[l16] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l17 = 0; (l17 < 4); l17 = (l17 + 1))
+        {
+            fRec23_perm[l17] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l18 = 0; (l18 < 4); l18 = (l18 + 1))
+        {
+            fRec22_perm[l18] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l19 = 0; (l19 < 4); l19 = (l19 + 1))
+        {
+            fRec24_perm[l19] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l20 = 0; (l20 < 4); l20 = (l20 + 1))
+        {
+            fRec26_perm[l20] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l21 = 0; (l21 < 4); l21 = (l21 + 1))
+        {
+            fRec27_perm[l21] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l22 = 0; (l22 < 4); l22 = (l22 + 1))
+        {
+            fYec1_perm[l22] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l23 = 0; (l23 < 4); l23 = (l23 + 1))
+        {
+            fRec28_perm[l23] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l24 = 0; (l24 < 4); l24 = (l24 + 1))
+        {
+            fRec30_perm[l24] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l25 = 0; (l25 < 4); l25 = (l25 + 1))
+        {
+            fYec2_perm[l25] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l26 = 0; (l26 < 2048); l26 = (l26 + 1))
+        {
+            fYec3[l26] = 0.0f;
+        }
+        fYec3_idx      = 0;
+        fYec3_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l27 = 0; (l27 < 4); l27 = (l27 + 1))
+        {
+            fRec29_perm[l27] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l28 = 0; (l28 < 4); l28 = (l28 + 1))
+        {
+            fRec31_perm[l28] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l29 = 0; (l29 < 4); l29 = (l29 + 1))
+        {
+            fRec32_perm[l29] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l30 = 0; (l30 < 4); l30 = (l30 + 1))
+        {
+            fRec25_perm[l30] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l31 = 0; (l31 < 4); l31 = (l31 + 1))
+        {
+            fRec33_perm[l31] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l32 = 0; (l32 < 4); l32 = (l32 + 1))
+        {
+            fRec10_perm[l32] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l33 = 0; (l33 < 4); l33 = (l33 + 1))
+        {
+            fRec34_perm[l33] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l34 = 0; (l34 < 4); l34 = (l34 + 1))
+        {
+            fRec9_perm[l34] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l35 = 0; (l35 < 4); l35 = (l35 + 1))
+        {
+            fRec8_perm[l35] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l36 = 0; (l36 < 4); l36 = (l36 + 1))
+        {
+            fRec35_perm[l36] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l37 = 0; (l37 < 4); l37 = (l37 + 1))
+        {
+            fRec36_perm[l37] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l38 = 0; (l38 < 2048); l38 = (l38 + 1))
+        {
+            fYec4[l38] = 0.0f;
+        }
+        fYec4_idx      = 0;
+        fYec4_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l39 = 0; (l39 < 4); l39 = (l39 + 1))
+        {
+            fRec6_perm[l39] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l40 = 0; (l40 < 4); l40 = (l40 + 1))
+        {
+            fRec37_perm[l40] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l41 = 0; (l41 < 4096); l41 = (l41 + 1))
+        {
+            fYec5[l41] = 0.0f;
+        }
+        fYec5_idx      = 0;
+        fYec5_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l42 = 0; (l42 < 4); l42 = (l42 + 1))
+        {
+            fRec4_perm[l42] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l43 = 0; (l43 < 4); l43 = (l43 + 1))
+        {
+            fRec42_perm[l43] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l44 = 0; (l44 < 4); l44 = (l44 + 1))
+        {
+            fRec43_perm[l44] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l45 = 0; (l45 < 4); l45 = (l45 + 1))
+        {
+            fRec38_perm[l45] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l46 = 0; (l46 < 4); l46 = (l46 + 1))
+        {
+            fRec39_perm[l46] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l47 = 0; (l47 < 4); l47 = (l47 + 1))
+        {
+            fRec40_perm[l47] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l48 = 0; (l48 < 4); l48 = (l48 + 1))
+        {
+            fRec41_perm[l48] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l49 = 0; (l49 < 131072); l49 = (l49 + 1))
+        {
+            fYec6[l49] = 0.0f;
+        }
+        fYec6_idx      = 0;
+        fYec6_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l50 = 0; (l50 < 1048576); l50 = (l50 + 1))
+        {
+            fYec7[l50] = 0.0f;
+        }
+        fYec7_idx      = 0;
+        fYec7_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l51 = 0; (l51 < 262144); l51 = (l51 + 1))
+        {
+            fRec0[l51] = 0.0f;
+        }
+        fRec0_idx      = 0;
+        fRec0_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l52 = 0; (l52 < 4); l52 = (l52 + 1))
+        {
+            fRec44_perm[l52] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l53 = 0; (l53 < 4); l53 = (l53 + 1))
+        {
+            fRec46_perm[l53] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l54 = 0; (l54 < 4); l54 = (l54 + 1))
+        {
+            fRec45_perm[l54] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l55 = 0; (l55 < 4); l55 = (l55 + 1))
+        {
+            fRec47_perm[l55] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l56 = 0; (l56 < 4); l56 = (l56 + 1))
+        {
+            fRec48_perm[l56] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l57 = 0; (l57 < 4); l57 = (l57 + 1))
+        {
+            fRec60_perm[l57] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l58 = 0; (l58 < 4); l58 = (l58 + 1))
+        {
+            fRec59_perm[l58] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l59 = 0; (l59 < 4); l59 = (l59 + 1))
+        {
+            fRec58_perm[l59] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l60 = 0; (l60 < 4); l60 = (l60 + 1))
+        {
+            fRec62_perm[l60] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l61 = 0; (l61 < 4); l61 = (l61 + 1))
+        {
+            fRec61_perm[l61] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l62 = 0; (l62 < 4); l62 = (l62 + 1))
+        {
+            fRec57_perm[l62] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l63 = 0; (l63 < 4); l63 = (l63 + 1))
+        {
+            fRec63_perm[l63] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l64 = 0; (l64 < 4); l64 = (l64 + 1))
+        {
+            fRec65_perm[l64] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l65 = 0; (l65 < 4); l65 = (l65 + 1))
+        {
+            fRec64_perm[l65] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l66 = 0; (l66 < 4); l66 = (l66 + 1))
+        {
+            fRec66_perm[l66] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l67 = 0; (l67 < 4); l67 = (l67 + 1))
+        {
+            fRec56_perm[l67] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l68 = 0; (l68 < 4); l68 = (l68 + 1))
+        {
+            fRec55_perm[l68] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l69 = 0; (l69 < 4); l69 = (l69 + 1))
+        {
+            fRec54_perm[l69] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l70 = 0; (l70 < 4); l70 = (l70 + 1))
+        {
+            fRec67_perm[l70] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l71 = 0; (l71 < 16384); l71 = (l71 + 1))
+        {
+            fYec8[l71] = 0.0f;
+        }
+        fYec8_idx      = 0;
+        fYec8_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l72 = 0; (l72 < 4); l72 = (l72 + 1))
+        {
+            fRec52_perm[l72] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l73 = 0; (l73 < 4); l73 = (l73 + 1))
+        {
+            fRec68_perm[l73] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l74 = 0; (l74 < 16384); l74 = (l74 + 1))
+        {
+            fYec9[l74] = 0.0f;
+        }
+        fYec9_idx      = 0;
+        fYec9_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l75 = 0; (l75 < 4); l75 = (l75 + 1))
+        {
+            fRec50_perm[l75] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l76 = 0; (l76 < 4); l76 = (l76 + 1))
+        {
+            fRec73_perm[l76] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l77 = 0; (l77 < 4); l77 = (l77 + 1))
+        {
+            fRec69_perm[l77] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l78 = 0; (l78 < 4); l78 = (l78 + 1))
+        {
+            fRec70_perm[l78] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l79 = 0; (l79 < 4); l79 = (l79 + 1))
+        {
+            fRec71_perm[l79] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l80 = 0; (l80 < 4); l80 = (l80 + 1))
+        {
+            fRec72_perm[l80] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l81 = 0; (l81 < 131072); l81 = (l81 + 1))
+        {
+            fYec10[l81] = 0.0f;
+        }
+        fYec10_idx      = 0;
+        fYec10_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l82 = 0; (l82 < 1048576); l82 = (l82 + 1))
+        {
+            fYec11[l82] = 0.0f;
+        }
+        fYec11_idx      = 0;
+        fYec11_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l83 = 0; (l83 < 262144); l83 = (l83 + 1))
+        {
+            fRec49[l83] = 0.0f;
+        }
+        fRec49_idx      = 0;
+        fRec49_idx_save = 0;
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l84 = 0; (l84 < 4); l84 = (l84 + 1))
+        {
+            fRec74_perm[l84] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l85 = 0; (l85 < 4); l85 = (l85 + 1))
+        {
+            fRec76_perm[l85] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l86 = 0; (l86 < 4); l86 = (l86 + 1))
+        {
+            fRec75_perm[l86] = 0.0f;
+        }
+#pragma clang loop vectorize(enable) interleave(enable)
+        for (int l87 = 0; (l87 < 4); l87 = (l87 + 1))
+        {
+            fRec77_perm[l87] = 0.0f;
+        }
+    }
+
+    virtual void init(int sample_rate)
+    {
+        classInit(sample_rate);
+        instanceInit(sample_rate);
+    }
+    virtual void instanceInit(int sample_rate)
+    {
+        instanceConstants(sample_rate);
+        instanceResetUserInterface();
+        instanceClear();
+    }
+
+    virtual Macalla* clone() { return new Macalla(); }
+
+    virtual int getSampleRate() { return fSampleRate; }
+
+    virtual void buildUserInterface(UI* ui_interface)
+    {
+        ui_interface->openVerticalBox("Macalla ");
+        ui_interface->addCheckButton("BitCrush Enable", &fCheckbox0);
+        ui_interface->declare(&fHslider11, "unit", "percent");
+        ui_interface->addHorizontalSlider("Ducking Amount",
+                                          &fHslider11,
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(0.00999999978f));
+        ui_interface->declare(&fHslider7, "unit", "percent");
+        ui_interface->addHorizontalSlider("Glitch",
+                                          &fHslider7,
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(0.00999999978f));
+        ui_interface->declare(&fHslider3, "unit", "percent");
+        ui_interface->addHorizontalSlider("Tape Wear",
+                                          &fHslider3,
+                                          FAUSTFLOAT(0.100000001f),
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(0.00999999978f));
+        ui_interface->addHorizontalSlider("delaytime",
+                                          &fHslider8,
+                                          FAUSTFLOAT(500.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(5000.0f),
+                                          FAUSTFLOAT(0.100000001f));
+        ui_interface->addHorizontalSlider("diffusion",
+                                          &fHslider6,
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(0.00999999978f));
+        ui_interface->addHorizontalSlider("duck_attack",
+                                          &fHslider10,
+                                          FAUSTFLOAT(10.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(100.0f),
+                                          FAUSTFLOAT(1.0f));
+        ui_interface->addHorizontalSlider("duck_release",
+                                          &fHslider9,
+                                          FAUSTFLOAT(200.0f),
+                                          FAUSTFLOAT(50.0f),
+                                          FAUSTFLOAT(1000.0f),
+                                          FAUSTFLOAT(1.0f));
+        ui_interface->addHorizontalSlider("feedback",
+                                          &fHslider2,
+                                          FAUSTFLOAT(0.5f),
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(0.00999999978f));
+        ui_interface->addHorizontalSlider("highpass",
+                                          &fHslider4,
+                                          FAUSTFLOAT(250.0f),
+                                          FAUSTFLOAT(20.0f),
+                                          FAUSTFLOAT(20000.0f),
+                                          FAUSTFLOAT(1.0f));
+        ui_interface->addHorizontalSlider("lowpass",
+                                          &fHslider5,
+                                          FAUSTFLOAT(10000.0f),
+                                          FAUSTFLOAT(20.0f),
+                                          FAUSTFLOAT(20000.0f),
+                                          FAUSTFLOAT(1.0f));
+        ui_interface->addHorizontalSlider("mix",
+                                          &fHslider12,
+                                          FAUSTFLOAT(50.0f),
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(100.0f),
+                                          FAUSTFLOAT(1.0f));
+        ui_interface->addHorizontalSlider("output_gain",
+                                          &fHslider0,
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(-96.0f),
+                                          FAUSTFLOAT(12.0f),
+                                          FAUSTFLOAT(0.00999999978f));
+        ui_interface->addHorizontalSlider("pitch_shift",
+                                          &fHslider1,
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(-12.0f),
+                                          FAUSTFLOAT(12.0f),
+                                          FAUSTFLOAT(1.0f));
+        ui_interface->addHorizontalSlider("spread_amount",
+                                          &fHslider13,
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(0.0f),
+                                          FAUSTFLOAT(1.0f),
+                                          FAUSTFLOAT(0.00999999978f));
+        ui_interface->closeBox();
+    }
+
+    virtual void compute(int count,
+                         FAUSTFLOAT** RESTRICT inputs,
+                         FAUSTFLOAT** RESTRICT outputs)
+    {
+        FAUSTFLOAT* input0_ptr  = inputs[0];
+        FAUSTFLOAT* input1_ptr  = inputs[1];
+        FAUSTFLOAT* output0_ptr = outputs[0];
+        FAUSTFLOAT* output1_ptr = outputs[1];
+        float fSlow0            = (fConst1 * float(fHslider0));
+        float fRec1_tmp[36];
+        float* fRec1 = &fRec1_tmp[4];
+        float fSlow1 = std::pow(2.0f, (0.0833333358f * float(fHslider1)));
+        float fRec2_tmp[36];
+        float* fRec2 = &fRec2_tmp[4];
+        float fSlow2 = (fConst1 * float(fHslider2));
+        float fRec3_tmp[36];
+        float* fRec3 = &fRec3_tmp[4];
+        float fSlow3 = (fConst1 * float(fHslider3));
+        float fRec12_tmp[36];
+        float* fRec12 = &fRec12_tmp[4];
+        int iRec14_tmp[36];
+        int* iRec14 = &iRec14_tmp[4];
+        int iVec0_tmp[36];
+        int* iVec0 = &iVec0_tmp[4];
+        int iZec0[32];
+        float fZec1[32];
+        float fZec2[32];
+        float fRec15_tmp[36];
+        float* fRec15 = &fRec15_tmp[4];
+        float fYec0_tmp[36];
+        float* fYec0 = &fYec0_tmp[4];
+        float fZec3[32];
+        float fRec13_tmp[36];
+        float* fRec13 = &fRec13_tmp[4];
+        float fZec4[32];
+        float fZec5[32];
+        float fRec17_tmp[36];
+        float* fRec17 = &fRec17_tmp[4];
+        float fZec6[32];
+        float fRec18_tmp[36];
+        float* fRec18 = &fRec18_tmp[4];
+        float fZec7[32];
+        float fRec16_tmp[36];
+        float* fRec16 = &fRec16_tmp[4];
+        float fZec8[32];
+        float fZec9[32];
+        int iZec10[32];
+        float fZec11[32];
+        float fRec11_tmp[36];
+        float* fRec11 = &fRec11_tmp[4];
+        int iRec21_tmp[36];
+        int* iRec21 = &iRec21_tmp[4];
+        int iZec12[32];
+        float fZec13[32];
+        float fRec20_tmp[36];
+        float* fRec20 = &fRec20_tmp[4];
+        int iSlow4    = int(float(fCheckbox0));
+        float fZec14[32];
+        float fZec15[32];
+        float fZec16[32];
+        float fRec23_tmp[36];
+        float* fRec23 = &fRec23_tmp[4];
+        float fRec22_tmp[36];
+        float* fRec22 = &fRec22_tmp[4];
+        float fZec17[32];
+        float fZec18[32];
+        float fZec19[32];
+        float fRec24_tmp[36];
+        float* fRec24 = &fRec24_tmp[4];
+        float fRec26_tmp[36];
+        float* fRec26 = &fRec26_tmp[4];
+        float fZec20[32];
+        float fRec27_tmp[36];
+        float* fRec27 = &fRec27_tmp[4];
+        float fYec1_tmp[36];
+        float* fYec1 = &fYec1_tmp[4];
+        int iZec21[32];
+        float fRec28_tmp[36];
+        float* fRec28 = &fRec28_tmp[4];
+        float fZec22[32];
+        float fRec30_tmp[36];
+        float* fRec30 = &fRec30_tmp[4];
+        float fYec2_tmp[36];
+        float* fYec2 = &fYec2_tmp[4];
+        float fRec29_tmp[36];
+        float* fRec29 = &fRec29_tmp[4];
+        float fZec23[32];
+        float fRec31_tmp[36];
+        float* fRec31 = &fRec31_tmp[4];
+        float fZec24[32];
+        float fRec32_tmp[36];
+        float* fRec32 = &fRec32_tmp[4];
+        float fZec25[32];
+        float fRec25_tmp[36];
+        float* fRec25 = &fRec25_tmp[4];
+        float fSlow5  = (fConst1 * float(fHslider4));
+        float fRec33_tmp[36];
+        float* fRec33 = &fRec33_tmp[4];
+        float fZec26[32];
+        float fZec27[32];
+        float fZec28[32];
+        float fZec29[32];
+        float fZec30[32];
+        float fZec31[32];
+        float fZec32[32];
+        float fZec33[32];
+        float fRec10_tmp[36];
+        float* fRec10 = &fRec10_tmp[4];
+        float fSlow6  = (fConst1 * float(fHslider5));
+        float fRec34_tmp[36];
+        float* fRec34 = &fRec34_tmp[4];
+        float fZec34[32];
+        float fZec35[32];
+        float fZec36[32];
+        float fZec37[32];
+        float fZec38[32];
+        float fZec39[32];
+        float fRec9_tmp[36];
+        float* fRec9 = &fRec9_tmp[4];
+        float fRec8_tmp[36];
+        float* fRec8 = &fRec8_tmp[4];
+        float fSlow7 = (fConst43 * float(fHslider6));
+        float fRec35_tmp[36];
+        float* fRec35 = &fRec35_tmp[4];
+        float fZec40[32];
+        float fRec36_tmp[36];
+        float* fRec36 = &fRec36_tmp[4];
+        float fZec41[32];
+        float fZec42[32];
+        int iZec43[32];
+        float fZec44[32];
+        float fRec6_tmp[36];
+        float* fRec6 = &fRec6_tmp[4];
+        float fRec7[32];
+        float fZec45[32];
+        float fRec37_tmp[36];
+        float* fRec37 = &fRec37_tmp[4];
+        float fZec46[32];
+        float fZec47[32];
+        int iZec48[32];
+        float fZec49[32];
+        float fRec4_tmp[36];
+        float* fRec4 = &fRec4_tmp[4];
+        float fRec5[32];
+        float fSlow8 = (fConst1 * float(fHslider7));
+        float fRec42_tmp[36];
+        float* fRec42 = &fRec42_tmp[4];
+        float fZec50[32];
+        float fZec51[32];
+        float fRec43_tmp[36];
+        float* fRec43 = &fRec43_tmp[4];
+        float fSlow9  = float(fHslider8);
+        float fSlow10 = (0.00100000005f * fSlow9);
+        float fZec52[32];
+        float fZec53[32];
+        float fRec38_tmp[36];
+        float* fRec38 = &fRec38_tmp[4];
+        float fRec39_tmp[36];
+        float* fRec39 = &fRec39_tmp[4];
+        float fRec40_tmp[36];
+        float* fRec40 = &fRec40_tmp[4];
+        float fRec41_tmp[36];
+        float* fRec41 = &fRec41_tmp[4];
+        float fZec54[32];
+        float fZec55[32];
+        int iZec56[32];
+        int iZec57[32];
+        float fZec58[32];
+        float fZec59[32];
+        float fZec60[32];
+        int iZec61[32];
+        float fZec62[32];
+        float fZec63[32];
+        int iZec64[32];
+        int iZec65[32];
+        float fZec66[32];
+        float fZec67[32];
+        float fZec68[32];
+        int iZec69[32];
+        float fZec70[32];
+        float fZec71[32];
+        float fZec72[32];
+        float fRec44_tmp[36];
+        float* fRec44 = &fRec44_tmp[4];
+        float fZec73[32];
+        float fZec74[32];
+        float fZec75[32];
+        float fRec46_tmp[36];
+        float* fRec46 = &fRec46_tmp[4];
+        float fRec45_tmp[36];
+        float* fRec45 = &fRec45_tmp[4];
+        float fZec76[32];
+        float fSlow11 = (0.00100000005f * float(fHslider9));
+        int iSlow12   = (std::fabs(fSlow11) < 1.1920929e-07f);
+        float fThen23 =
+          std::exp((0.0f - (fConst3 / (iSlow12 ? 1.0f : fSlow11))));
+        float fSlow13 = (iSlow12 ? 0.0f : fThen23);
+        float fSlow14 = (0.00100000005f * float(fHslider10));
+        int iSlow15   = (std::fabs(fSlow14) < 1.1920929e-07f);
+        float fThen25 =
+          std::exp((0.0f - (fConst3 / (iSlow15 ? 1.0f : fSlow14))));
+        float fSlow16 = (iSlow15 ? 0.0f : fThen25);
+        float fZec77[32];
+        float fRec47_tmp[36];
+        float* fRec47 = &fRec47_tmp[4];
+        float fSlow17 = (fConst1 * float(fHslider11));
+        float fRec48_tmp[36];
+        float* fRec48 = &fRec48_tmp[4];
+        float fSlow18 = (0.00999999978f * float(fHslider12));
+        float fSlow19 = (1.0f - fSlow18);
+        float fZec78[32];
+        float fZec79[32];
+        float fZec80[32];
+        float fZec81[32];
+        int iZec82[32];
+        float fZec83[32];
+        float fZec84[32];
+        float fSlow20 = (fConst1 * float(fHslider13));
+        float fRec60_tmp[36];
+        float* fRec60 = &fRec60_tmp[4];
+        float fZec85[32];
+        float fZec86[32];
+        float fRec59_tmp[36];
+        float* fRec59 = &fRec59_tmp[4];
+        float fRec58_tmp[36];
+        float* fRec58 = &fRec58_tmp[4];
+        float fZec87[32];
+        float fRec62_tmp[36];
+        float* fRec62 = &fRec62_tmp[4];
+        float fRec61_tmp[36];
+        float* fRec61 = &fRec61_tmp[4];
+        float fZec88[32];
+        float fZec89[32];
+        int iZec90[32];
+        float fZec91[32];
+        float fRec57_tmp[36];
+        float* fRec57 = &fRec57_tmp[4];
+        float fZec92[32];
+        float fRec63_tmp[36];
+        float* fRec63 = &fRec63_tmp[4];
+        float fZec93[32];
+        float fZec94[32];
+        float fZec95[32];
+        float fRec65_tmp[36];
+        float* fRec65 = &fRec65_tmp[4];
+        float fRec64_tmp[36];
+        float* fRec64 = &fRec64_tmp[4];
+        float fZec96[32];
+        float fZec97[32];
+        float fZec98[32];
+        float fRec66_tmp[36];
+        float* fRec66 = &fRec66_tmp[4];
+        float fRec56_tmp[36];
+        float* fRec56 = &fRec56_tmp[4];
+        float fRec55_tmp[36];
+        float* fRec55 = &fRec55_tmp[4];
+        float fRec54_tmp[36];
+        float* fRec54 = &fRec54_tmp[4];
+        float fZec99[32];
+        float fRec67_tmp[36];
+        float* fRec67 = &fRec67_tmp[4];
+        float fZec100[32];
+        float fZec101[32];
+        int iZec102[32];
+        float fZec103[32];
+        float fRec52_tmp[36];
+        float* fRec52 = &fRec52_tmp[4];
+        float fRec53[32];
+        float fZec104[32];
+        float fRec68_tmp[36];
+        float* fRec68 = &fRec68_tmp[4];
+        float fZec105[32];
+        float fZec106[32];
+        int iZec107[32];
+        float fZec108[32];
+        float fRec50_tmp[36];
+        float* fRec50 = &fRec50_tmp[4];
+        float fRec51[32];
+        float fZec109[32];
+        float fRec73_tmp[36];
+        float* fRec73 = &fRec73_tmp[4];
+        float fSlow21 = (fConst49 * fSlow9);
+        float fZec110[32];
+        float fZec111[32];
+        float fRec69_tmp[36];
+        float* fRec69 = &fRec69_tmp[4];
+        float fRec70_tmp[36];
+        float* fRec70 = &fRec70_tmp[4];
+        float fRec71_tmp[36];
+        float* fRec71 = &fRec71_tmp[4];
+        float fRec72_tmp[36];
+        float* fRec72 = &fRec72_tmp[4];
+        float fZec112[32];
+        float fZec113[32];
+        float fZec114[32];
+        float fRec74_tmp[36];
+        float* fRec74 = &fRec74_tmp[4];
+        float fZec115[32];
+        float fZec116[32];
+        float fZec117[32];
+        float fRec76_tmp[36];
+        float* fRec76 = &fRec76_tmp[4];
+        float fRec75_tmp[36];
+        float* fRec75 = &fRec75_tmp[4];
+        float fZec118[32];
+        float fZec119[32];
+        float fRec77_tmp[36];
+        float* fRec77 = &fRec77_tmp[4];
+        float fZec120[32];
+        int iZec121[32];
+        float fZec122[32];
+        int vindex = 0;
+        /* Main loop */
+        for (vindex = 0; (vindex <= (count - 32)); vindex = (vindex + 32))
+        {
+            FAUSTFLOAT* input0  = &input0_ptr[vindex];
+            FAUSTFLOAT* input1  = &input1_ptr[vindex];
+            FAUSTFLOAT* output0 = &output0_ptr[vindex];
+            FAUSTFLOAT* output1 = &output1_ptr[vindex];
+            int vsize           = 32;
+/* Vectorizable loop 0 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j10 = 0; (j10 < 4); j10 = (j10 + 1))
+            {
+                iVec0_tmp[j10] = iVec0_perm[j10];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iVec0[i] = 1;
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j11 = 0; (j11 < 4); j11 = (j11 + 1))
+            {
+                iVec0_perm[j11] = iVec0_tmp[(vsize + j11)];
+            }
+/* Vectorizable loop 1 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec0[i] = (1 - iVec0[(i - 1)]);
+            }
+/* Recursive loop 2 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j6 = 0; (j6 < 4); j6 = (j6 + 1))
+            {
+                fRec12_tmp[j6] = fRec12_perm[j6];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec12[i] = (fSlow3 + (fConst2 * fRec12[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j7 = 0; (j7 < 4); j7 = (j7 + 1))
+            {
+                fRec12_perm[j7] = fRec12_tmp[(vsize + j7)];
+            }
+/* Recursive loop 3 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j8 = 0; (j8 < 4); j8 = (j8 + 1))
+            {
+                iRec14_tmp[j8] = iRec14_perm[j8];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iRec14[i] = ((1103515245 * iRec14[(i - 1)]) + 12345);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j9 = 0; (j9 < 4); j9 = (j9 + 1))
+            {
+                iRec14_perm[j9] = iRec14_tmp[(vsize + j9)];
+            }
+/* Recursive loop 4 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j38 = 0; (j38 < 4); j38 = (j38 + 1))
+            {
+                fRec27_tmp[j38] = fRec27_perm[j38];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen7 = (fConst16 + fRec27[(i - 1)]);
+                fZec20[i]    = (iZec0[i] ? 0.0f : fThen7);
+                fRec27[i]    = (fZec20[i] - std::floor(fZec20[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j39 = 0; (j39 < 4); j39 = (j39 + 1))
+            {
+                fRec27_perm[j39] = fRec27_tmp[(vsize + j39)];
+            }
+/* Recursive loop 5 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j98 = 0; (j98 < 4); j98 = (j98 + 1))
+            {
+                fRec60_tmp[j98] = fRec60_perm[j98];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec60[i] = (fSlow20 + (fConst2 * fRec60[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j99 = 0; (j99 < 4); j99 = (j99 + 1))
+            {
+                fRec60_perm[j99] = fRec60_tmp[(vsize + j99)];
+            }
+/* Vectorizable loop 6 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec1[i] = (1.99000001f * fRec12[i]);
+            }
+/* Vectorizable loop 7 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j14 = 0; (j14 < 4); j14 = (j14 + 1))
+            {
+                fYec0_tmp[j14] = fYec0_perm[j14];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec0[i] = float(iRec14[i]);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j15 = 0; (j15 < 4); j15 = (j15 + 1))
+            {
+                fYec0_perm[j15] = fYec0_tmp[(vsize + j15)];
+            }
+/* Vectorizable loop 8 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec4[i] = (18.0f * fRec12[i]);
+            }
+/* Recursive loop 9 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j20 = 0; (j20 < 4); j20 = (j20 + 1))
+            {
+                fRec18_tmp[j20] = fRec18_perm[j20];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen2 = (fConst4 + fRec18[(i - 1)]);
+                fZec6[i]     = (iZec0[i] ? 0.0f : fThen2);
+                fRec18[i]    = (fZec6[i] - std::floor(fZec6[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j21 = 0; (j21 < 4); j21 = (j21 + 1))
+            {
+                fRec18_perm[j21] = fRec18_tmp[(vsize + j21)];
+            }
+/* Vectorizable loop 10 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j40 = 0; (j40 < 4); j40 = (j40 + 1))
+            {
+                fYec1_tmp[j40] = fYec1_perm[j40];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec1[i] = (fRec27[i] - fRec27[(i - 1)]);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j41 = 0; (j41 < 4); j41 = (j41 + 1))
+            {
+                fYec1_perm[j41] = fYec1_tmp[(vsize + j41)];
+            }
+/* Recursive loop 11 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j44 = 0; (j44 < 4); j44 = (j44 + 1))
+            {
+                fRec30_tmp[j44] = fRec30_perm[j44];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen8 = (fConst19 + fRec30[(i - 1)]);
+                fZec22[i]    = (iZec0[i] ? 0.0f : fThen8);
+                fRec30[i]    = (fZec22[i] - std::floor(fZec22[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j45 = 0; (j45 < 4); j45 = (j45 + 1))
+            {
+                fRec30_perm[j45] = fRec30_tmp[(vsize + j45)];
+            }
+/* Vectorizable loop 12 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec85[i] = (0.200000003f * fRec60[i]);
+            }
+/* Recursive loop 13 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j12 = 0; (j12 < 4); j12 = (j12 + 1))
+            {
+                fRec15_tmp[j12] = fRec15_perm[j12];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen0 =
+                  (fRec15[(i - 1)] + (fConst3 * (fZec1[i] + 0.00999999978f)));
+                fZec2[i]  = (iZec0[i] ? 0.0f : fThen0);
+                fRec15[i] = (fZec2[i] - std::floor(fZec2[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j13 = 0; (j13 < 4); j13 = (j13 + 1))
+            {
+                fRec15_perm[j13] = fRec15_tmp[(vsize + j13)];
+            }
+/* Vectorizable loop 14 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec3[i] = (4.65661277e-12f * (fRec12[i] * fYec0[i]));
+            }
+/* Recursive loop 15 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j18 = 0; (j18 < 4); j18 = (j18 + 1))
+            {
+                fRec17_tmp[j18] = fRec17_perm[j18];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen1 =
+                  (fRec17[(i - 1)] + (fConst3 * (fZec4[i] + 2.0f)));
+                fZec5[i]  = (iZec0[i] ? 0.0f : fThen1);
+                fRec17[i] = (fZec5[i] - std::floor(fZec5[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j19 = 0; (j19 < 4); j19 = (j19 + 1))
+            {
+                fRec17_perm[j19] = fRec17_tmp[(vsize + j19)];
+            }
+/* Vectorizable loop 16 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec7[i] = ((0.200000003f *
+                             ftbl0MacallaSIG0[int((65536.0f * fRec18[i]))]) +
+                            0.800000012f);
+            }
+/* Vectorizable loop 17 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec21[i] = ((fYec1[(i - 1)] <= 0.0f) & (fYec1[i] > 0.0f));
+            }
+/* Vectorizable loop 18 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j46 = 0; (j46 < 4); j46 = (j46 + 1))
+            {
+                fYec2_tmp[j46] = fYec2_perm[j46];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec2[i] = Macalla_faustpower2_f(((2.0f * fRec30[i]) + -1.0f));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j47 = 0; (j47 < 4); j47 = (j47 + 1))
+            {
+                fYec2_perm[j47] = fYec2_tmp[(vsize + j47)];
+            }
+/* Recursive loop 19 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j76 = 0; (j76 < 4); j76 = (j76 + 1))
+            {
+                fRec42_tmp[j76] = fRec42_perm[j76];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec42[i] = (fSlow8 + (fConst2 * fRec42[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j77 = 0; (j77 < 4); j77 = (j77 + 1))
+            {
+                fRec42_perm[j77] = fRec42_tmp[(vsize + j77)];
+            }
+/* Recursive loop 20 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j100 = 0; (j100 < 4); j100 = (j100 + 1))
+            {
+                fRec59_tmp[j100] = fRec59_perm[j100];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen29 =
+                  (fRec59[(i - 1)] +
+                   (fConst3 * ((fZec1[i] + fZec85[i]) + 0.00999999978f)));
+                fZec86[i] = (iZec0[i] ? 0.0f : fThen29);
+                fRec59[i] = (fZec86[i] - std::floor(fZec86[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j101 = 0; (j101 < 4); j101 = (j101 + 1))
+            {
+                fRec59_perm[j101] = fRec59_tmp[(vsize + j101)];
+            }
+/* Recursive loop 21 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j104 = 0; (j104 < 4); j104 = (j104 + 1))
+            {
+                fRec62_tmp[j104] = fRec62_perm[j104];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen30 = (fRec62[(i - 1)] +
+                                 (fConst3 * ((fZec4[i] + fZec85[i]) + 2.0f)));
+                fZec87[i]     = (iZec0[i] ? 0.0f : fThen30);
+                fRec62[i]     = (fZec87[i] - std::floor(fZec87[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j105 = 0; (j105 < 4); j105 = (j105 + 1))
+            {
+                fRec62_perm[j105] = fRec62_tmp[(vsize + j105)];
+            }
+/* Recursive loop 22 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j2 = 0; (j2 < 4); j2 = (j2 + 1))
+            {
+                fRec2_tmp[j2] = fRec2_perm[j2];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec2[i] =
+                  std::fmod(((fRec2[(i - 1)] + 4097.0f) - fSlow1), 4096.0f);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j3 = 0; (j3 < 4); j3 = (j3 + 1))
+            {
+                fRec2_perm[j3] = fRec2_tmp[(vsize + j3)];
+            }
+/* Recursive loop 23 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j16 = 0; (j16 < 4); j16 = (j16 + 1))
+            {
+                fRec13_tmp[j16] = fRec13_perm[j16];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec13[i] =
+                  ((9.99999975e-05f *
+                    (fZec3[i] +
+                     (1.0f - std::fabs(((2.0f * fRec15[i]) + -1.0f))))) +
+                   (0.999899983f * fRec13[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j17 = 0; (j17 < 4); j17 = (j17 + 1))
+            {
+                fRec13_perm[j17] = fRec13_tmp[(vsize + j17)];
+            }
+/* Recursive loop 24 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j22 = 0; (j22 < 4); j22 = (j22 + 1))
+            {
+                fRec16_tmp[j22] = fRec16_perm[j22];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec16[i] =
+                  ((9.99999975e-05f *
+                    ((fZec3[i] +
+                      (1.0f - std::fabs(((2.0f * fRec17[i]) + -1.0f)))) *
+                     fZec7[i])) +
+                   (0.999899983f * fRec16[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j23 = 0; (j23 < 4); j23 = (j23 + 1))
+            {
+                fRec16_perm[j23] = fRec16_tmp[(vsize + j23)];
+            }
+/* Recursive loop 25 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j42 = 0; (j42 < 4); j42 = (j42 + 1))
+            {
+                fRec28_tmp[j42] = fRec28_perm[j42];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec28[i] = ((fRec28[(i - 1)] * float((1 - iZec21[i]))) +
+                             (4.65661287e-10f * (fYec0[i] * float(iZec21[i]))));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j43 = 0; (j43 < 4); j43 = (j43 + 1))
+            {
+                fRec28_perm[j43] = fRec28_tmp[(vsize + j43)];
+            }
+            /* Vectorizable loop 26 */
+            /* Pre code */
+            fYec3_idx = ((fYec3_idx + fYec3_idx_save) & 2047);
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec3[((i + fYec3_idx) & 2047)] =
+                  (float(iVec0[(i - 1)]) * (fYec2[i] - fYec2[(i - 1)]));
+            }
+            /* Post code */
+            fYec3_idx_save = vsize;
+/* Recursive loop 27 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j56 = 0; (j56 < 4); j56 = (j56 + 1))
+            {
+                fRec33_tmp[j56] = fRec33_perm[j56];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec33[i] = (fSlow5 + (fConst2 * fRec33[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j57 = 0; (j57 < 4); j57 = (j57 + 1))
+            {
+                fRec33_perm[j57] = fRec33_tmp[(vsize + j57)];
+            }
+/* Recursive loop 28 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j60 = 0; (j60 < 4); j60 = (j60 + 1))
+            {
+                fRec34_tmp[j60] = fRec34_perm[j60];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec34[i] = (fSlow6 + (fConst2 * fRec34[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j61 = 0; (j61 < 4); j61 = (j61 + 1))
+            {
+                fRec34_perm[j61] = fRec34_tmp[(vsize + j61)];
+            }
+/* Recursive loop 29 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j68 = 0; (j68 < 4); j68 = (j68 + 1))
+            {
+                fRec36_tmp[j68] = fRec36_perm[j68];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen11 = (fConst44 + fRec36[(i - 1)]);
+                fZec40[i]     = (iZec0[i] ? 0.0f : fThen11);
+                fRec36[i]     = (fZec40[i] - std::floor(fZec40[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j69 = 0; (j69 < 4); j69 = (j69 + 1))
+            {
+                fRec36_perm[j69] = fRec36_tmp[(vsize + j69)];
+            }
+/* Recursive loop 30 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j72 = 0; (j72 < 4); j72 = (j72 + 1))
+            {
+                fRec37_tmp[j72] = fRec37_perm[j72];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen12 = (fConst50 + fRec37[(i - 1)]);
+                fZec45[i]     = (iZec0[i] ? 0.0f : fThen12);
+                fRec37[i]     = (fZec45[i] - std::floor(fZec45[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j73 = 0; (j73 < 4); j73 = (j73 + 1))
+            {
+                fRec37_perm[j73] = fRec37_tmp[(vsize + j73)];
+            }
+/* Vectorizable loop 31 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec50[i] = (4.98999977f * fRec42[i]);
+            }
+/* Recursive loop 32 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j102 = 0; (j102 < 4); j102 = (j102 + 1))
+            {
+                fRec58_tmp[j102] = fRec58_perm[j102];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec58[i] =
+                  ((9.99999975e-05f *
+                    (fZec3[i] +
+                     (1.0f - std::fabs(((2.0f * fRec59[i]) + -1.0f))))) +
+                   (0.999899983f * fRec58[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j103 = 0; (j103 < 4); j103 = (j103 + 1))
+            {
+                fRec58_perm[j103] = fRec58_tmp[(vsize + j103)];
+            }
+/* Recursive loop 33 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j106 = 0; (j106 < 4); j106 = (j106 + 1))
+            {
+                fRec61_tmp[j106] = fRec61_perm[j106];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec61[i] =
+                  ((9.99999975e-05f *
+                    (fZec7[i] *
+                     (fZec3[i] +
+                      (1.0f - std::fabs(((2.0f * fRec62[i]) + -1.0f)))))) +
+                   (0.999899983f * fRec61[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j107 = 0; (j107 < 4); j107 = (j107 + 1))
+            {
+                fRec61_perm[j107] = fRec61_tmp[(vsize + j107)];
+            }
+/* Recursive loop 34 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j124 = 0; (j124 < 4); j124 = (j124 + 1))
+            {
+                fRec67_tmp[j124] = fRec67_perm[j124];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen35 =
+                  (fRec67[(i - 1)] +
+                   (fConst3 * ((0.0199999996f * fRec60[i]) + 0.150000006f)));
+                fZec99[i] = (iZec0[i] ? 0.0f : fThen35);
+                fRec67[i] = (fZec99[i] - std::floor(fZec99[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j125 = 0; (j125 < 4); j125 = (j125 + 1))
+            {
+                fRec67_perm[j125] = fRec67_tmp[(vsize + j125)];
+            }
+/* Recursive loop 35 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j128 = 0; (j128 < 4); j128 = (j128 + 1))
+            {
+                fRec68_tmp[j128] = fRec68_perm[j128];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen36 =
+                  (fRec68[(i - 1)] +
+                   (fConst3 * ((0.0299999993f * fRec60[i]) + 0.230000004f)));
+                fZec104[i] = (iZec0[i] ? 0.0f : fThen36);
+                fRec68[i]  = (fZec104[i] - std::floor(fZec104[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j129 = 0; (j129 < 4); j129 = (j129 + 1))
+            {
+                fRec68_perm[j129] = fRec68_tmp[(vsize + j129)];
+            }
+/* Recursive loop 36 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j0 = 0; (j0 < 4); j0 = (j0 + 1))
+            {
+                fRec1_tmp[j0] = fRec1_perm[j0];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec1[i] = (fSlow0 + (fConst2 * fRec1[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j1 = 0; (j1 < 4); j1 = (j1 + 1))
+            {
+                fRec1_perm[j1] = fRec1_tmp[(vsize + j1)];
+            }
+/* Vectorizable loop 37 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec8[i] =
+                  (fRec12[i] * ((600.0f * fRec13[i]) + (100.0f * fRec16[i])));
+            }
+/* Recursive loop 38 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j36 = 0; (j36 < 4); j36 = (j36 + 1))
+            {
+                fRec26_tmp[j36] = fRec26_perm[j36];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec26[i] = (((0.522189379f * fRec26[(i - 3)]) +
+                              ((4.65661287e-10f * fYec0[i]) +
+                               (2.49495602f * fRec26[(i - 1)]))) -
+                             (2.0172658f * fRec26[(i - 2)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j37 = 0; (j37 < 4); j37 = (j37 + 1))
+            {
+                fRec26_perm[j37] = fRec26_tmp[(vsize + j37)];
+            }
+/* Recursive loop 39 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j48 = 0; (j48 < 4); j48 = (j48 + 1))
+            {
+                fRec29_tmp[j48] = fRec29_perm[j48];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec29[i] =
+                  ((0.999000013f * fRec29[(i - 1)]) +
+                   (fConst20 *
+                    ((fYec3[((i + fYec3_idx) & 2047)] -
+                      (fConst23 *
+                       fYec3[(((i + fYec3_idx) - iConst24) & 2047)])) -
+                     (fConst25 *
+                      fYec3[(((i + fYec3_idx) - iConst26) & 2047)]))));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j49 = 0; (j49 < 4); j49 = (j49 + 1))
+            {
+                fRec29_perm[j49] = fRec29_tmp[(vsize + j49)];
+            }
+/* Recursive loop 40 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j50 = 0; (j50 < 4); j50 = (j50 + 1))
+            {
+                fRec31_tmp[j50] = fRec31_perm[j50];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen9 = (fConst27 + fRec31[(i - 1)]);
+                fZec23[i]    = (iZec0[i] ? 0.0f : fThen9);
+                fRec31[i]    = (fZec23[i] - std::floor(fZec23[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j51 = 0; (j51 < 4); j51 = (j51 + 1))
+            {
+                fRec31_perm[j51] = fRec31_tmp[(vsize + j51)];
+            }
+/* Recursive loop 41 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j52 = 0; (j52 < 4); j52 = (j52 + 1))
+            {
+                fRec32_tmp[j52] = fRec32_perm[j52];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen10 = (fConst28 + fRec32[(i - 1)]);
+                fZec24[i]     = (iZec0[i] ? 0.0f : fThen10);
+                fRec32[i]     = (fZec24[i] - std::floor(fZec24[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j53 = 0; (j53 < 4); j53 = (j53 + 1))
+            {
+                fRec32_perm[j53] = fRec32_tmp[(vsize + j53)];
+            }
+/* Vectorizable loop 42 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec25[i] = (0.5f * (fRec28[i] + 1.0f));
+            }
+/* Vectorizable loop 43 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec28[i] = std::tan((fConst42 * fRec33[i]));
+            }
+/* Vectorizable loop 44 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec35[i] = std::tan((fConst42 * fRec34[i]));
+            }
+/* Vectorizable loop 45 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec41[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     ((1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec36[i]) +
+                                                          -1.0f)))) +
+                               -1.0f)) +
+                      7.0f))));
+            }
+/* Vectorizable loop 46 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec46[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     ((1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec37[i]) +
+                                                          -1.0f)))) +
+                               -1.0f)) +
+                      11.3000002f))));
+            }
+/* Recursive loop 47 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j78 = 0; (j78 < 4); j78 = (j78 + 1))
+            {
+                fRec43_tmp[j78] = fRec43_perm[j78];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen13 =
+                  (fRec43[(i - 1)] + (fConst3 * (fZec50[i] + 0.00999999978f)));
+                fZec51[i] = (iZec0[i] ? 0.0f : fThen13);
+                fRec43[i] = (fZec51[i] - std::floor(fZec51[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j79 = 0; (j79 < 4); j79 = (j79 + 1))
+            {
+                fRec43_perm[j79] = fRec43_tmp[(vsize + j79)];
+            }
+/* Vectorizable loop 48 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec55[i] = (fRec2[i] + 4096.0f);
+            }
+/* Vectorizable loop 49 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec88[i] =
+                  (fRec12[i] * ((600.0f * fRec58[i]) + (100.0f * fRec61[i])));
+            }
+/* Vectorizable loop 50 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec100[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     (((0.5f * fRec60[i]) +
+                       (1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec67[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))) +
+                      7.0f))));
+            }
+/* Vectorizable loop 51 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec105[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     (((0.699999988f * fRec60[i]) +
+                       (1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec68[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))) +
+                      11.3000002f))));
+            }
+/* Recursive loop 52 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j132 = 0; (j132 < 4); j132 = (j132 + 1))
+            {
+                fRec73_tmp[j132] = fRec73_perm[j132];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen37 = (fRec73[(i - 1)] +
+                                 (fConst3 * ((fZec50[i] + (2.0f * fRec60[i])) +
+                                             0.00999999978f)));
+                fZec109[i]    = (iZec0[i] ? 0.0f : fThen37);
+                fRec73[i]     = (fZec109[i] - std::floor(fZec109[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j133 = 0; (j133 < 4); j133 = (j133 + 1))
+            {
+                fRec73_perm[j133] = fRec73_tmp[(vsize + j133)];
+            }
+/* Vectorizable loop 53 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec9[i] = (fZec8[i] + 100.000008f);
+            }
+/* Recursive loop 54 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j26 = 0; (j26 < 4); j26 = (j26 + 1))
+            {
+                iRec21_tmp[j26] = iRec21_perm[j26];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iRec21[i] = (iRec21[(i - 1)] + 1);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j27 = 0; (j27 < 4); j27 = (j27 + 1))
+            {
+                iRec21_perm[j27] = iRec21_tmp[(vsize + j27)];
+            }
+/* Recursive loop 55 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j54 = 0; (j54 < 4); j54 = (j54 + 1))
+            {
+                fRec25_tmp[j54] = fRec25_perm[j54];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec25[i] =
+                  (((((1.20000005f * (((0.0499220341f * fRec26[i]) +
+                                       (0.0506126992f * fRec26[(i - 2)])) -
+                                      ((0.0959935337f * fRec26[(i - 1)]) +
+                                       (0.00440878607f * fRec26[(i - 3)])))) +
+                      (2.32830644e-10f *
+                       (fYec0[(i - 1)] *
+                        float(((fRec27[i] >= fZec25[i]) *
+                               (fRec27[(i - 1)] < fZec25[i])))))) +
+                     (fConst29 * fRec29[i])) +
+                    (0.00999999978f *
+                     (ftbl0MacallaSIG0[int((65536.0f * fRec31[i]))] +
+                      ftbl0MacallaSIG0[int((65536.0f * fRec32[i]))]))) -
+                   (fConst37 * ((fConst38 * fRec25[(i - 1)]) +
+                                (fConst39 * fRec25[(i - 2)]))));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j55 = 0; (j55 < 4); j55 = (j55 + 1))
+            {
+                fRec25_perm[j55] = fRec25_tmp[(vsize + j55)];
+            }
+/* Vectorizable loop 56 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec29[i] = (1.0f / fZec28[i]);
+            }
+/* Vectorizable loop 57 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec31[i] = Macalla_faustpower2_f(fZec28[i]);
+            }
+/* Vectorizable loop 58 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec36[i] = (1.0f / fZec35[i]);
+            }
+/* Vectorizable loop 59 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec42[i] = (fZec41[i] + -1.0f);
+            }
+/* Vectorizable loop 60 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec47[i] = (fZec46[i] + -1.0f);
+            }
+/* Vectorizable loop 61 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec52[i] = std::min<float>(
+                  524288.0f,
+                  (fConst0 *
+                   (fSlow10 +
+                    (fRec42[i] *
+                     std::fabs(((2.0f * (1.0f - std::fabs(((2.0f * fRec43[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))))));
+            }
+/* Vectorizable loop 62 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec54[i] = std::pow(10.0f, (0.0500000007f * fRec1[i]));
+            }
+/* Vectorizable loop 63 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec56[i] = int(fZec55[i]);
+            }
+/* Vectorizable loop 64 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec58[i] = std::floor(fZec55[i]);
+            }
+/* Vectorizable loop 65 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec62[i] = std::min<float>((0.001953125f * fRec2[i]), 1.0f);
+            }
+/* Vectorizable loop 66 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec64[i] = int(fRec2[i]);
+            }
+/* Vectorizable loop 67 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec66[i] = std::floor(fRec2[i]);
+            }
+/* Vectorizable loop 68 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec89[i] = (fZec88[i] + 100.000008f);
+            }
+/* Vectorizable loop 69 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec101[i] = (fZec100[i] + -1.0f);
+            }
+/* Vectorizable loop 70 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec106[i] = (fZec105[i] + -1.0f);
+            }
+/* Vectorizable loop 71 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec110[i] = std::min<float>(
+                  524288.0f,
+                  (fSlow21 +
+                   ((40.0f * fRec60[i]) +
+                    ((fRec42[i] * (fConst0 + (1000.0f * fRec60[i]))) *
+                     std::fabs(((2.0f * (1.0f - std::fabs(((2.0f * fRec73[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))))));
+            }
+/* Recursive loop 72 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j4 = 0; (j4 < 4); j4 = (j4 + 1))
+            {
+                fRec3_tmp[j4] = fRec3_perm[j4];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec3[i] = (fSlow2 + (fConst2 * fRec3[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j5 = 0; (j5 < 4); j5 = (j5 + 1))
+            {
+                fRec3_perm[j5] = fRec3_tmp[(vsize + j5)];
+            }
+/* Vectorizable loop 73 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec10[i] = int(fZec9[i]);
+            }
+/* Vectorizable loop 74 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec11[i] = std::floor(fZec9[i]);
+            }
+/* Vectorizable loop 75 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec12[i] = (((iRec21[i] + -1) % iConst11) == 0);
+            }
+/* Vectorizable loop 76 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec26[i] = Macalla_faustpower2_f(fRec12[i]);
+            }
+/* Vectorizable loop 77 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec27[i] =
+                  ((fConst40 * fRec25[i]) + (fConst41 * fRec25[(i - 2)]));
+            }
+/* Vectorizable loop 78 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec30[i] = (((fZec29[i] + -1.41421354f) / fZec28[i]) + 1.0f);
+            }
+/* Vectorizable loop 79 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec32[i] = (1.0f - (1.0f / fZec31[i]));
+            }
+/* Vectorizable loop 80 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec33[i] = (((fZec29[i] + 1.41421354f) / fZec28[i]) + 1.0f);
+            }
+/* Vectorizable loop 81 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec37[i] = (((fZec36[i] + -1.41421354f) / fZec35[i]) + 1.0f);
+            }
+/* Vectorizable loop 82 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec34[i] = (0.0f - (2.0f / fZec31[i]));
+            }
+/* Vectorizable loop 83 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec38[i] = (1.0f - (1.0f / Macalla_faustpower2_f(fZec35[i])));
+            }
+/* Vectorizable loop 84 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec39[i] = (((fZec36[i] + 1.41421354f) / fZec35[i]) + 1.0f);
+            }
+/* Recursive loop 85 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j66 = 0; (j66 < 4); j66 = (j66 + 1))
+            {
+                fRec35_tmp[j66] = fRec35_perm[j66];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec35[i] = (fSlow7 + (fConst2 * fRec35[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j67 = 0; (j67 < 4); j67 = (j67 + 1))
+            {
+                fRec35_perm[j67] = fRec35_tmp[(vsize + j67)];
+            }
+/* Vectorizable loop 86 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec44[i] = std::floor(fZec42[i]);
+            }
+/* Vectorizable loop 87 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec43[i] = int(fZec42[i]);
+            }
+/* Vectorizable loop 88 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec48[i] = int(fZec47[i]);
+            }
+/* Vectorizable loop 89 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec49[i] = std::floor(fZec47[i]);
+            }
+/* Recursive loop 90 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j80 = 0; (j80 < 4); j80 = (j80 + 1))
+            {
+                fRec38_tmp[j80] = fRec38_perm[j80];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j82 = 0; (j82 < 4); j82 = (j82 + 1))
+            {
+                fRec39_tmp[j82] = fRec39_perm[j82];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j84 = 0; (j84 < 4); j84 = (j84 + 1))
+            {
+                fRec40_tmp[j84] = fRec40_perm[j84];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j86 = 0; (j86 < 4); j86 = (j86 + 1))
+            {
+                fRec41_tmp[j86] = fRec41_perm[j86];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen15 =
+                  (((fRec39[(i - 1)] == 1.0f) & (fZec52[i] != fRec41[(i - 1)]))
+                     ? fConst17
+                     : 0.0f);
+                float fElse16 = fRec38[(i - 1)];
+                float fThen17 =
+                  (((fRec39[(i - 1)] == 0.0f) & (fZec52[i] != fRec40[(i - 1)]))
+                     ? fConst16
+                     : fThen15);
+                float fElse17 =
+                  (((fRec39[(i - 1)] > 0.0f) & (fRec39[(i - 1)] < 1.0f))
+                     ? fElse16
+                     : 0.0f);
+                fZec53[i] = ((fRec38[(i - 1)] != 0.0f) ? fElse17 : fThen17);
+                fRec38[i] = fZec53[i];
+                fRec39[i] = std::max<float>(
+                  0.0f, std::min<float>(1.0f, (fRec39[(i - 1)] + fZec53[i])));
+                float fThen18 = fRec40[(i - 1)];
+                float fElse18 = fZec52[i];
+                fRec40[i] =
+                  (((fRec39[(i - 1)] >= 1.0f) & (fRec41[(i - 1)] != fZec52[i]))
+                     ? fElse18
+                     : fThen18);
+                float fThen19 = fRec41[(i - 1)];
+                float fElse19 = fZec52[i];
+                fRec41[i] =
+                  (((fRec39[(i - 1)] <= 0.0f) & (fRec40[(i - 1)] != fZec52[i]))
+                     ? fElse19
+                     : fThen19);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j81 = 0; (j81 < 4); j81 = (j81 + 1))
+            {
+                fRec38_perm[j81] = fRec38_tmp[(vsize + j81)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j83 = 0; (j83 < 4); j83 = (j83 + 1))
+            {
+                fRec39_perm[j83] = fRec39_tmp[(vsize + j83)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j85 = 0; (j85 < 4); j85 = (j85 + 1))
+            {
+                fRec40_perm[j85] = fRec40_tmp[(vsize + j85)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j87 = 0; (j87 < 4); j87 = (j87 + 1))
+            {
+                fRec41_perm[j87] = fRec41_tmp[(vsize + j87)];
+            }
+            /* Vectorizable loop 91 */
+            /* Pre code */
+            fYec6_idx = ((fYec6_idx + fYec6_idx_save) & 131071);
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec6[((i + fYec6_idx) & 131071)] =
+                  (float(input0[i]) * fZec54[i]);
+            }
+            /* Post code */
+            fYec6_idx_save = vsize;
+/* Vectorizable loop 92 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec57[i] = std::min<int>(65537, std::max<int>(0, iZec56[i]));
+            }
+/* Vectorizable loop 93 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec59[i] = (fZec58[i] + (-4095.0f - fRec2[i]));
+            }
+/* Vectorizable loop 94 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec60[i] = (fRec2[i] + (4096.0f - fZec58[i]));
+            }
+/* Vectorizable loop 95 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec61[i] =
+                  std::min<int>(65537, std::max<int>(0, (iZec56[i] + 1)));
+            }
+/* Vectorizable loop 96 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec63[i] = (1.0f - fZec62[i]);
+            }
+/* Vectorizable loop 97 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec65[i] = std::min<int>(65537, std::max<int>(0, iZec64[i]));
+            }
+/* Vectorizable loop 98 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec67[i] = (fZec66[i] + (1.0f - fRec2[i]));
+            }
+/* Vectorizable loop 99 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec68[i] = (fRec2[i] - fZec66[i]);
+            }
+/* Vectorizable loop 100 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec69[i] =
+                  std::min<int>(65537, std::max<int>(0, (iZec64[i] + 1)));
+            }
+/* Vectorizable loop 101 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec90[i] = int(fZec89[i]);
+            }
+/* Vectorizable loop 102 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec91[i] = std::floor(fZec89[i]);
+            }
+/* Vectorizable loop 103 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec102[i] = int(fZec101[i]);
+            }
+/* Vectorizable loop 104 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec103[i] = std::floor(fZec101[i]);
+            }
+/* Vectorizable loop 105 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec107[i] = int(fZec106[i]);
+            }
+/* Vectorizable loop 106 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec108[i] = std::floor(fZec106[i]);
+            }
+/* Recursive loop 107 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j134 = 0; (j134 < 4); j134 = (j134 + 1))
+            {
+                fRec69_tmp[j134] = fRec69_perm[j134];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j136 = 0; (j136 < 4); j136 = (j136 + 1))
+            {
+                fRec70_tmp[j136] = fRec70_perm[j136];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j138 = 0; (j138 < 4); j138 = (j138 + 1))
+            {
+                fRec71_tmp[j138] = fRec71_perm[j138];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j140 = 0; (j140 < 4); j140 = (j140 + 1))
+            {
+                fRec72_tmp[j140] = fRec72_perm[j140];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen39 =
+                  (((fRec70[(i - 1)] == 1.0f) & (fZec110[i] != fRec72[(i - 1)]))
+                     ? fConst17
+                     : 0.0f);
+                float fElse40 = fRec69[(i - 1)];
+                float fThen41 =
+                  (((fRec70[(i - 1)] == 0.0f) & (fZec110[i] != fRec71[(i - 1)]))
+                     ? fConst16
+                     : fThen39);
+                float fElse41 =
+                  (((fRec70[(i - 1)] > 0.0f) & (fRec70[(i - 1)] < 1.0f))
+                     ? fElse40
+                     : 0.0f);
+                fZec111[i] = ((fRec69[(i - 1)] != 0.0f) ? fElse41 : fThen41);
+                fRec69[i]  = fZec111[i];
+                fRec70[i]  = std::max<float>(
+                  0.0f, std::min<float>(1.0f, (fRec70[(i - 1)] + fZec111[i])));
+                float fThen42 = fRec71[(i - 1)];
+                float fElse42 = fZec110[i];
+                fRec71[i] =
+                  (((fRec70[(i - 1)] >= 1.0f) & (fRec72[(i - 1)] != fZec110[i]))
+                     ? fElse42
+                     : fThen42);
+                float fThen43 = fRec72[(i - 1)];
+                float fElse43 = fZec110[i];
+                fRec72[i] =
+                  (((fRec70[(i - 1)] <= 0.0f) & (fRec71[(i - 1)] != fZec110[i]))
+                     ? fElse43
+                     : fThen43);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j135 = 0; (j135 < 4); j135 = (j135 + 1))
+            {
+                fRec69_perm[j135] = fRec69_tmp[(vsize + j135)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j137 = 0; (j137 < 4); j137 = (j137 + 1))
+            {
+                fRec70_perm[j137] = fRec70_tmp[(vsize + j137)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j139 = 0; (j139 < 4); j139 = (j139 + 1))
+            {
+                fRec71_perm[j139] = fRec71_tmp[(vsize + j139)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j141 = 0; (j141 < 4); j141 = (j141 + 1))
+            {
+                fRec72_perm[j141] = fRec72_tmp[(vsize + j141)];
+            }
+            /* Vectorizable loop 108 */
+            /* Pre code */
+            fYec10_idx = ((fYec10_idx + fYec10_idx_save) & 131071);
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec10[((i + fYec10_idx) & 131071)] =
+                  (float(input1[i]) * fZec54[i]);
+            }
+            /* Post code */
+            fYec10_idx_save = vsize;
+/* Recursive loop 109 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j24 = 0; (j24 < 4); j24 = (j24 + 1))
+            {
+                fRec11_tmp[j24] = fRec11_perm[j24];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j28 = 0; (j28 < 4); j28 = (j28 + 1))
+            {
+                fRec20_tmp[j28] = fRec20_perm[j28];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j30 = 0; (j30 < 4); j30 = (j30 + 1))
+            {
+                fRec23_tmp[j30] = fRec23_perm[j30];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j32 = 0; (j32 < 4); j32 = (j32 + 1))
+            {
+                fRec22_tmp[j32] = fRec22_perm[j32];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j34 = 0; (j34 < 4); j34 = (j34 + 1))
+            {
+                fRec24_tmp[j34] = fRec24_perm[j34];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j58 = 0; (j58 < 4); j58 = (j58 + 1))
+            {
+                fRec10_tmp[j58] = fRec10_perm[j58];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j62 = 0; (j62 < 4); j62 = (j62 + 1))
+            {
+                fRec9_tmp[j62] = fRec9_perm[j62];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j64 = 0; (j64 < 4); j64 = (j64 + 1))
+            {
+                fRec8_tmp[j64] = fRec8_perm[j64];
+            }
+            fYec4_idx = ((fYec4_idx + fYec4_idx_save) & 2047);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j70 = 0; (j70 < 4); j70 = (j70 + 1))
+            {
+                fRec6_tmp[j70] = fRec6_perm[j70];
+            }
+            fYec5_idx = ((fYec5_idx + fYec5_idx_save) & 4095);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j74 = 0; (j74 < 4); j74 = (j74 + 1))
+            {
+                fRec4_tmp[j74] = fRec4_perm[j74];
+            }
+            fYec7_idx = ((fYec7_idx + fYec7_idx_save) & 1048575);
+            fRec0_idx = ((fRec0_idx + fRec0_idx_save) & 262143);
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec11[i] =
+                  (((fRec0[(((i + fRec0_idx) -
+                             (int(std::min<float>(
+                                fConst0, float(std::max<int>(0, iZec10[i])))) +
+                              1)) &
+                            262143)] *
+                     (0.0f - (fZec8[i] + (99.0f - fZec11[i])))) +
+                    ((fZec8[i] + (100.0f - fZec11[i])) *
+                     fRec0[(
+                       ((i + fRec0_idx) -
+                        (int(std::min<float>(
+                           fConst0, float(std::max<int>(0, (iZec10[i] + 1))))) +
+                         1)) &
+                       262143)])) -
+                   (fConst8 * ((fConst9 * fRec11[(i - 2)]) +
+                               (fConst10 * fRec11[(i - 1)]))));
+                fZec13[i] =
+                  (fConst8 *
+                   (fRec11[(i - 2)] + (fRec11[i] + (2.0f * fRec11[(i - 1)]))));
+                float fThen3 = fRec20[(i - 1)];
+                float fElse3 =
+                  (0.00787401572f *
+                   (std::floor(((127.0f * std::fabs(fZec13[i])) + 0.5f)) *
+                    (float((2 * (fZec13[i] > 0.0f))) + -1.0f)));
+                fRec20[i]    = (iZec12[i] ? fElse3 : fThen3);
+                float fThen4 = fZec13[i];
+                float fElse4 = fRec20[i];
+                fZec14[i]    = (iSlow4 ? fElse4 : fThen4);
+                fZec15[i]    = std::fabs(fZec14[i]);
+                fZec16[i] =
+                  ((fZec15[i] > fRec23[(i - 1)]) ? fConst13 : fConst12);
+                fRec23[i] = ((fZec15[i] * (1.0f - fZec16[i])) +
+                             (fRec23[(i - 1)] * fZec16[i]));
+                fRec22[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec23[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec22[(i - 1)]));
+                fZec17[i] =
+                  (fZec14[i] * std::pow(10.0f, (0.0500000007f * fRec22[i])));
+                fZec18[i] = std::fabs((fZec17[i] + 9.99999975e-05f));
+                fZec19[i] =
+                  ((fZec18[i] > fRec24[(i - 1)]) ? fConst18 : fConst12);
+                fRec24[i] = ((fZec18[i] * (1.0f - fZec19[i])) +
+                             (fRec24[(i - 1)] * fZec19[i]));
+                fRec10[i] =
+                  ((fZec17[i] + ((fZec26[i] * fRec24[i]) * fZec27[i])) -
+                   (((fRec10[(i - 2)] * fZec30[i]) +
+                     (2.0f * (fRec10[(i - 1)] * fZec32[i]))) /
+                    fZec33[i]));
+                fRec9[i] =
+                  (((((fRec10[(i - 1)] * fZec34[i]) + (fRec10[i] / fZec31[i])) +
+                     (fRec10[(i - 2)] / fZec31[i])) /
+                    fZec33[i]) -
+                   (((fRec9[(i - 2)] * fZec37[i]) +
+                     (2.0f * (fRec9[(i - 1)] * fZec38[i]))) /
+                    fZec39[i]));
+                fRec8[i] =
+                  (((fRec9[(i - 2)] + (fRec9[i] + (2.0f * fRec9[(i - 1)]))) /
+                    fZec39[i]) -
+                   (fConst8 * ((fConst9 * fRec8[(i - 2)]) +
+                               (fConst10 * fRec8[(i - 1)]))));
+                fYec4[((i + fYec4_idx) & 2047)] =
+                  ((fConst45 *
+                    (fRec8[(i - 2)] + (fRec8[i] + (2.0f * fRec8[(i - 1)])))) -
+                   (fRec35[i] * fRec6[(i - 1)]));
+                fRec6[i] =
+                  ((fYec4[(
+                      ((i + fYec4_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec43[i]))) &
+                      2047)] *
+                    (fZec44[i] + (2.0f - fZec41[i]))) +
+                   ((fZec41[i] + (-1.0f - fZec44[i])) *
+                    fYec4[(((i + fYec4_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec43[i] + 1)))) &
+                           2047)]));
+                fRec7[i] = (fRec35[i] * fYec4[((i + fYec4_idx) & 2047)]);
+                fYec5[((i + fYec5_idx) & 4095)] =
+                  ((fRec7[i] + fRec6[(i - 1)]) -
+                   (0.899999976f * (fRec35[i] * fRec4[(i - 1)])));
+                fRec4[i] =
+                  ((fYec5[(
+                      ((i + fYec5_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec48[i]))) &
+                      4095)] *
+                    (fZec49[i] + (2.0f - fZec46[i]))) +
+                   ((fZec46[i] + (-1.0f - fZec49[i])) *
+                    fYec5[(((i + fYec5_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec48[i] + 1)))) &
+                           4095)]));
+                fRec5[i] = (0.899999976f *
+                            (fRec35[i] * fYec5[((i + fYec5_idx) & 4095)]));
+                fYec7[((i + fYec7_idx) & 1048575)] =
+                  ((((fYec6[(((i + fYec6_idx) - iZec57[i]) & 131071)] *
+                      fZec59[i]) +
+                     (fZec60[i] *
+                      fYec6[(((i + fYec6_idx) - iZec61[i]) & 131071)])) *
+                    fZec63[i]) +
+                   ((fRec3[i] * (fRec5[i] + fRec4[(i - 1)])) +
+                    (((fYec6[(((i + fYec6_idx) - iZec65[i]) & 131071)] *
+                       fZec67[i]) +
+                      (fZec68[i] *
+                       fYec6[(((i + fYec6_idx) - iZec69[i]) & 131071)])) *
+                     fZec62[i])));
+                fZec70[i] =
+                  fYec7[(((i + fYec7_idx) -
+                          int(std::min<float>(
+                            524288.0f, std::max<float>(0.0f, fRec40[i])))) &
+                         1048575)];
+                fRec0[((i + fRec0_idx) & 262143)] =
+                  (fZec70[i] +
+                   (fRec39[i] *
+                    (fYec7[(((i + fYec7_idx) -
+                             int(std::min<float>(
+                               524288.0f, std::max<float>(0.0f, fRec41[i])))) &
+                            1048575)] -
+                     fZec70[i])));
+            }
+            /* Post code */
+            fYec7_idx_save = vsize;
+            fYec5_idx_save = vsize;
+            fYec4_idx_save = vsize;
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j35 = 0; (j35 < 4); j35 = (j35 + 1))
+            {
+                fRec24_perm[j35] = fRec24_tmp[(vsize + j35)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j31 = 0; (j31 < 4); j31 = (j31 + 1))
+            {
+                fRec23_perm[j31] = fRec23_tmp[(vsize + j31)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j33 = 0; (j33 < 4); j33 = (j33 + 1))
+            {
+                fRec22_perm[j33] = fRec22_tmp[(vsize + j33)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j29 = 0; (j29 < 4); j29 = (j29 + 1))
+            {
+                fRec20_perm[j29] = fRec20_tmp[(vsize + j29)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j25 = 0; (j25 < 4); j25 = (j25 + 1))
+            {
+                fRec11_perm[j25] = fRec11_tmp[(vsize + j25)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j59 = 0; (j59 < 4); j59 = (j59 + 1))
+            {
+                fRec10_perm[j59] = fRec10_tmp[(vsize + j59)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j63 = 0; (j63 < 4); j63 = (j63 + 1))
+            {
+                fRec9_perm[j63] = fRec9_tmp[(vsize + j63)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j65 = 0; (j65 < 4); j65 = (j65 + 1))
+            {
+                fRec8_perm[j65] = fRec8_tmp[(vsize + j65)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j71 = 0; (j71 < 4); j71 = (j71 + 1))
+            {
+                fRec6_perm[j71] = fRec6_tmp[(vsize + j71)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j75 = 0; (j75 < 4); j75 = (j75 + 1))
+            {
+                fRec4_perm[j75] = fRec4_tmp[(vsize + j75)];
+            }
+            fRec0_idx_save = vsize;
+/* Recursive loop 110 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j108 = 0; (j108 < 4); j108 = (j108 + 1))
+            {
+                fRec57_tmp[j108] = fRec57_perm[j108];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j110 = 0; (j110 < 4); j110 = (j110 + 1))
+            {
+                fRec63_tmp[j110] = fRec63_perm[j110];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j112 = 0; (j112 < 4); j112 = (j112 + 1))
+            {
+                fRec65_tmp[j112] = fRec65_perm[j112];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j114 = 0; (j114 < 4); j114 = (j114 + 1))
+            {
+                fRec64_tmp[j114] = fRec64_perm[j114];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j116 = 0; (j116 < 4); j116 = (j116 + 1))
+            {
+                fRec66_tmp[j116] = fRec66_perm[j116];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j118 = 0; (j118 < 4); j118 = (j118 + 1))
+            {
+                fRec56_tmp[j118] = fRec56_perm[j118];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j120 = 0; (j120 < 4); j120 = (j120 + 1))
+            {
+                fRec55_tmp[j120] = fRec55_perm[j120];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j122 = 0; (j122 < 4); j122 = (j122 + 1))
+            {
+                fRec54_tmp[j122] = fRec54_perm[j122];
+            }
+            fYec8_idx = ((fYec8_idx + fYec8_idx_save) & 16383);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j126 = 0; (j126 < 4); j126 = (j126 + 1))
+            {
+                fRec52_tmp[j126] = fRec52_perm[j126];
+            }
+            fYec9_idx = ((fYec9_idx + fYec9_idx_save) & 16383);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j130 = 0; (j130 < 4); j130 = (j130 + 1))
+            {
+                fRec50_tmp[j130] = fRec50_perm[j130];
+            }
+            fYec11_idx = ((fYec11_idx + fYec11_idx_save) & 1048575);
+            fRec49_idx = ((fRec49_idx + fRec49_idx_save) & 262143);
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec57[i] =
+                  (((fRec49[(((i + fRec49_idx) -
+                              (int(std::min<float>(
+                                 fConst0, float(std::max<int>(0, iZec90[i])))) +
+                               1)) &
+                             262143)] *
+                     (0.0f - (fZec88[i] + (99.0f - fZec91[i])))) +
+                    ((fZec88[i] + (100.0f - fZec91[i])) *
+                     fRec49[(
+                       ((i + fRec49_idx) -
+                        (int(std::min<float>(
+                           fConst0, float(std::max<int>(0, (iZec90[i] + 1))))) +
+                         1)) &
+                       262143)])) -
+                   (fConst8 * ((fConst9 * fRec57[(i - 2)]) +
+                               (fConst10 * fRec57[(i - 1)]))));
+                fZec92[i] =
+                  (fConst8 *
+                   (fRec57[(i - 2)] + (fRec57[i] + (2.0f * fRec57[(i - 1)]))));
+                float fThen31 = fRec63[(i - 1)];
+                float fElse31 =
+                  (0.00787401572f *
+                   (std::floor(((127.0f * std::fabs(fZec92[i])) + 0.5f)) *
+                    (float((2 * (fZec92[i] > 0.0f))) + -1.0f)));
+                fRec63[i]     = (iZec12[i] ? fElse31 : fThen31);
+                float fThen32 = fZec92[i];
+                float fElse32 = fRec63[i];
+                fZec93[i]     = (iSlow4 ? fElse32 : fThen32);
+                fZec94[i]     = std::fabs(fZec93[i]);
+                fZec95[i] =
+                  ((fZec94[i] > fRec65[(i - 1)]) ? fConst13 : fConst12);
+                fRec65[i] = ((fZec94[i] * (1.0f - fZec95[i])) +
+                             (fRec65[(i - 1)] * fZec95[i]));
+                fRec64[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec65[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec64[(i - 1)]));
+                fZec96[i] =
+                  (fZec93[i] * std::pow(10.0f, (0.0500000007f * fRec64[i])));
+                fZec97[i] = std::fabs((fZec96[i] + 9.99999975e-05f));
+                fZec98[i] =
+                  ((fZec97[i] > fRec66[(i - 1)]) ? fConst18 : fConst12);
+                fRec66[i] = ((fZec97[i] * (1.0f - fZec98[i])) +
+                             (fRec66[(i - 1)] * fZec98[i]));
+                fRec56[i] =
+                  ((fZec96[i] + ((fZec26[i] * fRec66[i]) * fZec27[i])) -
+                   (((fZec30[i] * fRec56[(i - 2)]) +
+                     (2.0f * (fZec32[i] * fRec56[(i - 1)]))) /
+                    fZec33[i]));
+                fRec55[i] =
+                  (((((fZec34[i] * fRec56[(i - 1)]) + (fRec56[i] / fZec31[i])) +
+                     (fRec56[(i - 2)] / fZec31[i])) /
+                    fZec33[i]) -
+                   (((fZec37[i] * fRec55[(i - 2)]) +
+                     (2.0f * (fZec38[i] * fRec55[(i - 1)]))) /
+                    fZec39[i]));
+                fRec54[i] =
+                  (((fRec55[(i - 2)] + (fRec55[i] + (2.0f * fRec55[(i - 1)]))) /
+                    fZec39[i]) -
+                   (fConst8 * ((fConst9 * fRec54[(i - 2)]) +
+                               (fConst10 * fRec54[(i - 1)]))));
+                fYec8[((i + fYec8_idx) & 16383)] =
+                  ((fConst45 * (fRec54[(i - 2)] +
+                                (fRec54[i] + (2.0f * fRec54[(i - 1)])))) -
+                   (fRec35[i] * fRec52[(i - 1)]));
+                fRec52[i] =
+                  ((fYec8[(
+                      ((i + fYec8_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec102[i]))) &
+                      16383)] *
+                    (fZec103[i] + (2.0f - fZec100[i]))) +
+                   ((fZec100[i] + (-1.0f - fZec103[i])) *
+                    fYec8[(((i + fYec8_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec102[i] + 1)))) &
+                           16383)]));
+                fRec53[i] = (fRec35[i] * fYec8[((i + fYec8_idx) & 16383)]);
+                fYec9[((i + fYec9_idx) & 16383)] =
+                  ((fRec53[i] + fRec52[(i - 1)]) -
+                   (0.899999976f * (fRec35[i] * fRec50[(i - 1)])));
+                fRec50[i] =
+                  ((fYec9[(
+                      ((i + fYec9_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec107[i]))) &
+                      16383)] *
+                    (fZec108[i] + (2.0f - fZec105[i]))) +
+                   ((fZec105[i] + (-1.0f - fZec108[i])) *
+                    fYec9[(((i + fYec9_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec107[i] + 1)))) &
+                           16383)]));
+                fRec51[i] = (0.899999976f *
+                             (fRec35[i] * fYec9[((i + fYec9_idx) & 16383)]));
+                fYec11[((i + fYec11_idx) & 1048575)] =
+                  ((fZec63[i] *
+                    ((fZec59[i] *
+                      fYec10[(((i + fYec10_idx) - iZec57[i]) & 131071)]) +
+                     (fZec60[i] *
+                      fYec10[(((i + fYec10_idx) - iZec61[i]) & 131071)]))) +
+                   ((fRec3[i] * (fRec51[i] + fRec50[(i - 1)])) +
+                    (fZec62[i] *
+                     ((fZec67[i] *
+                       fYec10[(((i + fYec10_idx) - iZec65[i]) & 131071)]) +
+                      (fZec68[i] *
+                       fYec10[(((i + fYec10_idx) - iZec69[i]) & 131071)])))));
+                fZec112[i] =
+                  fYec11[(((i + fYec11_idx) -
+                           int(std::min<float>(
+                             524288.0f, std::max<float>(0.0f, fRec71[i])))) &
+                          1048575)];
+                fRec49[((i + fRec49_idx) & 262143)] =
+                  (fZec112[i] +
+                   (fRec70[i] *
+                    (fYec11[(((i + fYec11_idx) -
+                              int(std::min<float>(
+                                524288.0f, std::max<float>(0.0f, fRec72[i])))) &
+                             1048575)] -
+                     fZec112[i])));
+            }
+            /* Post code */
+            fYec11_idx_save = vsize;
+            fYec9_idx_save  = vsize;
+            fYec8_idx_save  = vsize;
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j117 = 0; (j117 < 4); j117 = (j117 + 1))
+            {
+                fRec66_perm[j117] = fRec66_tmp[(vsize + j117)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j113 = 0; (j113 < 4); j113 = (j113 + 1))
+            {
+                fRec65_perm[j113] = fRec65_tmp[(vsize + j113)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j115 = 0; (j115 < 4); j115 = (j115 + 1))
+            {
+                fRec64_perm[j115] = fRec64_tmp[(vsize + j115)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j111 = 0; (j111 < 4); j111 = (j111 + 1))
+            {
+                fRec63_perm[j111] = fRec63_tmp[(vsize + j111)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j109 = 0; (j109 < 4); j109 = (j109 + 1))
+            {
+                fRec57_perm[j109] = fRec57_tmp[(vsize + j109)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j119 = 0; (j119 < 4); j119 = (j119 + 1))
+            {
+                fRec56_perm[j119] = fRec56_tmp[(vsize + j119)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j121 = 0; (j121 < 4); j121 = (j121 + 1))
+            {
+                fRec55_perm[j121] = fRec55_tmp[(vsize + j121)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j123 = 0; (j123 < 4); j123 = (j123 + 1))
+            {
+                fRec54_perm[j123] = fRec54_tmp[(vsize + j123)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j127 = 0; (j127 < 4); j127 = (j127 + 1))
+            {
+                fRec52_perm[j127] = fRec52_tmp[(vsize + j127)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j131 = 0; (j131 < 4); j131 = (j131 + 1))
+            {
+                fRec50_perm[j131] = fRec50_tmp[(vsize + j131)];
+            }
+            fRec49_idx_save = vsize;
+/* Vectorizable loop 111 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec71[i] = std::fabs(
+                  (fRec0[((i + fRec0_idx) & 262143)] + 9.99999975e-05f));
+            }
+/* Vectorizable loop 112 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec113[i] = std::fabs(
+                  (fRec49[((i + fRec49_idx) & 262143)] + 9.99999975e-05f));
+            }
+/* Recursive loop 113 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j88 = 0; (j88 < 4); j88 = (j88 + 1))
+            {
+                fRec44_tmp[j88] = fRec44_perm[j88];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec72[i] =
+                  ((fZec71[i] > fRec44[(i - 1)]) ? fConst18 : fConst12);
+                fRec44[i] = ((fZec71[i] * (1.0f - fZec72[i])) +
+                             (fRec44[(i - 1)] * fZec72[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j89 = 0; (j89 < 4); j89 = (j89 + 1))
+            {
+                fRec44_perm[j89] = fRec44_tmp[(vsize + j89)];
+            }
+/* Recursive loop 114 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j142 = 0; (j142 < 4); j142 = (j142 + 1))
+            {
+                fRec74_tmp[j142] = fRec74_perm[j142];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec114[i] =
+                  ((fZec113[i] > fRec74[(i - 1)]) ? fConst18 : fConst12);
+                fRec74[i] = ((fZec113[i] * (1.0f - fZec114[i])) +
+                             (fRec74[(i - 1)] * fZec114[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j143 = 0; (j143 < 4); j143 = (j143 + 1))
+            {
+                fRec74_perm[j143] = fRec74_tmp[(vsize + j143)];
+            }
+/* Vectorizable loop 115 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec73[i] = (fRec0[((i + fRec0_idx) & 262143)] +
+                             ((fZec26[i] * fRec44[i]) * fZec27[i]));
+            }
+/* Vectorizable loop 116 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec76[i] = std::fabs(float(input0[i]));
+            }
+/* Recursive loop 117 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j96 = 0; (j96 < 4); j96 = (j96 + 1))
+            {
+                fRec48_tmp[j96] = fRec48_perm[j96];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec48[i] = (fSlow17 + (fConst2 * fRec48[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j97 = 0; (j97 < 4); j97 = (j97 + 1))
+            {
+                fRec48_perm[j97] = fRec48_tmp[(vsize + j97)];
+            }
+/* Vectorizable loop 118 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec115[i] = (fRec49[((i + fRec49_idx) & 262143)] +
+                              ((fZec26[i] * fRec74[i]) * fZec27[i]));
+            }
+/* Vectorizable loop 119 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec118[i] = std::fabs(float(input1[i]));
+            }
+/* Vectorizable loop 120 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec74[i] = std::fabs(fZec73[i]);
+            }
+/* Recursive loop 121 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j94 = 0; (j94 < 4); j94 = (j94 + 1))
+            {
+                fRec47_tmp[j94] = fRec47_perm[j94];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec77[i] = ((fZec76[i] > fRec47[(i - 1)]) ? fSlow16 : fSlow13);
+                fRec47[i] = ((fZec76[i] * (1.0f - fZec77[i])) +
+                             (fRec47[(i - 1)] * fZec77[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j95 = 0; (j95 < 4); j95 = (j95 + 1))
+            {
+                fRec47_perm[j95] = fRec47_tmp[(vsize + j95)];
+            }
+/* Vectorizable loop 122 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec79[i] = (60.0f * fRec48[i]);
+            }
+/* Vectorizable loop 123 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec116[i] = std::fabs(fZec115[i]);
+            }
+/* Recursive loop 124 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j148 = 0; (j148 < 4); j148 = (j148 + 1))
+            {
+                fRec77_tmp[j148] = fRec77_perm[j148];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec119[i] =
+                  ((fZec118[i] > fRec77[(i - 1)]) ? fSlow16 : fSlow13);
+                fRec77[i] = ((fZec118[i] * (1.0f - fZec119[i])) +
+                             (fRec77[(i - 1)] * fZec119[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j149 = 0; (j149 < 4); j149 = (j149 + 1))
+            {
+                fRec77_perm[j149] = fRec77_tmp[(vsize + j149)];
+            }
+/* Recursive loop 125 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j90 = 0; (j90 < 4); j90 = (j90 + 1))
+            {
+                fRec46_tmp[j90] = fRec46_perm[j90];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec75[i] =
+                  ((fZec74[i] > fRec46[(i - 1)]) ? fConst13 : fConst12);
+                fRec46[i] = ((fZec74[i] * (1.0f - fZec75[i])) +
+                             (fRec46[(i - 1)] * fZec75[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j91 = 0; (j91 < 4); j91 = (j91 + 1))
+            {
+                fRec46_perm[j91] = fRec46_tmp[(vsize + j91)];
+            }
+/* Vectorizable loop 126 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec78[i] = (20.0f * std::log10(std::max<float>(1.17549435e-38f,
+                                                                fRec47[i])));
+            }
+/* Vectorizable loop 127 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec80[i] = (-1.5f - fZec79[i]);
+            }
+/* Vectorizable loop 128 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec81[i] = (1.5f - fZec79[i]);
+            }
+/* Recursive loop 129 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j144 = 0; (j144 < 4); j144 = (j144 + 1))
+            {
+                fRec76_tmp[j144] = fRec76_perm[j144];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec117[i] =
+                  ((fZec116[i] > fRec76[(i - 1)]) ? fConst13 : fConst12);
+                fRec76[i] = ((fZec116[i] * (1.0f - fZec117[i])) +
+                             (fRec76[(i - 1)] * fZec117[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j145 = 0; (j145 < 4); j145 = (j145 + 1))
+            {
+                fRec76_perm[j145] = fRec76_tmp[(vsize + j145)];
+            }
+/* Vectorizable loop 130 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec120[i] =
+                  (20.0f *
+                   std::log10(std::max<float>(1.17549435e-38f, fRec77[i])));
+            }
+/* Recursive loop 131 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j92 = 0; (j92 < 4); j92 = (j92 + 1))
+            {
+                fRec45_tmp[j92] = fRec45_perm[j92];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec45[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec46[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec45[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j93 = 0; (j93 < 4); j93 = (j93 + 1))
+            {
+                fRec45_perm[j93] = fRec45_tmp[(vsize + j93)];
+            }
+/* Vectorizable loop 132 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec82[i] = ((fZec78[i] > fZec80[i]) + (fZec78[i] > fZec81[i]));
+            }
+/* Vectorizable loop 133 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec83[i] = (fZec78[i] + fZec79[i]);
+            }
+/* Vectorizable loop 134 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec84[i] = (1.0f - (1.0f / ((19.0f * fRec48[i]) + 1.0f)));
+            }
+/* Recursive loop 135 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j146 = 0; (j146 < 4); j146 = (j146 + 1))
+            {
+                fRec75_tmp[j146] = fRec75_perm[j146];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec75[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec76[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec75[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j147 = 0; (j147 < 4); j147 = (j147 + 1))
+            {
+                fRec75_perm[j147] = fRec75_tmp[(vsize + j147)];
+            }
+/* Vectorizable loop 136 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec121[i] =
+                  ((fZec120[i] > fZec80[i]) + (fZec120[i] > fZec81[i]));
+            }
+/* Vectorizable loop 137 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec122[i] = (fZec79[i] + fZec120[i]);
+            }
+/* Vectorizable loop 138 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen27 = fZec83[i];
+                float fElse27 =
+                  (0.166666672f * Macalla_faustpower2_f((fZec83[i] + 1.5f)));
+                float fThen28 = ((iZec82[i] == 1) ? fElse27 : fThen27);
+                output0[i]    = FAUSTFLOAT((
+                  (fSlow19 * float(input0[i])) +
+                  (fSlow18 *
+                   ((fZec73[i] * std::pow(10.0f, (0.0500000007f * fRec45[i]))) *
+                    std::pow(
+                      10.0f,
+                      (0.0500000007f *
+                       (0.0f - (std::max<float>(
+                                  0.0f, ((iZec82[i] == 0) ? 0.0f : fThen28)) *
+                                fZec84[i]))))))));
+            }
+/* Vectorizable loop 139 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen47 = fZec122[i];
+                float fElse47 =
+                  (0.166666672f * Macalla_faustpower2_f((fZec122[i] + 1.5f)));
+                float fThen48 = ((iZec121[i] == 1) ? fElse47 : fThen47);
+                output1[i]    = FAUSTFLOAT(
+                  ((fSlow19 * float(input1[i])) +
+                   (fSlow18 *
+                    ((fZec115[i] *
+                      std::pow(10.0f, (0.0500000007f * fRec75[i]))) *
+                     std::pow(
+                       10.0f,
+                       (0.0500000007f *
+                        (0.0f -
+                         (fZec84[i] *
+                          std::max<float>(
+                            0.0f, ((iZec121[i] == 0) ? 0.0f : fThen48))))))))));
+            }
+        }
+        /* Remaining frames */
+        if ((vindex < count))
+        {
+            FAUSTFLOAT* input0  = &input0_ptr[vindex];
+            FAUSTFLOAT* input1  = &input1_ptr[vindex];
+            FAUSTFLOAT* output0 = &output0_ptr[vindex];
+            FAUSTFLOAT* output1 = &output1_ptr[vindex];
+            int vsize           = (count - vindex);
+/* Vectorizable loop 0 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j10 = 0; (j10 < 4); j10 = (j10 + 1))
+            {
+                iVec0_tmp[j10] = iVec0_perm[j10];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iVec0[i] = 1;
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j11 = 0; (j11 < 4); j11 = (j11 + 1))
+            {
+                iVec0_perm[j11] = iVec0_tmp[(vsize + j11)];
+            }
+/* Vectorizable loop 1 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec0[i] = (1 - iVec0[(i - 1)]);
+            }
+/* Recursive loop 2 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j6 = 0; (j6 < 4); j6 = (j6 + 1))
+            {
+                fRec12_tmp[j6] = fRec12_perm[j6];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec12[i] = (fSlow3 + (fConst2 * fRec12[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j7 = 0; (j7 < 4); j7 = (j7 + 1))
+            {
+                fRec12_perm[j7] = fRec12_tmp[(vsize + j7)];
+            }
+/* Recursive loop 3 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j8 = 0; (j8 < 4); j8 = (j8 + 1))
+            {
+                iRec14_tmp[j8] = iRec14_perm[j8];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iRec14[i] = ((1103515245 * iRec14[(i - 1)]) + 12345);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j9 = 0; (j9 < 4); j9 = (j9 + 1))
+            {
+                iRec14_perm[j9] = iRec14_tmp[(vsize + j9)];
+            }
+/* Recursive loop 4 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j38 = 0; (j38 < 4); j38 = (j38 + 1))
+            {
+                fRec27_tmp[j38] = fRec27_perm[j38];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen7 = (fConst16 + fRec27[(i - 1)]);
+                fZec20[i]    = (iZec0[i] ? 0.0f : fThen7);
+                fRec27[i]    = (fZec20[i] - std::floor(fZec20[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j39 = 0; (j39 < 4); j39 = (j39 + 1))
+            {
+                fRec27_perm[j39] = fRec27_tmp[(vsize + j39)];
+            }
+/* Recursive loop 5 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j98 = 0; (j98 < 4); j98 = (j98 + 1))
+            {
+                fRec60_tmp[j98] = fRec60_perm[j98];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec60[i] = (fSlow20 + (fConst2 * fRec60[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j99 = 0; (j99 < 4); j99 = (j99 + 1))
+            {
+                fRec60_perm[j99] = fRec60_tmp[(vsize + j99)];
+            }
+/* Vectorizable loop 6 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec1[i] = (1.99000001f * fRec12[i]);
+            }
+/* Vectorizable loop 7 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j14 = 0; (j14 < 4); j14 = (j14 + 1))
+            {
+                fYec0_tmp[j14] = fYec0_perm[j14];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec0[i] = float(iRec14[i]);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j15 = 0; (j15 < 4); j15 = (j15 + 1))
+            {
+                fYec0_perm[j15] = fYec0_tmp[(vsize + j15)];
+            }
+/* Vectorizable loop 8 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec4[i] = (18.0f * fRec12[i]);
+            }
+/* Recursive loop 9 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j20 = 0; (j20 < 4); j20 = (j20 + 1))
+            {
+                fRec18_tmp[j20] = fRec18_perm[j20];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen2 = (fConst4 + fRec18[(i - 1)]);
+                fZec6[i]     = (iZec0[i] ? 0.0f : fThen2);
+                fRec18[i]    = (fZec6[i] - std::floor(fZec6[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j21 = 0; (j21 < 4); j21 = (j21 + 1))
+            {
+                fRec18_perm[j21] = fRec18_tmp[(vsize + j21)];
+            }
+/* Vectorizable loop 10 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j40 = 0; (j40 < 4); j40 = (j40 + 1))
+            {
+                fYec1_tmp[j40] = fYec1_perm[j40];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec1[i] = (fRec27[i] - fRec27[(i - 1)]);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j41 = 0; (j41 < 4); j41 = (j41 + 1))
+            {
+                fYec1_perm[j41] = fYec1_tmp[(vsize + j41)];
+            }
+/* Recursive loop 11 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j44 = 0; (j44 < 4); j44 = (j44 + 1))
+            {
+                fRec30_tmp[j44] = fRec30_perm[j44];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen8 = (fConst19 + fRec30[(i - 1)]);
+                fZec22[i]    = (iZec0[i] ? 0.0f : fThen8);
+                fRec30[i]    = (fZec22[i] - std::floor(fZec22[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j45 = 0; (j45 < 4); j45 = (j45 + 1))
+            {
+                fRec30_perm[j45] = fRec30_tmp[(vsize + j45)];
+            }
+/* Vectorizable loop 12 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec85[i] = (0.200000003f * fRec60[i]);
+            }
+/* Recursive loop 13 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j12 = 0; (j12 < 4); j12 = (j12 + 1))
+            {
+                fRec15_tmp[j12] = fRec15_perm[j12];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen0 =
+                  (fRec15[(i - 1)] + (fConst3 * (fZec1[i] + 0.00999999978f)));
+                fZec2[i]  = (iZec0[i] ? 0.0f : fThen0);
+                fRec15[i] = (fZec2[i] - std::floor(fZec2[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j13 = 0; (j13 < 4); j13 = (j13 + 1))
+            {
+                fRec15_perm[j13] = fRec15_tmp[(vsize + j13)];
+            }
+/* Vectorizable loop 14 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec3[i] = (4.65661277e-12f * (fRec12[i] * fYec0[i]));
+            }
+/* Recursive loop 15 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j18 = 0; (j18 < 4); j18 = (j18 + 1))
+            {
+                fRec17_tmp[j18] = fRec17_perm[j18];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen1 =
+                  (fRec17[(i - 1)] + (fConst3 * (fZec4[i] + 2.0f)));
+                fZec5[i]  = (iZec0[i] ? 0.0f : fThen1);
+                fRec17[i] = (fZec5[i] - std::floor(fZec5[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j19 = 0; (j19 < 4); j19 = (j19 + 1))
+            {
+                fRec17_perm[j19] = fRec17_tmp[(vsize + j19)];
+            }
+/* Vectorizable loop 16 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec7[i] = ((0.200000003f *
+                             ftbl0MacallaSIG0[int((65536.0f * fRec18[i]))]) +
+                            0.800000012f);
+            }
+/* Vectorizable loop 17 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec21[i] = ((fYec1[(i - 1)] <= 0.0f) & (fYec1[i] > 0.0f));
+            }
+/* Vectorizable loop 18 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j46 = 0; (j46 < 4); j46 = (j46 + 1))
+            {
+                fYec2_tmp[j46] = fYec2_perm[j46];
+            }
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec2[i] = Macalla_faustpower2_f(((2.0f * fRec30[i]) + -1.0f));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j47 = 0; (j47 < 4); j47 = (j47 + 1))
+            {
+                fYec2_perm[j47] = fYec2_tmp[(vsize + j47)];
+            }
+/* Recursive loop 19 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j76 = 0; (j76 < 4); j76 = (j76 + 1))
+            {
+                fRec42_tmp[j76] = fRec42_perm[j76];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec42[i] = (fSlow8 + (fConst2 * fRec42[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j77 = 0; (j77 < 4); j77 = (j77 + 1))
+            {
+                fRec42_perm[j77] = fRec42_tmp[(vsize + j77)];
+            }
+/* Recursive loop 20 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j100 = 0; (j100 < 4); j100 = (j100 + 1))
+            {
+                fRec59_tmp[j100] = fRec59_perm[j100];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen29 =
+                  (fRec59[(i - 1)] +
+                   (fConst3 * ((fZec1[i] + fZec85[i]) + 0.00999999978f)));
+                fZec86[i] = (iZec0[i] ? 0.0f : fThen29);
+                fRec59[i] = (fZec86[i] - std::floor(fZec86[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j101 = 0; (j101 < 4); j101 = (j101 + 1))
+            {
+                fRec59_perm[j101] = fRec59_tmp[(vsize + j101)];
+            }
+/* Recursive loop 21 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j104 = 0; (j104 < 4); j104 = (j104 + 1))
+            {
+                fRec62_tmp[j104] = fRec62_perm[j104];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen30 = (fRec62[(i - 1)] +
+                                 (fConst3 * ((fZec4[i] + fZec85[i]) + 2.0f)));
+                fZec87[i]     = (iZec0[i] ? 0.0f : fThen30);
+                fRec62[i]     = (fZec87[i] - std::floor(fZec87[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j105 = 0; (j105 < 4); j105 = (j105 + 1))
+            {
+                fRec62_perm[j105] = fRec62_tmp[(vsize + j105)];
+            }
+/* Recursive loop 22 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j2 = 0; (j2 < 4); j2 = (j2 + 1))
+            {
+                fRec2_tmp[j2] = fRec2_perm[j2];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec2[i] =
+                  std::fmod(((fRec2[(i - 1)] + 4097.0f) - fSlow1), 4096.0f);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j3 = 0; (j3 < 4); j3 = (j3 + 1))
+            {
+                fRec2_perm[j3] = fRec2_tmp[(vsize + j3)];
+            }
+/* Recursive loop 23 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j16 = 0; (j16 < 4); j16 = (j16 + 1))
+            {
+                fRec13_tmp[j16] = fRec13_perm[j16];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec13[i] =
+                  ((9.99999975e-05f *
+                    (fZec3[i] +
+                     (1.0f - std::fabs(((2.0f * fRec15[i]) + -1.0f))))) +
+                   (0.999899983f * fRec13[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j17 = 0; (j17 < 4); j17 = (j17 + 1))
+            {
+                fRec13_perm[j17] = fRec13_tmp[(vsize + j17)];
+            }
+/* Recursive loop 24 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j22 = 0; (j22 < 4); j22 = (j22 + 1))
+            {
+                fRec16_tmp[j22] = fRec16_perm[j22];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec16[i] =
+                  ((9.99999975e-05f *
+                    ((fZec3[i] +
+                      (1.0f - std::fabs(((2.0f * fRec17[i]) + -1.0f)))) *
+                     fZec7[i])) +
+                   (0.999899983f * fRec16[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j23 = 0; (j23 < 4); j23 = (j23 + 1))
+            {
+                fRec16_perm[j23] = fRec16_tmp[(vsize + j23)];
+            }
+/* Recursive loop 25 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j42 = 0; (j42 < 4); j42 = (j42 + 1))
+            {
+                fRec28_tmp[j42] = fRec28_perm[j42];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec28[i] = ((fRec28[(i - 1)] * float((1 - iZec21[i]))) +
+                             (4.65661287e-10f * (fYec0[i] * float(iZec21[i]))));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j43 = 0; (j43 < 4); j43 = (j43 + 1))
+            {
+                fRec28_perm[j43] = fRec28_tmp[(vsize + j43)];
+            }
+            /* Vectorizable loop 26 */
+            /* Pre code */
+            fYec3_idx = ((fYec3_idx + fYec3_idx_save) & 2047);
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec3[((i + fYec3_idx) & 2047)] =
+                  (float(iVec0[(i - 1)]) * (fYec2[i] - fYec2[(i - 1)]));
+            }
+            /* Post code */
+            fYec3_idx_save = vsize;
+/* Recursive loop 27 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j56 = 0; (j56 < 4); j56 = (j56 + 1))
+            {
+                fRec33_tmp[j56] = fRec33_perm[j56];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec33[i] = (fSlow5 + (fConst2 * fRec33[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j57 = 0; (j57 < 4); j57 = (j57 + 1))
+            {
+                fRec33_perm[j57] = fRec33_tmp[(vsize + j57)];
+            }
+/* Recursive loop 28 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j60 = 0; (j60 < 4); j60 = (j60 + 1))
+            {
+                fRec34_tmp[j60] = fRec34_perm[j60];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec34[i] = (fSlow6 + (fConst2 * fRec34[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j61 = 0; (j61 < 4); j61 = (j61 + 1))
+            {
+                fRec34_perm[j61] = fRec34_tmp[(vsize + j61)];
+            }
+/* Recursive loop 29 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j68 = 0; (j68 < 4); j68 = (j68 + 1))
+            {
+                fRec36_tmp[j68] = fRec36_perm[j68];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen11 = (fConst44 + fRec36[(i - 1)]);
+                fZec40[i]     = (iZec0[i] ? 0.0f : fThen11);
+                fRec36[i]     = (fZec40[i] - std::floor(fZec40[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j69 = 0; (j69 < 4); j69 = (j69 + 1))
+            {
+                fRec36_perm[j69] = fRec36_tmp[(vsize + j69)];
+            }
+/* Recursive loop 30 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j72 = 0; (j72 < 4); j72 = (j72 + 1))
+            {
+                fRec37_tmp[j72] = fRec37_perm[j72];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen12 = (fConst50 + fRec37[(i - 1)]);
+                fZec45[i]     = (iZec0[i] ? 0.0f : fThen12);
+                fRec37[i]     = (fZec45[i] - std::floor(fZec45[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j73 = 0; (j73 < 4); j73 = (j73 + 1))
+            {
+                fRec37_perm[j73] = fRec37_tmp[(vsize + j73)];
+            }
+/* Vectorizable loop 31 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec50[i] = (4.98999977f * fRec42[i]);
+            }
+/* Recursive loop 32 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j102 = 0; (j102 < 4); j102 = (j102 + 1))
+            {
+                fRec58_tmp[j102] = fRec58_perm[j102];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec58[i] =
+                  ((9.99999975e-05f *
+                    (fZec3[i] +
+                     (1.0f - std::fabs(((2.0f * fRec59[i]) + -1.0f))))) +
+                   (0.999899983f * fRec58[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j103 = 0; (j103 < 4); j103 = (j103 + 1))
+            {
+                fRec58_perm[j103] = fRec58_tmp[(vsize + j103)];
+            }
+/* Recursive loop 33 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j106 = 0; (j106 < 4); j106 = (j106 + 1))
+            {
+                fRec61_tmp[j106] = fRec61_perm[j106];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec61[i] =
+                  ((9.99999975e-05f *
+                    (fZec7[i] *
+                     (fZec3[i] +
+                      (1.0f - std::fabs(((2.0f * fRec62[i]) + -1.0f)))))) +
+                   (0.999899983f * fRec61[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j107 = 0; (j107 < 4); j107 = (j107 + 1))
+            {
+                fRec61_perm[j107] = fRec61_tmp[(vsize + j107)];
+            }
+/* Recursive loop 34 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j124 = 0; (j124 < 4); j124 = (j124 + 1))
+            {
+                fRec67_tmp[j124] = fRec67_perm[j124];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen35 =
+                  (fRec67[(i - 1)] +
+                   (fConst3 * ((0.0199999996f * fRec60[i]) + 0.150000006f)));
+                fZec99[i] = (iZec0[i] ? 0.0f : fThen35);
+                fRec67[i] = (fZec99[i] - std::floor(fZec99[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j125 = 0; (j125 < 4); j125 = (j125 + 1))
+            {
+                fRec67_perm[j125] = fRec67_tmp[(vsize + j125)];
+            }
+/* Recursive loop 35 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j128 = 0; (j128 < 4); j128 = (j128 + 1))
+            {
+                fRec68_tmp[j128] = fRec68_perm[j128];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen36 =
+                  (fRec68[(i - 1)] +
+                   (fConst3 * ((0.0299999993f * fRec60[i]) + 0.230000004f)));
+                fZec104[i] = (iZec0[i] ? 0.0f : fThen36);
+                fRec68[i]  = (fZec104[i] - std::floor(fZec104[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j129 = 0; (j129 < 4); j129 = (j129 + 1))
+            {
+                fRec68_perm[j129] = fRec68_tmp[(vsize + j129)];
+            }
+/* Recursive loop 36 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j0 = 0; (j0 < 4); j0 = (j0 + 1))
+            {
+                fRec1_tmp[j0] = fRec1_perm[j0];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec1[i] = (fSlow0 + (fConst2 * fRec1[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j1 = 0; (j1 < 4); j1 = (j1 + 1))
+            {
+                fRec1_perm[j1] = fRec1_tmp[(vsize + j1)];
+            }
+/* Vectorizable loop 37 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec8[i] =
+                  (fRec12[i] * ((600.0f * fRec13[i]) + (100.0f * fRec16[i])));
+            }
+/* Recursive loop 38 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j36 = 0; (j36 < 4); j36 = (j36 + 1))
+            {
+                fRec26_tmp[j36] = fRec26_perm[j36];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec26[i] = (((0.522189379f * fRec26[(i - 3)]) +
+                              ((4.65661287e-10f * fYec0[i]) +
+                               (2.49495602f * fRec26[(i - 1)]))) -
+                             (2.0172658f * fRec26[(i - 2)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j37 = 0; (j37 < 4); j37 = (j37 + 1))
+            {
+                fRec26_perm[j37] = fRec26_tmp[(vsize + j37)];
+            }
+/* Recursive loop 39 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j48 = 0; (j48 < 4); j48 = (j48 + 1))
+            {
+                fRec29_tmp[j48] = fRec29_perm[j48];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec29[i] =
+                  ((0.999000013f * fRec29[(i - 1)]) +
+                   (fConst20 *
+                    ((fYec3[((i + fYec3_idx) & 2047)] -
+                      (fConst23 *
+                       fYec3[(((i + fYec3_idx) - iConst24) & 2047)])) -
+                     (fConst25 *
+                      fYec3[(((i + fYec3_idx) - iConst26) & 2047)]))));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j49 = 0; (j49 < 4); j49 = (j49 + 1))
+            {
+                fRec29_perm[j49] = fRec29_tmp[(vsize + j49)];
+            }
+/* Recursive loop 40 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j50 = 0; (j50 < 4); j50 = (j50 + 1))
+            {
+                fRec31_tmp[j50] = fRec31_perm[j50];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen9 = (fConst27 + fRec31[(i - 1)]);
+                fZec23[i]    = (iZec0[i] ? 0.0f : fThen9);
+                fRec31[i]    = (fZec23[i] - std::floor(fZec23[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j51 = 0; (j51 < 4); j51 = (j51 + 1))
+            {
+                fRec31_perm[j51] = fRec31_tmp[(vsize + j51)];
+            }
+/* Recursive loop 41 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j52 = 0; (j52 < 4); j52 = (j52 + 1))
+            {
+                fRec32_tmp[j52] = fRec32_perm[j52];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen10 = (fConst28 + fRec32[(i - 1)]);
+                fZec24[i]     = (iZec0[i] ? 0.0f : fThen10);
+                fRec32[i]     = (fZec24[i] - std::floor(fZec24[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j53 = 0; (j53 < 4); j53 = (j53 + 1))
+            {
+                fRec32_perm[j53] = fRec32_tmp[(vsize + j53)];
+            }
+/* Vectorizable loop 42 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec25[i] = (0.5f * (fRec28[i] + 1.0f));
+            }
+/* Vectorizable loop 43 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec28[i] = std::tan((fConst42 * fRec33[i]));
+            }
+/* Vectorizable loop 44 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec35[i] = std::tan((fConst42 * fRec34[i]));
+            }
+/* Vectorizable loop 45 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec41[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     ((1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec36[i]) +
+                                                          -1.0f)))) +
+                               -1.0f)) +
+                      7.0f))));
+            }
+/* Vectorizable loop 46 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec46[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     ((1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec37[i]) +
+                                                          -1.0f)))) +
+                               -1.0f)) +
+                      11.3000002f))));
+            }
+/* Recursive loop 47 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j78 = 0; (j78 < 4); j78 = (j78 + 1))
+            {
+                fRec43_tmp[j78] = fRec43_perm[j78];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen13 =
+                  (fRec43[(i - 1)] + (fConst3 * (fZec50[i] + 0.00999999978f)));
+                fZec51[i] = (iZec0[i] ? 0.0f : fThen13);
+                fRec43[i] = (fZec51[i] - std::floor(fZec51[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j79 = 0; (j79 < 4); j79 = (j79 + 1))
+            {
+                fRec43_perm[j79] = fRec43_tmp[(vsize + j79)];
+            }
+/* Vectorizable loop 48 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec55[i] = (fRec2[i] + 4096.0f);
+            }
+/* Vectorizable loop 49 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec88[i] =
+                  (fRec12[i] * ((600.0f * fRec58[i]) + (100.0f * fRec61[i])));
+            }
+/* Vectorizable loop 50 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec100[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     (((0.5f * fRec60[i]) +
+                       (1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec67[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))) +
+                      7.0f))));
+            }
+/* Vectorizable loop 51 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec105[i] = std::max<float>(
+                  0.0f,
+                  std::min<float>(
+                    fConst48,
+                    (fConst49 *
+                     (((0.699999988f * fRec60[i]) +
+                       (1.5f * ((2.0f * (1.0f - std::fabs(((2.0f * fRec68[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))) +
+                      11.3000002f))));
+            }
+/* Recursive loop 52 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j132 = 0; (j132 < 4); j132 = (j132 + 1))
+            {
+                fRec73_tmp[j132] = fRec73_perm[j132];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen37 = (fRec73[(i - 1)] +
+                                 (fConst3 * ((fZec50[i] + (2.0f * fRec60[i])) +
+                                             0.00999999978f)));
+                fZec109[i]    = (iZec0[i] ? 0.0f : fThen37);
+                fRec73[i]     = (fZec109[i] - std::floor(fZec109[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j133 = 0; (j133 < 4); j133 = (j133 + 1))
+            {
+                fRec73_perm[j133] = fRec73_tmp[(vsize + j133)];
+            }
+/* Vectorizable loop 53 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec9[i] = (fZec8[i] + 100.000008f);
+            }
+/* Recursive loop 54 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j26 = 0; (j26 < 4); j26 = (j26 + 1))
+            {
+                iRec21_tmp[j26] = iRec21_perm[j26];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iRec21[i] = (iRec21[(i - 1)] + 1);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j27 = 0; (j27 < 4); j27 = (j27 + 1))
+            {
+                iRec21_perm[j27] = iRec21_tmp[(vsize + j27)];
+            }
+/* Recursive loop 55 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j54 = 0; (j54 < 4); j54 = (j54 + 1))
+            {
+                fRec25_tmp[j54] = fRec25_perm[j54];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec25[i] =
+                  (((((1.20000005f * (((0.0499220341f * fRec26[i]) +
+                                       (0.0506126992f * fRec26[(i - 2)])) -
+                                      ((0.0959935337f * fRec26[(i - 1)]) +
+                                       (0.00440878607f * fRec26[(i - 3)])))) +
+                      (2.32830644e-10f *
+                       (fYec0[(i - 1)] *
+                        float(((fRec27[i] >= fZec25[i]) *
+                               (fRec27[(i - 1)] < fZec25[i])))))) +
+                     (fConst29 * fRec29[i])) +
+                    (0.00999999978f *
+                     (ftbl0MacallaSIG0[int((65536.0f * fRec31[i]))] +
+                      ftbl0MacallaSIG0[int((65536.0f * fRec32[i]))]))) -
+                   (fConst37 * ((fConst38 * fRec25[(i - 1)]) +
+                                (fConst39 * fRec25[(i - 2)]))));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j55 = 0; (j55 < 4); j55 = (j55 + 1))
+            {
+                fRec25_perm[j55] = fRec25_tmp[(vsize + j55)];
+            }
+/* Vectorizable loop 56 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec29[i] = (1.0f / fZec28[i]);
+            }
+/* Vectorizable loop 57 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec31[i] = Macalla_faustpower2_f(fZec28[i]);
+            }
+/* Vectorizable loop 58 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec36[i] = (1.0f / fZec35[i]);
+            }
+/* Vectorizable loop 59 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec42[i] = (fZec41[i] + -1.0f);
+            }
+/* Vectorizable loop 60 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec47[i] = (fZec46[i] + -1.0f);
+            }
+/* Vectorizable loop 61 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec52[i] = std::min<float>(
+                  524288.0f,
+                  (fConst0 *
+                   (fSlow10 +
+                    (fRec42[i] *
+                     std::fabs(((2.0f * (1.0f - std::fabs(((2.0f * fRec43[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))))));
+            }
+/* Vectorizable loop 62 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec54[i] = std::pow(10.0f, (0.0500000007f * fRec1[i]));
+            }
+/* Vectorizable loop 63 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec56[i] = int(fZec55[i]);
+            }
+/* Vectorizable loop 64 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec58[i] = std::floor(fZec55[i]);
+            }
+/* Vectorizable loop 65 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec62[i] = std::min<float>((0.001953125f * fRec2[i]), 1.0f);
+            }
+/* Vectorizable loop 66 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec64[i] = int(fRec2[i]);
+            }
+/* Vectorizable loop 67 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec66[i] = std::floor(fRec2[i]);
+            }
+/* Vectorizable loop 68 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec89[i] = (fZec88[i] + 100.000008f);
+            }
+/* Vectorizable loop 69 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec101[i] = (fZec100[i] + -1.0f);
+            }
+/* Vectorizable loop 70 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec106[i] = (fZec105[i] + -1.0f);
+            }
+/* Vectorizable loop 71 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec110[i] = std::min<float>(
+                  524288.0f,
+                  (fSlow21 +
+                   ((40.0f * fRec60[i]) +
+                    ((fRec42[i] * (fConst0 + (1000.0f * fRec60[i]))) *
+                     std::fabs(((2.0f * (1.0f - std::fabs(((2.0f * fRec73[i]) +
+                                                           -1.0f)))) +
+                                -1.0f))))));
+            }
+/* Recursive loop 72 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j4 = 0; (j4 < 4); j4 = (j4 + 1))
+            {
+                fRec3_tmp[j4] = fRec3_perm[j4];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec3[i] = (fSlow2 + (fConst2 * fRec3[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j5 = 0; (j5 < 4); j5 = (j5 + 1))
+            {
+                fRec3_perm[j5] = fRec3_tmp[(vsize + j5)];
+            }
+/* Vectorizable loop 73 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec10[i] = int(fZec9[i]);
+            }
+/* Vectorizable loop 74 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec11[i] = std::floor(fZec9[i]);
+            }
+/* Vectorizable loop 75 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec12[i] = (((iRec21[i] + -1) % iConst11) == 0);
+            }
+/* Vectorizable loop 76 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec26[i] = Macalla_faustpower2_f(fRec12[i]);
+            }
+/* Vectorizable loop 77 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec27[i] =
+                  ((fConst40 * fRec25[i]) + (fConst41 * fRec25[(i - 2)]));
+            }
+/* Vectorizable loop 78 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec30[i] = (((fZec29[i] + -1.41421354f) / fZec28[i]) + 1.0f);
+            }
+/* Vectorizable loop 79 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec32[i] = (1.0f - (1.0f / fZec31[i]));
+            }
+/* Vectorizable loop 80 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec33[i] = (((fZec29[i] + 1.41421354f) / fZec28[i]) + 1.0f);
+            }
+/* Vectorizable loop 81 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec37[i] = (((fZec36[i] + -1.41421354f) / fZec35[i]) + 1.0f);
+            }
+/* Vectorizable loop 82 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec34[i] = (0.0f - (2.0f / fZec31[i]));
+            }
+/* Vectorizable loop 83 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec38[i] = (1.0f - (1.0f / Macalla_faustpower2_f(fZec35[i])));
+            }
+/* Vectorizable loop 84 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec39[i] = (((fZec36[i] + 1.41421354f) / fZec35[i]) + 1.0f);
+            }
+/* Recursive loop 85 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j66 = 0; (j66 < 4); j66 = (j66 + 1))
+            {
+                fRec35_tmp[j66] = fRec35_perm[j66];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec35[i] = (fSlow7 + (fConst2 * fRec35[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j67 = 0; (j67 < 4); j67 = (j67 + 1))
+            {
+                fRec35_perm[j67] = fRec35_tmp[(vsize + j67)];
+            }
+/* Vectorizable loop 86 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec44[i] = std::floor(fZec42[i]);
+            }
+/* Vectorizable loop 87 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec43[i] = int(fZec42[i]);
+            }
+/* Vectorizable loop 88 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec48[i] = int(fZec47[i]);
+            }
+/* Vectorizable loop 89 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec49[i] = std::floor(fZec47[i]);
+            }
+/* Recursive loop 90 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j80 = 0; (j80 < 4); j80 = (j80 + 1))
+            {
+                fRec38_tmp[j80] = fRec38_perm[j80];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j82 = 0; (j82 < 4); j82 = (j82 + 1))
+            {
+                fRec39_tmp[j82] = fRec39_perm[j82];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j84 = 0; (j84 < 4); j84 = (j84 + 1))
+            {
+                fRec40_tmp[j84] = fRec40_perm[j84];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j86 = 0; (j86 < 4); j86 = (j86 + 1))
+            {
+                fRec41_tmp[j86] = fRec41_perm[j86];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen15 =
+                  (((fRec39[(i - 1)] == 1.0f) & (fZec52[i] != fRec41[(i - 1)]))
+                     ? fConst17
+                     : 0.0f);
+                float fElse16 = fRec38[(i - 1)];
+                float fThen17 =
+                  (((fRec39[(i - 1)] == 0.0f) & (fZec52[i] != fRec40[(i - 1)]))
+                     ? fConst16
+                     : fThen15);
+                float fElse17 =
+                  (((fRec39[(i - 1)] > 0.0f) & (fRec39[(i - 1)] < 1.0f))
+                     ? fElse16
+                     : 0.0f);
+                fZec53[i] = ((fRec38[(i - 1)] != 0.0f) ? fElse17 : fThen17);
+                fRec38[i] = fZec53[i];
+                fRec39[i] = std::max<float>(
+                  0.0f, std::min<float>(1.0f, (fRec39[(i - 1)] + fZec53[i])));
+                float fThen18 = fRec40[(i - 1)];
+                float fElse18 = fZec52[i];
+                fRec40[i] =
+                  (((fRec39[(i - 1)] >= 1.0f) & (fRec41[(i - 1)] != fZec52[i]))
+                     ? fElse18
+                     : fThen18);
+                float fThen19 = fRec41[(i - 1)];
+                float fElse19 = fZec52[i];
+                fRec41[i] =
+                  (((fRec39[(i - 1)] <= 0.0f) & (fRec40[(i - 1)] != fZec52[i]))
+                     ? fElse19
+                     : fThen19);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j81 = 0; (j81 < 4); j81 = (j81 + 1))
+            {
+                fRec38_perm[j81] = fRec38_tmp[(vsize + j81)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j83 = 0; (j83 < 4); j83 = (j83 + 1))
+            {
+                fRec39_perm[j83] = fRec39_tmp[(vsize + j83)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j85 = 0; (j85 < 4); j85 = (j85 + 1))
+            {
+                fRec40_perm[j85] = fRec40_tmp[(vsize + j85)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j87 = 0; (j87 < 4); j87 = (j87 + 1))
+            {
+                fRec41_perm[j87] = fRec41_tmp[(vsize + j87)];
+            }
+            /* Vectorizable loop 91 */
+            /* Pre code */
+            fYec6_idx = ((fYec6_idx + fYec6_idx_save) & 131071);
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec6[((i + fYec6_idx) & 131071)] =
+                  (float(input0[i]) * fZec54[i]);
+            }
+            /* Post code */
+            fYec6_idx_save = vsize;
+/* Vectorizable loop 92 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec57[i] = std::min<int>(65537, std::max<int>(0, iZec56[i]));
+            }
+/* Vectorizable loop 93 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec59[i] = (fZec58[i] + (-4095.0f - fRec2[i]));
+            }
+/* Vectorizable loop 94 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec60[i] = (fRec2[i] + (4096.0f - fZec58[i]));
+            }
+/* Vectorizable loop 95 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec61[i] =
+                  std::min<int>(65537, std::max<int>(0, (iZec56[i] + 1)));
+            }
+/* Vectorizable loop 96 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec63[i] = (1.0f - fZec62[i]);
+            }
+/* Vectorizable loop 97 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec65[i] = std::min<int>(65537, std::max<int>(0, iZec64[i]));
+            }
+/* Vectorizable loop 98 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec67[i] = (fZec66[i] + (1.0f - fRec2[i]));
+            }
+/* Vectorizable loop 99 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec68[i] = (fRec2[i] - fZec66[i]);
+            }
+/* Vectorizable loop 100 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec69[i] =
+                  std::min<int>(65537, std::max<int>(0, (iZec64[i] + 1)));
+            }
+/* Vectorizable loop 101 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec90[i] = int(fZec89[i]);
+            }
+/* Vectorizable loop 102 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec91[i] = std::floor(fZec89[i]);
+            }
+/* Vectorizable loop 103 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec102[i] = int(fZec101[i]);
+            }
+/* Vectorizable loop 104 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec103[i] = std::floor(fZec101[i]);
+            }
+/* Vectorizable loop 105 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec107[i] = int(fZec106[i]);
+            }
+/* Vectorizable loop 106 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec108[i] = std::floor(fZec106[i]);
+            }
+/* Recursive loop 107 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j134 = 0; (j134 < 4); j134 = (j134 + 1))
+            {
+                fRec69_tmp[j134] = fRec69_perm[j134];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j136 = 0; (j136 < 4); j136 = (j136 + 1))
+            {
+                fRec70_tmp[j136] = fRec70_perm[j136];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j138 = 0; (j138 < 4); j138 = (j138 + 1))
+            {
+                fRec71_tmp[j138] = fRec71_perm[j138];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j140 = 0; (j140 < 4); j140 = (j140 + 1))
+            {
+                fRec72_tmp[j140] = fRec72_perm[j140];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen39 =
+                  (((fRec70[(i - 1)] == 1.0f) & (fZec110[i] != fRec72[(i - 1)]))
+                     ? fConst17
+                     : 0.0f);
+                float fElse40 = fRec69[(i - 1)];
+                float fThen41 =
+                  (((fRec70[(i - 1)] == 0.0f) & (fZec110[i] != fRec71[(i - 1)]))
+                     ? fConst16
+                     : fThen39);
+                float fElse41 =
+                  (((fRec70[(i - 1)] > 0.0f) & (fRec70[(i - 1)] < 1.0f))
+                     ? fElse40
+                     : 0.0f);
+                fZec111[i] = ((fRec69[(i - 1)] != 0.0f) ? fElse41 : fThen41);
+                fRec69[i]  = fZec111[i];
+                fRec70[i]  = std::max<float>(
+                  0.0f, std::min<float>(1.0f, (fRec70[(i - 1)] + fZec111[i])));
+                float fThen42 = fRec71[(i - 1)];
+                float fElse42 = fZec110[i];
+                fRec71[i] =
+                  (((fRec70[(i - 1)] >= 1.0f) & (fRec72[(i - 1)] != fZec110[i]))
+                     ? fElse42
+                     : fThen42);
+                float fThen43 = fRec72[(i - 1)];
+                float fElse43 = fZec110[i];
+                fRec72[i] =
+                  (((fRec70[(i - 1)] <= 0.0f) & (fRec71[(i - 1)] != fZec110[i]))
+                     ? fElse43
+                     : fThen43);
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j135 = 0; (j135 < 4); j135 = (j135 + 1))
+            {
+                fRec69_perm[j135] = fRec69_tmp[(vsize + j135)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j137 = 0; (j137 < 4); j137 = (j137 + 1))
+            {
+                fRec70_perm[j137] = fRec70_tmp[(vsize + j137)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j139 = 0; (j139 < 4); j139 = (j139 + 1))
+            {
+                fRec71_perm[j139] = fRec71_tmp[(vsize + j139)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j141 = 0; (j141 < 4); j141 = (j141 + 1))
+            {
+                fRec72_perm[j141] = fRec72_tmp[(vsize + j141)];
+            }
+            /* Vectorizable loop 108 */
+            /* Pre code */
+            fYec10_idx = ((fYec10_idx + fYec10_idx_save) & 131071);
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fYec10[((i + fYec10_idx) & 131071)] =
+                  (float(input1[i]) * fZec54[i]);
+            }
+            /* Post code */
+            fYec10_idx_save = vsize;
+/* Recursive loop 109 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j24 = 0; (j24 < 4); j24 = (j24 + 1))
+            {
+                fRec11_tmp[j24] = fRec11_perm[j24];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j28 = 0; (j28 < 4); j28 = (j28 + 1))
+            {
+                fRec20_tmp[j28] = fRec20_perm[j28];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j30 = 0; (j30 < 4); j30 = (j30 + 1))
+            {
+                fRec23_tmp[j30] = fRec23_perm[j30];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j32 = 0; (j32 < 4); j32 = (j32 + 1))
+            {
+                fRec22_tmp[j32] = fRec22_perm[j32];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j34 = 0; (j34 < 4); j34 = (j34 + 1))
+            {
+                fRec24_tmp[j34] = fRec24_perm[j34];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j58 = 0; (j58 < 4); j58 = (j58 + 1))
+            {
+                fRec10_tmp[j58] = fRec10_perm[j58];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j62 = 0; (j62 < 4); j62 = (j62 + 1))
+            {
+                fRec9_tmp[j62] = fRec9_perm[j62];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j64 = 0; (j64 < 4); j64 = (j64 + 1))
+            {
+                fRec8_tmp[j64] = fRec8_perm[j64];
+            }
+            fYec4_idx = ((fYec4_idx + fYec4_idx_save) & 2047);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j70 = 0; (j70 < 4); j70 = (j70 + 1))
+            {
+                fRec6_tmp[j70] = fRec6_perm[j70];
+            }
+            fYec5_idx = ((fYec5_idx + fYec5_idx_save) & 4095);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j74 = 0; (j74 < 4); j74 = (j74 + 1))
+            {
+                fRec4_tmp[j74] = fRec4_perm[j74];
+            }
+            fYec7_idx = ((fYec7_idx + fYec7_idx_save) & 1048575);
+            fRec0_idx = ((fRec0_idx + fRec0_idx_save) & 262143);
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec11[i] =
+                  (((fRec0[(((i + fRec0_idx) -
+                             (int(std::min<float>(
+                                fConst0, float(std::max<int>(0, iZec10[i])))) +
+                              1)) &
+                            262143)] *
+                     (0.0f - (fZec8[i] + (99.0f - fZec11[i])))) +
+                    ((fZec8[i] + (100.0f - fZec11[i])) *
+                     fRec0[(
+                       ((i + fRec0_idx) -
+                        (int(std::min<float>(
+                           fConst0, float(std::max<int>(0, (iZec10[i] + 1))))) +
+                         1)) &
+                       262143)])) -
+                   (fConst8 * ((fConst9 * fRec11[(i - 2)]) +
+                               (fConst10 * fRec11[(i - 1)]))));
+                fZec13[i] =
+                  (fConst8 *
+                   (fRec11[(i - 2)] + (fRec11[i] + (2.0f * fRec11[(i - 1)]))));
+                float fThen3 = fRec20[(i - 1)];
+                float fElse3 =
+                  (0.00787401572f *
+                   (std::floor(((127.0f * std::fabs(fZec13[i])) + 0.5f)) *
+                    (float((2 * (fZec13[i] > 0.0f))) + -1.0f)));
+                fRec20[i]    = (iZec12[i] ? fElse3 : fThen3);
+                float fThen4 = fZec13[i];
+                float fElse4 = fRec20[i];
+                fZec14[i]    = (iSlow4 ? fElse4 : fThen4);
+                fZec15[i]    = std::fabs(fZec14[i]);
+                fZec16[i] =
+                  ((fZec15[i] > fRec23[(i - 1)]) ? fConst13 : fConst12);
+                fRec23[i] = ((fZec15[i] * (1.0f - fZec16[i])) +
+                             (fRec23[(i - 1)] * fZec16[i]));
+                fRec22[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec23[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec22[(i - 1)]));
+                fZec17[i] =
+                  (fZec14[i] * std::pow(10.0f, (0.0500000007f * fRec22[i])));
+                fZec18[i] = std::fabs((fZec17[i] + 9.99999975e-05f));
+                fZec19[i] =
+                  ((fZec18[i] > fRec24[(i - 1)]) ? fConst18 : fConst12);
+                fRec24[i] = ((fZec18[i] * (1.0f - fZec19[i])) +
+                             (fRec24[(i - 1)] * fZec19[i]));
+                fRec10[i] =
+                  ((fZec17[i] + ((fZec26[i] * fRec24[i]) * fZec27[i])) -
+                   (((fRec10[(i - 2)] * fZec30[i]) +
+                     (2.0f * (fRec10[(i - 1)] * fZec32[i]))) /
+                    fZec33[i]));
+                fRec9[i] =
+                  (((((fRec10[(i - 1)] * fZec34[i]) + (fRec10[i] / fZec31[i])) +
+                     (fRec10[(i - 2)] / fZec31[i])) /
+                    fZec33[i]) -
+                   (((fRec9[(i - 2)] * fZec37[i]) +
+                     (2.0f * (fRec9[(i - 1)] * fZec38[i]))) /
+                    fZec39[i]));
+                fRec8[i] =
+                  (((fRec9[(i - 2)] + (fRec9[i] + (2.0f * fRec9[(i - 1)]))) /
+                    fZec39[i]) -
+                   (fConst8 * ((fConst9 * fRec8[(i - 2)]) +
+                               (fConst10 * fRec8[(i - 1)]))));
+                fYec4[((i + fYec4_idx) & 2047)] =
+                  ((fConst45 *
+                    (fRec8[(i - 2)] + (fRec8[i] + (2.0f * fRec8[(i - 1)])))) -
+                   (fRec35[i] * fRec6[(i - 1)]));
+                fRec6[i] =
+                  ((fYec4[(
+                      ((i + fYec4_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec43[i]))) &
+                      2047)] *
+                    (fZec44[i] + (2.0f - fZec41[i]))) +
+                   ((fZec41[i] + (-1.0f - fZec44[i])) *
+                    fYec4[(((i + fYec4_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec43[i] + 1)))) &
+                           2047)]));
+                fRec7[i] = (fRec35[i] * fYec4[((i + fYec4_idx) & 2047)]);
+                fYec5[((i + fYec5_idx) & 4095)] =
+                  ((fRec7[i] + fRec6[(i - 1)]) -
+                   (0.899999976f * (fRec35[i] * fRec4[(i - 1)])));
+                fRec4[i] =
+                  ((fYec5[(
+                      ((i + fYec5_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec48[i]))) &
+                      4095)] *
+                    (fZec49[i] + (2.0f - fZec46[i]))) +
+                   ((fZec46[i] + (-1.0f - fZec49[i])) *
+                    fYec5[(((i + fYec5_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec48[i] + 1)))) &
+                           4095)]));
+                fRec5[i] = (0.899999976f *
+                            (fRec35[i] * fYec5[((i + fYec5_idx) & 4095)]));
+                fYec7[((i + fYec7_idx) & 1048575)] =
+                  ((((fYec6[(((i + fYec6_idx) - iZec57[i]) & 131071)] *
+                      fZec59[i]) +
+                     (fZec60[i] *
+                      fYec6[(((i + fYec6_idx) - iZec61[i]) & 131071)])) *
+                    fZec63[i]) +
+                   ((fRec3[i] * (fRec5[i] + fRec4[(i - 1)])) +
+                    (((fYec6[(((i + fYec6_idx) - iZec65[i]) & 131071)] *
+                       fZec67[i]) +
+                      (fZec68[i] *
+                       fYec6[(((i + fYec6_idx) - iZec69[i]) & 131071)])) *
+                     fZec62[i])));
+                fZec70[i] =
+                  fYec7[(((i + fYec7_idx) -
+                          int(std::min<float>(
+                            524288.0f, std::max<float>(0.0f, fRec40[i])))) &
+                         1048575)];
+                fRec0[((i + fRec0_idx) & 262143)] =
+                  (fZec70[i] +
+                   (fRec39[i] *
+                    (fYec7[(((i + fYec7_idx) -
+                             int(std::min<float>(
+                               524288.0f, std::max<float>(0.0f, fRec41[i])))) &
+                            1048575)] -
+                     fZec70[i])));
+            }
+            /* Post code */
+            fYec7_idx_save = vsize;
+            fYec5_idx_save = vsize;
+            fYec4_idx_save = vsize;
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j35 = 0; (j35 < 4); j35 = (j35 + 1))
+            {
+                fRec24_perm[j35] = fRec24_tmp[(vsize + j35)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j31 = 0; (j31 < 4); j31 = (j31 + 1))
+            {
+                fRec23_perm[j31] = fRec23_tmp[(vsize + j31)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j33 = 0; (j33 < 4); j33 = (j33 + 1))
+            {
+                fRec22_perm[j33] = fRec22_tmp[(vsize + j33)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j29 = 0; (j29 < 4); j29 = (j29 + 1))
+            {
+                fRec20_perm[j29] = fRec20_tmp[(vsize + j29)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j25 = 0; (j25 < 4); j25 = (j25 + 1))
+            {
+                fRec11_perm[j25] = fRec11_tmp[(vsize + j25)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j59 = 0; (j59 < 4); j59 = (j59 + 1))
+            {
+                fRec10_perm[j59] = fRec10_tmp[(vsize + j59)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j63 = 0; (j63 < 4); j63 = (j63 + 1))
+            {
+                fRec9_perm[j63] = fRec9_tmp[(vsize + j63)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j65 = 0; (j65 < 4); j65 = (j65 + 1))
+            {
+                fRec8_perm[j65] = fRec8_tmp[(vsize + j65)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j71 = 0; (j71 < 4); j71 = (j71 + 1))
+            {
+                fRec6_perm[j71] = fRec6_tmp[(vsize + j71)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j75 = 0; (j75 < 4); j75 = (j75 + 1))
+            {
+                fRec4_perm[j75] = fRec4_tmp[(vsize + j75)];
+            }
+            fRec0_idx_save = vsize;
+/* Recursive loop 110 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j108 = 0; (j108 < 4); j108 = (j108 + 1))
+            {
+                fRec57_tmp[j108] = fRec57_perm[j108];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j110 = 0; (j110 < 4); j110 = (j110 + 1))
+            {
+                fRec63_tmp[j110] = fRec63_perm[j110];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j112 = 0; (j112 < 4); j112 = (j112 + 1))
+            {
+                fRec65_tmp[j112] = fRec65_perm[j112];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j114 = 0; (j114 < 4); j114 = (j114 + 1))
+            {
+                fRec64_tmp[j114] = fRec64_perm[j114];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j116 = 0; (j116 < 4); j116 = (j116 + 1))
+            {
+                fRec66_tmp[j116] = fRec66_perm[j116];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j118 = 0; (j118 < 4); j118 = (j118 + 1))
+            {
+                fRec56_tmp[j118] = fRec56_perm[j118];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j120 = 0; (j120 < 4); j120 = (j120 + 1))
+            {
+                fRec55_tmp[j120] = fRec55_perm[j120];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j122 = 0; (j122 < 4); j122 = (j122 + 1))
+            {
+                fRec54_tmp[j122] = fRec54_perm[j122];
+            }
+            fYec8_idx = ((fYec8_idx + fYec8_idx_save) & 16383);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j126 = 0; (j126 < 4); j126 = (j126 + 1))
+            {
+                fRec52_tmp[j126] = fRec52_perm[j126];
+            }
+            fYec9_idx = ((fYec9_idx + fYec9_idx_save) & 16383);
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j130 = 0; (j130 < 4); j130 = (j130 + 1))
+            {
+                fRec50_tmp[j130] = fRec50_perm[j130];
+            }
+            fYec11_idx = ((fYec11_idx + fYec11_idx_save) & 1048575);
+            fRec49_idx = ((fRec49_idx + fRec49_idx_save) & 262143);
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec57[i] =
+                  (((fRec49[(((i + fRec49_idx) -
+                              (int(std::min<float>(
+                                 fConst0, float(std::max<int>(0, iZec90[i])))) +
+                               1)) &
+                             262143)] *
+                     (0.0f - (fZec88[i] + (99.0f - fZec91[i])))) +
+                    ((fZec88[i] + (100.0f - fZec91[i])) *
+                     fRec49[(
+                       ((i + fRec49_idx) -
+                        (int(std::min<float>(
+                           fConst0, float(std::max<int>(0, (iZec90[i] + 1))))) +
+                         1)) &
+                       262143)])) -
+                   (fConst8 * ((fConst9 * fRec57[(i - 2)]) +
+                               (fConst10 * fRec57[(i - 1)]))));
+                fZec92[i] =
+                  (fConst8 *
+                   (fRec57[(i - 2)] + (fRec57[i] + (2.0f * fRec57[(i - 1)]))));
+                float fThen31 = fRec63[(i - 1)];
+                float fElse31 =
+                  (0.00787401572f *
+                   (std::floor(((127.0f * std::fabs(fZec92[i])) + 0.5f)) *
+                    (float((2 * (fZec92[i] > 0.0f))) + -1.0f)));
+                fRec63[i]     = (iZec12[i] ? fElse31 : fThen31);
+                float fThen32 = fZec92[i];
+                float fElse32 = fRec63[i];
+                fZec93[i]     = (iSlow4 ? fElse32 : fThen32);
+                fZec94[i]     = std::fabs(fZec93[i]);
+                fZec95[i] =
+                  ((fZec94[i] > fRec65[(i - 1)]) ? fConst13 : fConst12);
+                fRec65[i] = ((fZec94[i] * (1.0f - fZec95[i])) +
+                             (fRec65[(i - 1)] * fZec95[i]));
+                fRec64[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec65[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec64[(i - 1)]));
+                fZec96[i] =
+                  (fZec93[i] * std::pow(10.0f, (0.0500000007f * fRec64[i])));
+                fZec97[i] = std::fabs((fZec96[i] + 9.99999975e-05f));
+                fZec98[i] =
+                  ((fZec97[i] > fRec66[(i - 1)]) ? fConst18 : fConst12);
+                fRec66[i] = ((fZec97[i] * (1.0f - fZec98[i])) +
+                             (fRec66[(i - 1)] * fZec98[i]));
+                fRec56[i] =
+                  ((fZec96[i] + ((fZec26[i] * fRec66[i]) * fZec27[i])) -
+                   (((fZec30[i] * fRec56[(i - 2)]) +
+                     (2.0f * (fZec32[i] * fRec56[(i - 1)]))) /
+                    fZec33[i]));
+                fRec55[i] =
+                  (((((fZec34[i] * fRec56[(i - 1)]) + (fRec56[i] / fZec31[i])) +
+                     (fRec56[(i - 2)] / fZec31[i])) /
+                    fZec33[i]) -
+                   (((fZec37[i] * fRec55[(i - 2)]) +
+                     (2.0f * (fZec38[i] * fRec55[(i - 1)]))) /
+                    fZec39[i]));
+                fRec54[i] =
+                  (((fRec55[(i - 2)] + (fRec55[i] + (2.0f * fRec55[(i - 1)]))) /
+                    fZec39[i]) -
+                   (fConst8 * ((fConst9 * fRec54[(i - 2)]) +
+                               (fConst10 * fRec54[(i - 1)]))));
+                fYec8[((i + fYec8_idx) & 16383)] =
+                  ((fConst45 * (fRec54[(i - 2)] +
+                                (fRec54[i] + (2.0f * fRec54[(i - 1)])))) -
+                   (fRec35[i] * fRec52[(i - 1)]));
+                fRec52[i] =
+                  ((fYec8[(
+                      ((i + fYec8_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec102[i]))) &
+                      16383)] *
+                    (fZec103[i] + (2.0f - fZec100[i]))) +
+                   ((fZec100[i] + (-1.0f - fZec103[i])) *
+                    fYec8[(((i + fYec8_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec102[i] + 1)))) &
+                           16383)]));
+                fRec53[i] = (fRec35[i] * fYec8[((i + fYec8_idx) & 16383)]);
+                fYec9[((i + fYec9_idx) & 16383)] =
+                  ((fRec53[i] + fRec52[(i - 1)]) -
+                   (0.899999976f * (fRec35[i] * fRec50[(i - 1)])));
+                fRec50[i] =
+                  ((fYec9[(
+                      ((i + fYec9_idx) -
+                       std::min<int>(iConst47, std::max<int>(0, iZec107[i]))) &
+                      16383)] *
+                    (fZec108[i] + (2.0f - fZec105[i]))) +
+                   ((fZec105[i] + (-1.0f - fZec108[i])) *
+                    fYec9[(((i + fYec9_idx) -
+                            std::min<int>(iConst47,
+                                          std::max<int>(0, (iZec107[i] + 1)))) &
+                           16383)]));
+                fRec51[i] = (0.899999976f *
+                             (fRec35[i] * fYec9[((i + fYec9_idx) & 16383)]));
+                fYec11[((i + fYec11_idx) & 1048575)] =
+                  ((fZec63[i] *
+                    ((fZec59[i] *
+                      fYec10[(((i + fYec10_idx) - iZec57[i]) & 131071)]) +
+                     (fZec60[i] *
+                      fYec10[(((i + fYec10_idx) - iZec61[i]) & 131071)]))) +
+                   ((fRec3[i] * (fRec51[i] + fRec50[(i - 1)])) +
+                    (fZec62[i] *
+                     ((fZec67[i] *
+                       fYec10[(((i + fYec10_idx) - iZec65[i]) & 131071)]) +
+                      (fZec68[i] *
+                       fYec10[(((i + fYec10_idx) - iZec69[i]) & 131071)])))));
+                fZec112[i] =
+                  fYec11[(((i + fYec11_idx) -
+                           int(std::min<float>(
+                             524288.0f, std::max<float>(0.0f, fRec71[i])))) &
+                          1048575)];
+                fRec49[((i + fRec49_idx) & 262143)] =
+                  (fZec112[i] +
+                   (fRec70[i] *
+                    (fYec11[(((i + fYec11_idx) -
+                              int(std::min<float>(
+                                524288.0f, std::max<float>(0.0f, fRec72[i])))) &
+                             1048575)] -
+                     fZec112[i])));
+            }
+            /* Post code */
+            fYec11_idx_save = vsize;
+            fYec9_idx_save  = vsize;
+            fYec8_idx_save  = vsize;
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j117 = 0; (j117 < 4); j117 = (j117 + 1))
+            {
+                fRec66_perm[j117] = fRec66_tmp[(vsize + j117)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j113 = 0; (j113 < 4); j113 = (j113 + 1))
+            {
+                fRec65_perm[j113] = fRec65_tmp[(vsize + j113)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j115 = 0; (j115 < 4); j115 = (j115 + 1))
+            {
+                fRec64_perm[j115] = fRec64_tmp[(vsize + j115)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j111 = 0; (j111 < 4); j111 = (j111 + 1))
+            {
+                fRec63_perm[j111] = fRec63_tmp[(vsize + j111)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j109 = 0; (j109 < 4); j109 = (j109 + 1))
+            {
+                fRec57_perm[j109] = fRec57_tmp[(vsize + j109)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j119 = 0; (j119 < 4); j119 = (j119 + 1))
+            {
+                fRec56_perm[j119] = fRec56_tmp[(vsize + j119)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j121 = 0; (j121 < 4); j121 = (j121 + 1))
+            {
+                fRec55_perm[j121] = fRec55_tmp[(vsize + j121)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j123 = 0; (j123 < 4); j123 = (j123 + 1))
+            {
+                fRec54_perm[j123] = fRec54_tmp[(vsize + j123)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j127 = 0; (j127 < 4); j127 = (j127 + 1))
+            {
+                fRec52_perm[j127] = fRec52_tmp[(vsize + j127)];
+            }
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j131 = 0; (j131 < 4); j131 = (j131 + 1))
+            {
+                fRec50_perm[j131] = fRec50_tmp[(vsize + j131)];
+            }
+            fRec49_idx_save = vsize;
+/* Vectorizable loop 111 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec71[i] = std::fabs(
+                  (fRec0[((i + fRec0_idx) & 262143)] + 9.99999975e-05f));
+            }
+/* Vectorizable loop 112 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec113[i] = std::fabs(
+                  (fRec49[((i + fRec49_idx) & 262143)] + 9.99999975e-05f));
+            }
+/* Recursive loop 113 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j88 = 0; (j88 < 4); j88 = (j88 + 1))
+            {
+                fRec44_tmp[j88] = fRec44_perm[j88];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec72[i] =
+                  ((fZec71[i] > fRec44[(i - 1)]) ? fConst18 : fConst12);
+                fRec44[i] = ((fZec71[i] * (1.0f - fZec72[i])) +
+                             (fRec44[(i - 1)] * fZec72[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j89 = 0; (j89 < 4); j89 = (j89 + 1))
+            {
+                fRec44_perm[j89] = fRec44_tmp[(vsize + j89)];
+            }
+/* Recursive loop 114 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j142 = 0; (j142 < 4); j142 = (j142 + 1))
+            {
+                fRec74_tmp[j142] = fRec74_perm[j142];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec114[i] =
+                  ((fZec113[i] > fRec74[(i - 1)]) ? fConst18 : fConst12);
+                fRec74[i] = ((fZec113[i] * (1.0f - fZec114[i])) +
+                             (fRec74[(i - 1)] * fZec114[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j143 = 0; (j143 < 4); j143 = (j143 + 1))
+            {
+                fRec74_perm[j143] = fRec74_tmp[(vsize + j143)];
+            }
+/* Vectorizable loop 115 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec73[i] = (fRec0[((i + fRec0_idx) & 262143)] +
+                             ((fZec26[i] * fRec44[i]) * fZec27[i]));
+            }
+/* Vectorizable loop 116 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec76[i] = std::fabs(float(input0[i]));
+            }
+/* Recursive loop 117 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j96 = 0; (j96 < 4); j96 = (j96 + 1))
+            {
+                fRec48_tmp[j96] = fRec48_perm[j96];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec48[i] = (fSlow17 + (fConst2 * fRec48[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j97 = 0; (j97 < 4); j97 = (j97 + 1))
+            {
+                fRec48_perm[j97] = fRec48_tmp[(vsize + j97)];
+            }
+/* Vectorizable loop 118 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec115[i] = (fRec49[((i + fRec49_idx) & 262143)] +
+                              ((fZec26[i] * fRec74[i]) * fZec27[i]));
+            }
+/* Vectorizable loop 119 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec118[i] = std::fabs(float(input1[i]));
+            }
+/* Vectorizable loop 120 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec74[i] = std::fabs(fZec73[i]);
+            }
+/* Recursive loop 121 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j94 = 0; (j94 < 4); j94 = (j94 + 1))
+            {
+                fRec47_tmp[j94] = fRec47_perm[j94];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec77[i] = ((fZec76[i] > fRec47[(i - 1)]) ? fSlow16 : fSlow13);
+                fRec47[i] = ((fZec76[i] * (1.0f - fZec77[i])) +
+                             (fRec47[(i - 1)] * fZec77[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j95 = 0; (j95 < 4); j95 = (j95 + 1))
+            {
+                fRec47_perm[j95] = fRec47_tmp[(vsize + j95)];
+            }
+/* Vectorizable loop 122 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec79[i] = (60.0f * fRec48[i]);
+            }
+/* Vectorizable loop 123 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec116[i] = std::fabs(fZec115[i]);
+            }
+/* Recursive loop 124 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j148 = 0; (j148 < 4); j148 = (j148 + 1))
+            {
+                fRec77_tmp[j148] = fRec77_perm[j148];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec119[i] =
+                  ((fZec118[i] > fRec77[(i - 1)]) ? fSlow16 : fSlow13);
+                fRec77[i] = ((fZec118[i] * (1.0f - fZec119[i])) +
+                             (fRec77[(i - 1)] * fZec119[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j149 = 0; (j149 < 4); j149 = (j149 + 1))
+            {
+                fRec77_perm[j149] = fRec77_tmp[(vsize + j149)];
+            }
+/* Recursive loop 125 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j90 = 0; (j90 < 4); j90 = (j90 + 1))
+            {
+                fRec46_tmp[j90] = fRec46_perm[j90];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec75[i] =
+                  ((fZec74[i] > fRec46[(i - 1)]) ? fConst13 : fConst12);
+                fRec46[i] = ((fZec74[i] * (1.0f - fZec75[i])) +
+                             (fRec46[(i - 1)] * fZec75[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j91 = 0; (j91 < 4); j91 = (j91 + 1))
+            {
+                fRec46_perm[j91] = fRec46_tmp[(vsize + j91)];
+            }
+/* Vectorizable loop 126 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec78[i] = (20.0f * std::log10(std::max<float>(1.17549435e-38f,
+                                                                fRec47[i])));
+            }
+/* Vectorizable loop 127 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec80[i] = (-1.5f - fZec79[i]);
+            }
+/* Vectorizable loop 128 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec81[i] = (1.5f - fZec79[i]);
+            }
+/* Recursive loop 129 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j144 = 0; (j144 < 4); j144 = (j144 + 1))
+            {
+                fRec76_tmp[j144] = fRec76_perm[j144];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec117[i] =
+                  ((fZec116[i] > fRec76[(i - 1)]) ? fConst13 : fConst12);
+                fRec76[i] = ((fZec116[i] * (1.0f - fZec117[i])) +
+                             (fRec76[(i - 1)] * fZec117[i]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j145 = 0; (j145 < 4); j145 = (j145 + 1))
+            {
+                fRec76_perm[j145] = fRec76_tmp[(vsize + j145)];
+            }
+/* Vectorizable loop 130 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec120[i] =
+                  (20.0f *
+                   std::log10(std::max<float>(1.17549435e-38f, fRec77[i])));
+            }
+/* Recursive loop 131 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j92 = 0; (j92 < 4); j92 = (j92 + 1))
+            {
+                fRec45_tmp[j92] = fRec45_perm[j92];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec45[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec46[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec45[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j93 = 0; (j93 < 4); j93 = (j93 + 1))
+            {
+                fRec45_perm[j93] = fRec45_tmp[(vsize + j93)];
+            }
+/* Vectorizable loop 132 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec82[i] = ((fZec78[i] > fZec80[i]) + (fZec78[i] > fZec81[i]));
+            }
+/* Vectorizable loop 133 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec83[i] = (fZec78[i] + fZec79[i]);
+            }
+/* Vectorizable loop 134 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec84[i] = (1.0f - (1.0f / ((19.0f * fRec48[i]) + 1.0f)));
+            }
+/* Recursive loop 135 */
+/* Pre code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j146 = 0; (j146 < 4); j146 = (j146 + 1))
+            {
+                fRec75_tmp[j146] = fRec75_perm[j146];
+            }
+            /* Compute code */
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fRec75[i] =
+                  ((fConst15 *
+                    (0.0f -
+                     (0.75f * std::max<float>(
+                                ((20.0f * std::log10(std::max<float>(
+                                            1.17549435e-38f, fRec76[i]))) +
+                                 6.0f),
+                                0.0f)))) +
+                   (fConst14 * fRec75[(i - 1)]));
+            }
+/* Post code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int j147 = 0; (j147 < 4); j147 = (j147 + 1))
+            {
+                fRec75_perm[j147] = fRec75_tmp[(vsize + j147)];
+            }
+/* Vectorizable loop 136 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                iZec121[i] =
+                  ((fZec120[i] > fZec80[i]) + (fZec120[i] > fZec81[i]));
+            }
+/* Vectorizable loop 137 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                fZec122[i] = (fZec79[i] + fZec120[i]);
+            }
+/* Vectorizable loop 138 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen27 = fZec83[i];
+                float fElse27 =
+                  (0.166666672f * Macalla_faustpower2_f((fZec83[i] + 1.5f)));
+                float fThen28 = ((iZec82[i] == 1) ? fElse27 : fThen27);
+                output0[i]    = FAUSTFLOAT((
+                  (fSlow19 * float(input0[i])) +
+                  (fSlow18 *
+                   ((fZec73[i] * std::pow(10.0f, (0.0500000007f * fRec45[i]))) *
+                    std::pow(
+                      10.0f,
+                      (0.0500000007f *
+                       (0.0f - (std::max<float>(
+                                  0.0f, ((iZec82[i] == 0) ? 0.0f : fThen28)) *
+                                fZec84[i]))))))));
+            }
+/* Vectorizable loop 139 */
+/* Compute code */
+#pragma clang loop vectorize(enable) interleave(enable)
+            for (int i = 0; (i < vsize); i = (i + 1))
+            {
+                float fThen47 = fZec122[i];
+                float fElse47 =
+                  (0.166666672f * Macalla_faustpower2_f((fZec122[i] + 1.5f)));
+                float fThen48 = ((iZec121[i] == 1) ? fElse47 : fThen47);
+                output1[i]    = FAUSTFLOAT(
+                  ((fSlow19 * float(input1[i])) +
+                   (fSlow18 *
+                    ((fZec115[i] *
+                      std::pow(10.0f, (0.0500000007f * fRec75[i]))) *
+                     std::pow(
+                       10.0f,
+                       (0.0500000007f *
+                        (0.0f -
+                         (fZec84[i] *
+                          std::max<float>(
+                            0.0f, ((iZec121[i] == 0) ? 0.0f : fThen48))))))))));
+            }
+        }
+    }
 };
 
-    // END-FAUSTDSP
+// END-FAUSTDSP
 
 #endif

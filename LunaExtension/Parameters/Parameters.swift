@@ -10,20 +10,13 @@ import Foundation
 
 let LunaExtensionParameterSpecs = ParameterTreeSpec {
     ParameterGroupSpec(identifier: "global", name: "Global") {
-        ParameterSpec(
-            address: .gain,
-            identifier: "gain",
-            name: "Output Gain",
-            units: .linearGain,
-            valueRange: 0.0 ... 1.0,
-            defaultValue: 0.25
-        )
+        // Visible Parameters based on updated Macalla.dsp and Addresses.h
 
         ParameterSpec(
             address: .spread_amount,
             identifier: "spreadAmount",
             name: "Spread Amount",
-            units: .percent,
+            units: .percent, // Assuming 0-1 maps to 0-100%
             valueRange: 0.0 ... 1.0,
             defaultValue: 0.0
         )
@@ -39,38 +32,31 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .delay_ms,
-            identifier: "delayTime",
+            identifier: "delayTime", // Kept identifier for consistency
             name: "Delay Time",
             units: .milliseconds,
             valueRange: 1.0 ... 1000.0,
-            defaultValue: 300.0
+            defaultValue: 300.0,
+            flags: [.flag_IsWritable, .flag_IsReadable, .flag_DisplayLogarithmic] // Log scale often good for time
         )
 
         ParameterSpec(
             address: .feedback,
             identifier: "feedback",
             name: "Feedback",
-            units: .percent,
+            units: .percent, // Assuming 0-1 maps to 0-100%
             valueRange: 0.0 ... 1.0,
             defaultValue: 0.5
-        )
-
-        ParameterSpec(
-            address: .noise_amount,
-            identifier: "noiseAmount",
-            name: "Noise Amount",
-            units: .percent,
-            valueRange: 0.0 ... 1.0,
-            defaultValue: 0.0
         )
 
         ParameterSpec(
             address: .pitch_shift,
             identifier: "pitchShift",
             name: "Pitch Shift",
-            units: .midiNoteNumber,
+            units: .generic, // Use generic units
             valueRange: -12.0 ... 12.0,
-            defaultValue: 0.0
+            defaultValue: 0.0,
+            unitName: "st" // Specify unit name as semitones
         )
 
         ParameterSpec(
@@ -79,7 +65,8 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
             name: "Highpass",
             units: .hertz,
             valueRange: 20.0 ... 20000.0,
-            defaultValue: 250.0
+            defaultValue: 250.0,
+            flags: [.flag_IsWritable, .flag_IsReadable, .flag_DisplayLogarithmic] // Log scale for frequency
         )
 
         ParameterSpec(
@@ -88,116 +75,99 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
             name: "Lowpass",
             units: .hertz,
             valueRange: 20.0 ... 20000.0,
-            defaultValue: 10000.0
+            defaultValue: 10000.0,
+            flags: [.flag_IsWritable, .flag_IsReadable, .flag_DisplayLogarithmic] // Log scale for frequency
         )
 
         ParameterSpec(
-            address: .random_mod,
-            identifier: "randomMod",
-            name: "Random Mod",
-            units: .percent,
-            valueRange: 0.0 ... 0.01,
-            defaultValue: 0.002
+            address: .diffusion_amount, // New
+            identifier: "diffusionAmount",
+            name: "Diffusion",
+            units: .percent, // Maps 0-0.7 in Faust to 0-100% UI
+            valueRange: 0.0 ... 0.7,
+            defaultValue: 0.0
         )
 
         ParameterSpec(
-            address: .wow,
-            identifier: "wow",
-            name: "Wow",
-            units: .rate,
-            valueRange: 0.0 ... 2.0,
-            defaultValue: 0.5
-        )
-
-        ParameterSpec(
-            address: .wow_intensity,
-            identifier: "wowIntensity",
-            name: "Wow Intensity",
-            units: .percent,
+            address: .tape_wear_macro, // New Macro
+            identifier: "tapeWearMacro",
+            name: "Tape Wear",
+            units: .percent, // Maps 0-1 in Faust to 0-100% UI
             valueRange: 0.0 ... 1.0,
-            defaultValue: 0.3
+            defaultValue: 0.1 // Default matches Faust
         )
 
         ParameterSpec(
-            address: .flutter,
-            identifier: "flutter",
-            name: "Flutter",
-            units: .rate,
-            valueRange: 2.0 ... 20.0,
-            defaultValue: 8.0
-        )
-
-        ParameterSpec(
-            address: .flutter_intensity,
-            identifier: "flutterIntensity",
-            name: "Flutter Intensity",
-            units: .percent,
-            valueRange: 0.0 ... 1.0,
-            defaultValue: 0.1
-        )
-
-        ParameterSpec(
-            address: .ducking,
-            identifier: "ducking",
-            name: "Ducking",
-            units: .decibels,
-            valueRange: -60.0 ... 0.0,
-            defaultValue: -30.0
-        )
-
-        ParameterSpec(
-            address: .attack,
-            identifier: "attack",
-            name: "Attack",
-            units: .milliseconds,
-            valueRange: 1.0 ... 100.0,
-            defaultValue: 10.0
-        )
-
-        ParameterSpec(
-            address: .release,
-            identifier: "release",
-            name: "Release",
-            units: .milliseconds,
-            valueRange: 50.0 ... 1000.0,
-            defaultValue: 200.0
-        )
-
-        ParameterSpec(
-            address: .ratio,
-            identifier: "ratio",
-            name: "Ratio",
-            units: .generic,
-            valueRange: 1.0 ... 20.0,
-            defaultValue: 4.0
-        )
-
-        ParameterSpec(
-            address: .glitch_rate,
-            identifier: "glitchRate",
-            name: "Glitch Rate",
-            units: .rate,
-            valueRange: 0.01 ... 5.0,
-            defaultValue: 0.5
-        )
-
-        ParameterSpec(
-            address: .glitch_amount,
-            identifier: "glitchAmount",
-            name: "Glitch Amount",
-            units: .percent,
+            address: .glitch_macro, // New Macro
+            identifier: "glitchMacro",
+            name: "Glitch",
+            units: .percent, // Maps 0-1 in Faust to 0-100% UI
             valueRange: 0.0 ... 1.0,
             defaultValue: 0.0
+        )
+
+        ParameterSpec(
+            address: .ducking_macro, // New Macro
+            identifier: "duckingMacro",
+            name: "Ducking Amount",
+            units: .percent, // Maps 0-1 in Faust to 0-100% UI
+            valueRange: 0.0 ... 1.0,
+            defaultValue: 0.0
+        )
+
+        ParameterSpec(
+            address: .duck_attack, // Renamed from 'attack'
+            identifier: "duckAttack",
+            name: "Ducking Attack",
+            units: .milliseconds,
+            valueRange: 1.0 ... 100.0,
+            defaultValue: 10.0,
+            flags: [.flag_IsWritable, .flag_IsReadable, .flag_DisplayLogarithmic] // Log scale often good for time
+        )
+
+        ParameterSpec(
+            address: .duck_release, // Renamed from 'release'
+            identifier: "duckRelease",
+            name: "Ducking Release",
+            units: .milliseconds,
+            valueRange: 50.0 ... 1000.0,
+            defaultValue: 200.0,
+            flags: [.flag_IsWritable, .flag_IsReadable, .flag_DisplayLogarithmic] // Log scale often good for time
         )
 
         ParameterSpec(
             address: .mix,
             identifier: "mix",
             name: "Mix",
-            units: .percent,
+            units: .percent, // Maps 0-100 in Faust code to 0-100% UI
             valueRange: 0.0 ... 100.0,
             defaultValue: 50.0
         )
+
+        // Sync Parameters (New)
+        ParameterSpec(
+            address: .delayTimeSync,
+            identifier: "delayTimeSync",
+            name: "Time Sync",
+            units: .indexed,
+            valueRange: 0 ... 17,
+            defaultValue: 4, // Default to 1/4 note?
+            valueStrings: ["1/64T", "1/64", "1/32T", "1/32", "1/16T", "1/16", "1/8T", "1/8", "1/4T", "1/4", "1/2T", "1/2", "1/1T", "1/1", "2/1T", "2/1", "4/1T", "4/1"]
+        )
+
+        ParameterSpec(
+            address: .syncEnabled,
+            identifier: "syncEnabled",
+            name: "Sync",
+            units: .boolean,
+            valueRange: 0 ... 1,
+            defaultValue: 0
+        )
+
+        // Removed ParameterSpecs for hidden parameters:
+        // noise_amount, random_mod, wow, wow_intensity,
+        // flutter, flutter_intensity, ducking (threshold),
+        // ratio, glitch_rate, glitch_amount
     }
 }
 

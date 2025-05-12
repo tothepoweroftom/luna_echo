@@ -1,0 +1,24 @@
+{
+  "originHash" : "56eec4818fff8ad65b9027a62f7083f32a59c8c5954bb92d0a9dfafa01b447d0",
+  "pins" : [
+    {
+      "identity" : "controls",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AudioKit/Controls.git",
+      "state" : {
+        "revision" : "4dd10370125af7f1e26d7a71b2c5929bb3c95087",
+        "version" : "1.1.4"
+      }
+    },
+    {
+      "identity" : "swiftui-sliders",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/spacenation/swiftui-sliders.git",
+      "state" : {
+        "revision" : "d5a7d856655d5c91f891c2b69d982c30fd5c7bdf",
+        "version" : "2.1.0"
+      }
+    }
+  ],
+  "version" : 3
+}

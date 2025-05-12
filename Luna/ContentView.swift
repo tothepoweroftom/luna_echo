@@ -12,7 +12,7 @@ struct ContentView: View {
     @State var hostModel: AudioUnitHostModel
     @State private var isSheetPresented = false
     
-    var margin = 10.0
+    var margin = 0.0
     var doubleMargin: Double {
         margin * 2.0
     }
@@ -45,20 +45,20 @@ struct ContentView: View {
             }
             .padding(doubleMargin)
             
-            if hostModel.viewModel.showAudioControls {
-                Text("Audio Playback")
-                Button {
-                    hostModel.isPlaying ? hostModel.stopPlaying() : hostModel.startPlaying()
-                    
-                } label: {
-                    Text(hostModel.isPlaying ? "Stop" : "Play")
-                }
-            }
-            if hostModel.viewModel.showMIDIContols {
-                Text("MIDI Input: Enabled")
-            }
-            Spacer()
-                .frame(height: margin)
+//            if hostModel.viewModel.showAudioControls {
+//                Text("Audio Playback")
+//                Button {
+//                    hostModel.isPlaying ? hostModel.stopPlaying() : hostModel.startPlaying()
+//                    
+//                } label: {
+//                    Text(hostModel.isPlaying ? "Stop" : "Play")
+//                }
+//            }
+//            if hostModel.viewModel.showMIDIContols {
+//                Text("MIDI Input: Enabled")
+//            }
+//            Spacer()
+//                .frame(height: margin)
         }
     }
 }

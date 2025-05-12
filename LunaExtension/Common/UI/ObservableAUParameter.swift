@@ -1,12 +1,12 @@
 //
 //  ObservableAUParameter.swift
-//  LunaExtension
+//  AutoPanExtension
 //
-//  Created by Thomas Power on 04/05/2025.
+//  Created by Thomas Power on 23/06/2023.
 //
 
-import SwiftUI
 import AudioToolbox
+import SwiftUI
 
 /// Base-class for SwiftUI-capable AUParameterNodes
 ///
@@ -16,10 +16,8 @@ import AudioToolbox
 ///
 /// This does *not* provide any of Swift's usual type-safety benefits, and may result in fatal errors if the
 /// implementation attempts to access the subscript of an ObservableAUParameter (which has no children, as it's not a group).
-@MainActor
 @dynamicMemberLookup
 class ObservableAUParameterNode {
-
     /// Create an ObservableAUParameterNode
     ///
     /// This creates the appropriate subclass, depending on the type of the passed in AUParameterNode
@@ -94,7 +92,6 @@ class ObservableAUParameterNode {
 /// The primary purpose here is to expose observable versions of the group's child parameters.
 ///
 final class ObservableAUParameterGroup: ObservableAUParameterNode {
-
     private(set) var children: [String: ObservableAUParameterNode]
 
     init(_ parameterGroup: AUParameterGroup) {
@@ -115,9 +112,7 @@ final class ObservableAUParameterGroup: ObservableAUParameterNode {
 ///
 /// The ObservableAUParameter can also manage automation event types by calling
 /// `onEditingChanged()` whenever a UI element will change its editing state.
-@Observable
-final class ObservableAUParameter: ObservableAUParameterNode {
-
+final class ObservableAUParameter: ObservableAUParameterNode, ObservableObject {
     private weak var parameter: AUParameter?
     private var observerToken: AUParameterObserverToken!
     private var editingState: EditingState = .inactive
@@ -127,23 +122,24 @@ final class ObservableAUParameter: ObservableAUParameterNode {
     let displayName: String
     let defaultValue: AUValue = 0.0
     let unit: AudioUnitParameterUnit
+    let valueStrings: [String]?
 
     init(_ parameter: AUParameter) {
         self.parameter = parameter
-        self.value = parameter.value
+        value = parameter.value
         self.min = parameter.minValue
         self.max = parameter.maxValue
-        self.displayName = parameter.displayName
-        self.unit = parameter.unit
+        displayName = parameter.displayName
+        valueStrings = parameter.valueStrings
+        unit = parameter.unit
         super.init()
 
         /// Use the parameter.token(byAddingParameterObserver:) function to monitor for parameter
         /// changes from the host. The only role of this callback is to update the UI if the value is changed by the host.
-        self.observerToken = parameter.token { @Sendable (_ address: AUParameterAddress, _ auValue: AUValue) in
+        observerToken = parameter.token { (_ address: AUParameterAddress, _ auValue: AUValue) in
+            guard address == self.parameter?.address else { return }
 
             DispatchQueue.main.async {
-                guard address == self.parameter?.address else { return }
-                
                 // Don't update the UI if the user is currently interacting
                 guard self.editingState == .inactive else { return }
 
@@ -154,7 +150,7 @@ final class ObservableAUParameter: ObservableAUParameterNode {
         }
     }
 
-    var value: AUValue {
+    @Published var value: AUValue {
         didSet {
             /// If the editing state is .hostUpdate, don't propagate this back to the host
             guard editingState != .hostUpdate else { return }
@@ -167,15 +163,6 @@ final class ObservableAUParameter: ObservableAUParameterNode {
                 eventType: automationEventType
             )
             print("Param was set \(value)")
-        }
-    }
-
-    var boolValue: Bool {
-       get {
-		   value >= 0.5
-        }
-        set {
-            value = newValue ? 1.0 : 0.0
         }
     }
 
@@ -228,8 +215,8 @@ final class ObservableAUParameter: ObservableAUParameterNode {
 extension AUAudioUnit {
     // Can we subclass the Parameter tree to set that on the AUAudioUnit?
 
-    @MainActor var observableParameterTree: ObservableAUParameterGroup? {
-        guard let paramTree = self.parameterTree else { return nil }
+    var observableParameterTree: ObservableAUParameterGroup? {
+        guard let paramTree = parameterTree else { return nil }
         return ObservableAUParameterGroup(paramTree)
     }
 }
