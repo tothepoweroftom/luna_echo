@@ -420,89 +420,90 @@ struct SyncToggle: View {
     }
 }
 
-//
-// public struct ArcKnob: View {
-//    @ObservedObject var param: ObservableAUParameter
-//    var range: ClosedRange<Float>
-//    @State private var isDragging = false
-//
-//    var backgroundColor: Color = .gray.opacity(0.3)
-//    var foregroundColor: Color = .text
-//
-//    private let startAngle: Double = -225
-//    private let endAngle: Double = 45
-//
-//    init(param: ObservableAUParameter, range: ClosedRange<Float>) {
-//        self.param = param
-//        self.range = range
-//    }
-//
-//    var normalizedValue: Double {
-//        Double((param.value - range.lowerBound) / (range.upperBound - range.lowerBound))
-//    }
-//
-//    var specifier: String {
-//        switch param.unit {
-//        case .midiNoteNumber:
-//            return "%.0f"
-//        default:
-//            return "%.2f"
-//        }
-//    }
-//
-//    public var body: some View {
-//        VStack {
-//            Control(value: $param.value, in: range,
-//                    geometry: .twoDimensionalDrag(xSensitivity: 0, ySensitivity: 0.5),
-//                    onStarted: { self.isDragging = true },
-//                    onEnded: { self.isDragging = false }) { _ in
-//                ZStack(alignment: .center) {
-//                    // Background Arc
-//                    Arc(startAngle: .degrees(startAngle), endAngle: .degrees(endAngle), clockwise: false)
-//                        .stroke(backgroundColor, lineWidth: 4)
-//                        .padding(5)
-//                    // Value Arc
-//                    Arc(startAngle: .degrees(startAngle),
-//                        endAngle: .degrees(startAngle + (endAngle - startAngle) * normalizedValue),
-//                        clockwise: false)
-//                        .stroke(foregroundColor, lineWidth: 3)
-//                        .padding(5)
-//                }
-//                .drawingGroup()
-//                .aspectRatio(1, contentMode: .fit)
-//            }
-//            .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fit)
-//
-//            Spacer()
-//
-//            // Display the parameter name and value
-//            Text(isDragging ? String(format: "%.2f", locale: Locale(identifier: "en_US_POSIX"), param.value) : "\(param.displayName)")
-//                .font(.custom("AzeretMono-Light", size: 12))
-//                .foregroundColor(Color.accent)
-//                .minimumScaleFactor(0.5)
-//                .lineLimit(1)
-//        }
-//    }
-// }
-//
-// public extension ArcKnob {
-//    /// Modifier to change the background color of the knob
-//    /// - Parameter backgroundColor: background color
-//    func backgroundColor(_ backgroundColor: Color) -> ArcKnob {
-//        var copy = self
-//        copy.backgroundColor = backgroundColor
-//        return copy
-//    }
-//
-//    /// Modifier to change the foreground color of the knob
-//    /// - Parameter foregroundColor: foreground color
-//    func foregroundColor(_ foregroundColor: Color) -> ArcKnob {
-//        var copy = self
-//        copy.foregroundColor = foregroundColor
-//        return copy
-//    }
-// }
-//
+// MARK: - Arc Slider Implementation
+
+public struct ArcSlider: View {
+    @ObservedObject var param: ObservableAUParameter
+    var range: ClosedRange<Float>
+    @State private var isDragging = false
+
+    var backgroundColor: Color = .gray.opacity(0.3)
+    var foregroundColor: Color = .text
+
+    private let startAngle: Double = -225
+    private let endAngle: Double = 45
+
+    init(param: ObservableAUParameter, range: ClosedRange<Float>? = nil) {
+        self.param = param
+        self.range = range ?? param.min...param.max
+    }
+
+    var normalizedValue: Double {
+        Double((param.value - range.lowerBound) / (range.upperBound - range.lowerBound))
+    }
+
+    var specifier: String {
+        switch param.unit {
+        case .midiNoteNumber:
+            return "%.0f"
+        default:
+            return "%.2f"
+        }
+    }
+
+    public var body: some View {
+        VStack {
+            Control(value: $param.value, in: range,
+                    geometry: .twoDimensionalDrag(xSensitivity: 0, ySensitivity: 0.5),
+                    onStarted: { self.isDragging = true },
+                    onEnded: { self.isDragging = false }) { _ in
+                ZStack(alignment: .center) {
+                    // Background Arc
+                    Arc(startAngle: .degrees(startAngle), endAngle: .degrees(endAngle), clockwise: false)
+                        .stroke(backgroundColor, lineWidth: 4)
+                        .padding(5)
+                    // Value Arc
+                    Arc(startAngle: .degrees(startAngle),
+                        endAngle: .degrees(startAngle + (endAngle - startAngle) * normalizedValue),
+                        clockwise: false)
+                        .stroke(foregroundColor, lineWidth: 3)
+                        .padding(5)
+                }
+                .drawingGroup()
+                .aspectRatio(1, contentMode: .fit)
+            }
+            .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fit)
+
+            Spacer()
+
+            // Display the parameter name and value
+            Text(isDragging ? String(format: specifier, locale: Locale(identifier: "en_US_POSIX"), param.value) : "\(param.displayName)")
+                .font(.custom("AzeretMono-Light", size: 12))
+                .foregroundColor(Color.accent)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+        }
+    }
+}
+
+public extension ArcSlider {
+    /// Modifier to change the background color of the slider
+    /// - Parameter backgroundColor: background color
+    func backgroundColor(_ backgroundColor: Color) -> ArcSlider {
+        var copy = self
+        copy.backgroundColor = backgroundColor
+        return copy
+    }
+
+    /// Modifier to change the foreground color of the slider
+    /// - Parameter foregroundColor: foreground color
+    func foregroundColor(_ foregroundColor: Color) -> ArcSlider {
+        var copy = self
+        copy.foregroundColor = foregroundColor
+        return copy
+    }
+}
+
 struct Arc: Shape {
     var startAngle: Angle
     var endAngle: Angle
@@ -645,99 +646,6 @@ public extension ArcKnob {
         return copy
     }
 }
-
-//
-// struct TwoHandledParameterSlider: View {
-//    @ObservedObject var lowParam: ObservableAUParameter
-//    @ObservedObject var highParam: ObservableAUParameter
-//    public var horizontal: Bool
-//    public var range: ClosedRange<Float>
-//    @State private var isDragging = false
-//
-//    @State private var lowHandle: CGFloat = 0
-//    @State private var highHandle: CGFloat = 1
-//
-//    private let middleFrequency: Float = 635
-//    private let thumbSize: CGFloat = 24 // 8 + 8 + 8 (inner circle + padding + stroke)
-//
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 4) {
-//            GeometryReader { geometry in
-//                ZStack(alignment: .leading) {
-//                    // Track
-//                    Rectangle()
-//                        .fill(Color.accent.opacity(0.2))
-//                        .frame(width: horizontal ? nil : 2, height: horizontal ? 2 : nil)
-//
-//                    // Selected Range
-//                    Rectangle()
-//                        .fill(Color.accent)
-//                        .frame(
-//                            width: horizontal ? CGFloat(highHandle - lowHandle) * geometry.size.width : 2,
-//                            height: horizontal ? 2 : CGFloat(highHandle - lowHandle) * geometry.size.height
-//                        )
-//                        .offset(
-//                            x: horizontal ? CGFloat(lowHandle) * geometry.size.width : 0,
-//                            y: horizontal ? 0 : CGFloat(1 - highHandle) * geometry.size.height
-//                        )
-//
-//                    // Low Handle
-//                    ThumbView()
-//                        .position(
-//                            x: horizontal ? CGFloat(lowHandle) * geometry.size.width : geometry.size.width / 2,
-//                            y: horizontal ? geometry.size.height / 2 : CGFloat(1 - lowHandle) * geometry.size.height
-//                        )
-//                        .gesture(
-//                            DragGesture()
-//                                .onChanged { gesture in
-//                                    isDragging = true
-//                                    lowHandle = min(highHandle, max(0, horizontal ? gesture.location.x / geometry.size.width : 1 - gesture.location.y / geometry.size.height))
-//                                    updateParams()
-//                                }
-//                                .onEnded { _ in isDragging = false }
-//                        )
-//
-//                    // High Handle
-//                    ThumbView()
-//                        .position(
-//                            x: horizontal ? CGFloat(highHandle) * geometry.size.width : geometry.size.width / 2,
-//                            y: horizontal ? geometry.size.height / 2 : CGFloat(1 - highHandle) * geometry.size.height
-//                        )
-//                        .gesture(
-//                            DragGesture()
-//                                .onChanged { gesture in
-//                                    isDragging = true
-//                                    highHandle = max(lowHandle, min(1, horizontal ? gesture.location.x / geometry.size.width : 1 - gesture.location.y / geometry.size.height))
-//                                    updateParams()
-//                                }
-//                                .onEnded { _ in isDragging = false }
-//                        )
-//                }
-//            }
-//            .frame(height: thumbSize)
-//
-//            Text(isDragging ?
-//                String(format: "%.0f - %.0f Hz", lowParam.value, highParam.value) :
-//                "\(lowParam.displayName) - \(highParam.displayName)")
-//                .font(.custom("AzeretMono-Light", size: 11))
-//                .foregroundColor(Color.text)
-//                .lineLimit(1)
-//        }
-//        .frame(width: horizontal ? nil : thumbSize)
-//        .onAppear {
-//            lowHandle = CGFloat(log2(lowParam.value / middleFrequency) / log2(range.upperBound / range.lowerBound) + 0.5)
-//            highHandle = CGFloat(log2(highParam.value / middleFrequency) / log2(range.upperBound / range.lowerBound) + 0.5)
-//        }
-//    }
-//
-//    private func updateParams() {
-//        let lowOctave = Float(lowHandle - 0.5) * log2(range.upperBound / range.lowerBound)
-//        let highOctave = Float(highHandle - 0.5) * log2(range.upperBound / range.lowerBound)
-//
-//        lowParam.value = middleFrequency * pow(2, lowOctave)
-//        highParam.value = middleFrequency * pow(2, highOctave)
-//    }
-// }
 
 struct TwoHandledParameterSlider: View {
     @ObservedObject var lowParam: ObservableAUParameter

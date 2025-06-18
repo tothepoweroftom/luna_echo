@@ -35,7 +35,8 @@ struct LunaExtensionMainView: View {
     // Define colors
     let colorTab1 = Color(hex: "#121420") // Core & Tone
     let colorTab2 = Color(hex: "#1B2432") // Character
-    let colorTab3 = Color(hex: "#848C8E") // Dynamics
+    let colorTab3 = Color(hex: "#242F42") // Dynamics
+    let colorTab4 = Color(hex: "#F0EFF4") // Presets
     let textColorLight = Color.white
     let textColorDark = Color.black // For the lighter tab background
 
@@ -56,7 +57,8 @@ struct LunaExtensionMainView: View {
         tabs = [
             TabData(id: 0, title: "Core & Tone", color: Color(hex: "#121420"), content: AnyView(CoreToneSection(parameterTree: parameterTree))),
             TabData(id: 1, title: "Character", color: Color(hex: "#1B2432"), content: AnyView(CharacterSection(parameterTree: parameterTree))),
-            TabData(id: 2, title: "Dynamics", color: Color(hex: "#848C8E"), content: AnyView(DynamicsOutputSection(parameterTree: parameterTree))),
+            TabData(id: 2, title: "Dynamics", color: Color(hex: "#242F42"), content: AnyView(DynamicsOutputSection(parameterTree: parameterTree))),
+            TabData(id: 3, title: "Presets", color: Color(hex: "#F0EFF4"), content: AnyView(PresetsSection(parameterTree: parameterTree))),
         ]
     }
 
@@ -98,10 +100,9 @@ struct HorizontalAccordionView: View {
                     if isSelected {
                         // Expanded Content
                         VStack(alignment: .leading, spacing: 0) {
-                            ScrollView {
-                                tab.content.padding()
-                            }
-                            .transition(.opacity.animation(.easeInOut(duration: 0.2).delay(0.15)))
+                            tab.content
+                                .padding()
+                                .transition(.opacity.animation(.easeInOut(duration: 0.2).delay(0.15)))
                         }
                         .clipped()
                     } else {
@@ -164,12 +165,11 @@ struct VerticalAccordionView: View {
 
                         // Content (conditional visibility and height)
                         if isSelected {
-                            ScrollView {
-                                tab.content.padding()
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            // Animate opacity for smooth appearance
-                            .transition(.opacity.animation(.easeInOut(duration: 0.2).delay(0.1)))
+                            tab.content
+                                .padding()
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                // Animate opacity for smooth appearance
+                                .transition(.opacity.animation(.easeInOut(duration: 0.2).delay(0.1)))
                         }
                         // else: No content shown, frame collapses below
                     }
@@ -186,29 +186,78 @@ struct VerticalAccordionView: View {
 
 // MARK: - Section Content Views (Remain the same)
 
-// CoreToneSection with custom sliders
+// CoreToneSection with custom sliders - always square
 struct CoreToneSection: View {
     var parameterTree: ObservableAUParameterGroup
     var body: some View {
-        VStack(spacing: 12) {
-            // XYControl for Delay Time and Feedback
-            XYControl(
-                paramX: parameterTree.global.delayTime,
-                paramY: parameterTree.global.feedback,
-                paramXSynced: parameterTree.global.delayTimeSync, // Assuming you have this parameter
-                synced: parameterTree.global.syncEnabled, // Assuming you have this parameter
-                showing3D: false
-            )
-            .frame(height: 200)
+        GeometryReader { geometry in
+            let squareSize = min(geometry.size.width, geometry.size.height) - 32 // Account for padding
+            let xyControlSize = squareSize * 0.9 // 90% for XY control
+            let mixSliderHeight = CGFloat(30) // 30px for mix slider
+            
+            VStack(spacing: 16) {
+                // XYControl for Delay Time and Feedback
+                XYControl(
+                    paramX: parameterTree.global.delayTime,
+                    paramY: parameterTree.global.feedback,
+                    paramXSynced: parameterTree.global.delayTimeSync,
+                    synced: parameterTree.global.syncEnabled,
+                    showing3D: false
+                )
+                .frame(width: xyControlSize, height: xyControlSize)
+                Spacer()
+                // CustomParameterSlider for Mix
+                CustomParameterSlider(
+                    param: parameterTree.global.mix,
+                    horizontal: false
+                )
+                .frame(width: xyControlSize, height: mixSliderHeight)
+            }
+            .frame(width: squareSize, height: squareSize)
+            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+        }
+        .aspectRatio(1, contentMode: .fit) // Force square aspect ratio
+        .colorScheme(.dark)
+    }
+}
 
-            // CustomParameterSlider for Mix
-            CustomParameterSlider(
-                param: parameterTree.global.mix,
-                horizontal: false
-            )
-            .frame(height: 100)
-
-            // TwoHandledParameterSlider for filters
+// CharacterSection with arc sliders in grid
+struct CharacterSection: View {
+    var parameterTree: ObservableAUParameterGroup
+    
+    let gridColumns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let sliderSize = min((geometry.size.width - 64) / 3, 100) // Adaptive sizing with padding
+            
+            LazyVGrid(columns: gridColumns, spacing: 16) {
+                // ArcSlider for pitch shift
+                ArcSlider(param: parameterTree.global.pitchShift)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+                
+                // ArcSlider for tape wear macro
+                ArcSlider(param: parameterTree.global.tapeWearMacro)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+                
+                // ArcSlider for glitch macro
+                ArcSlider(param: parameterTree.global.glitchMacro)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+                
+                // ArcSlider for diffusion amount
+                ArcSlider(param: parameterTree.global.diffusionAmount)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+                
+                // ArcSlider for spread amount
+                ArcSlider(param: parameterTree.global.spreadAmount)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+            }
+            .padding(.horizontal, 16)
+               // TwoHandledParameterSlider for filters
             TwoHandledParameterSlider(
                 lowParam: parameterTree.global.highpass,
                 highParam: parameterTree.global.lowpass,
@@ -216,83 +265,53 @@ struct CoreToneSection: View {
                 range: 20 ... 20000
             )
             .frame(height: 70)
-
-            // CustomParameterSlider for pitch shift
-            CustomParameterSlider(
-                param: parameterTree.global.pitchShift,
-                horizontal: false
-            )
-            .frame(height: 100)
         }
-        .colorScheme(.dark)
-        .padding(20)
-    }
-}
-
-// CharacterSection with custom sliders
-struct CharacterSection: View {
-    var parameterTree: ObservableAUParameterGroup
-    var body: some View {
-        VStack(spacing: 12) {
-            // CustomParameterSlider for all parameters in this section
-            CustomParameterSlider(
-                param: parameterTree.global.tapeWearMacro,
-                horizontal: false
-            )
-            .frame(height: 100)
-
-            CustomParameterSlider(
-                param: parameterTree.global.glitchMacro,
-                horizontal: false
-            )
-            .frame(height: 100)
-
-            CustomParameterSlider(
-                param: parameterTree.global.diffusionAmount,
-                horizontal: false
-            )
-            .frame(height: 100)
-
-            CustomParameterSlider(
-                param: parameterTree.global.spreadAmount,
-                horizontal: false
-            )
-            .frame(height: 100)
-        }
-        .padding(20)
         .colorScheme(.dark)
     }
 }
 
-// DynamicsOutputSection with custom sliders
+// DynamicsOutputSection with arc sliders in grid
 struct DynamicsOutputSection: View {
     var parameterTree: ObservableAUParameterGroup
+    
+    let gridColumns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let sliderSize = min((geometry.size.width - 64) / 3, 100) // Adaptive sizing with padding
+            
+            LazyVGrid(columns: gridColumns, spacing: 16) {
+                // ArcSlider for ducking macro
+                ArcSlider(param: parameterTree.global.duckingMacro)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+                
+                // ArcSlider for duck attack
+                ArcSlider(param: parameterTree.global.duckAttack)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+                
+                // ArcSlider for duck release
+                ArcSlider(param: parameterTree.global.duckRelease)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+                
+                // ArcSlider for output gain
+                ArcSlider(param: parameterTree.global.outputGain)
+                    .frame(width: sliderSize, height: sliderSize + 20)
+            }
+            .padding(.horizontal, 16)
+        }
+        .colorScheme(.dark)
+    }
+}
+
+struct PresetsSection: View {
+    var parameterTree: ObservableAUParameterGroup
     var body: some View {
         VStack(spacing: 12) {
-            // CustomParameterSlider for all parameters in this section
-            CustomParameterSlider(
-                param: parameterTree.global.duckingMacro,
-                horizontal: false
-            )
-            .frame(height: 100)
-
-            CustomParameterSlider(
-                param: parameterTree.global.duckAttack,
-                horizontal: false
-            )
-            .frame(height: 100)
-
-            CustomParameterSlider(
-                param: parameterTree.global.duckRelease,
-                horizontal: false
-            )
-            .frame(height: 100)
-
-            CustomParameterSlider(
-                param: parameterTree.global.outputGain,
-                horizontal: false
-            )
-            .frame(height: 100)
+            Text("Presets")
         }
         .colorScheme(.light)
         .padding(20)
