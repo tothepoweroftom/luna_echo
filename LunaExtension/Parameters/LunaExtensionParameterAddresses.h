@@ -15,24 +15,27 @@
 
 typedef NS_ENUM(AUParameterAddress, LunaExtensionParameterAddress) {
     // Visible Parameters from Macalla.dsp
-    spread_amount    = 0,
-    output_gain      = 1,
-    delay_ms         = 2, // Original: 'delay(ms)'
-    feedback         = 3,
-    pitch_shift      = 4,
-    highpass         = 5,  // Original: 'highpass'
-    lowpass          = 6,  // Original: 'lowpass'
-    diffusion_amount = 7,  // New
-    tape_wear_macro  = 8,  // New Macro
-    glitch_macro     = 9,  // New Macro
-    ducking_macro    = 10, // New Macro
-    duck_attack      = 11, // Original: 'attack'
-    duck_release     = 12, // Original: 'release'
-    mix              = 13,
+    spread_amount = 0,
+    output_gain = 1,
+    delay_ms = 2, // Original: 'delay(ms)'
+    feedback = 3,
+    pitch_shift = 4,
+    highpass = 5,         // Original: 'highpass'
+    lowpass = 6,          // Original: 'lowpass'
+    diffusion_amount = 7, // New
+    tape_wear_macro = 8,  // New Macro
+    glitch_macro = 9,     // New Macro
+    ducking_macro = 10,   // New Macro
+    duck_attack = 11,     // Original: 'attack'
+    duck_release = 12,    // Original: 'release'
+    mix = 13,
 
     // Sync Parameters (New)
     delayTimeSync = 14,
-    syncEnabled   = 15,
+    syncEnabled = 15,
+
+    // BitCrush Parameters (New)
+    bitCrush = 16,
 
     // Count must be the last element
     ParameterAddressCount

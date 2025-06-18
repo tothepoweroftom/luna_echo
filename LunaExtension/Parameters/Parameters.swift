@@ -164,6 +164,15 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
             defaultValue: 0
         )
 
+        ParameterSpec(
+            address: .bitCrush,
+            identifier: "bitCrush",
+            name: "Bit Crush",
+            units: .boolean,
+            valueRange: 0 ... 1,
+            defaultValue: 0
+        )
+
         // Removed ParameterSpecs for hidden parameters:
         // noise_amount, random_mod, wow, wow_intensity,
         // flutter, flutter_intensity, ducking (threshold),

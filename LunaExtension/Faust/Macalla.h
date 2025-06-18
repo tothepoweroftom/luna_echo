@@ -1674,30 +1674,30 @@ class Macalla : public dsp
     virtual void buildUserInterface(UI* ui_interface)
     {
         ui_interface->openVerticalBox("Macalla ");
-        ui_interface->addCheckButton("BitCrush Enable", &fCheckbox0);
+        ui_interface->addCheckButton("bitcrush", &fCheckbox0);
         ui_interface->declare(&fHslider12, "unit", "percent");
-        ui_interface->addHorizontalSlider("Ducking Amount",
+        ui_interface->addHorizontalSlider("ducking_amount",
                                           &fHslider12,
                                           FAUSTFLOAT(0.0f),
                                           FAUSTFLOAT(0.0f),
                                           FAUSTFLOAT(1.0f),
                                           FAUSTFLOAT(0.00999999978f));
         ui_interface->declare(&fHslider8, "unit", "percent");
-        ui_interface->addHorizontalSlider("Glitch",
+        ui_interface->addHorizontalSlider("glitch",
                                           &fHslider8,
                                           FAUSTFLOAT(0.0f),
                                           FAUSTFLOAT(0.0f),
                                           FAUSTFLOAT(1.0f),
                                           FAUSTFLOAT(0.00999999978f));
         ui_interface->declare(&fHslider4, "unit", "percent");
-        ui_interface->addHorizontalSlider("Tape Noise",
+        ui_interface->addHorizontalSlider("tape_noise",
                                           &fHslider4,
                                           FAUSTFLOAT(0.100000001f),
                                           FAUSTFLOAT(0.0f),
                                           FAUSTFLOAT(1.0f),
                                           FAUSTFLOAT(0.00999999978f));
         ui_interface->declare(&fHslider3, "unit", "percent");
-        ui_interface->addHorizontalSlider("Wow & Flutter",
+        ui_interface->addHorizontalSlider("wow_flutter",
                                           &fHslider3,
                                           FAUSTFLOAT(0.100000001f),
                                           FAUSTFLOAT(0.0f),
