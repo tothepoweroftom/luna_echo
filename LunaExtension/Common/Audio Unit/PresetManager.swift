@@ -153,33 +153,33 @@ class PresetManager {
 
         case 1: // Vintage Tape
             // Apply vintage tape settings using macros and new params
-            setParameterValue(.tape_wear_macro, value: 0.65) // Moderate wear
+            setParameterValue(.tape_noise_macro, value: 0.65)  // Moderate wear
             setParameterValue(.feedback, value: 0.68)
             setParameterValue(.highpass, value: 320)
             setParameterValue(.lowpass, value: 6500)
-            setParameterValue(.delay_ms, value: 350)
+            setParameterValue(.delay_time, value: 350)
             setParameterValue(.mix, value: 45)
             setParameterValue(.diffusion_amount, value: 0.1) // Subtle diffusion
 
         case 2: // Glitchy Repeat
             // Apply glitchy repeat settings using macros
             setParameterValue(.glitch_macro, value: 0.70) // Significant glitch
-            setParameterValue(.tape_wear_macro, value: 0.15) // Low wear for clarity
-            setParameterValue(.delay_ms, value: 220)
+            setParameterValue(.tape_noise_macro, value: 0.15)  // Low wear for clarity
+            setParameterValue(.delay_time, value: 220)
             setParameterValue(.pitch_shift, value: -3)
             setParameterValue(.feedback, value: 0.72)
             setParameterValue(.mix, value: 55) // Slightly wetter mix
 
         case 3: // Ambience
             // Apply ambience settings
-            setParameterValue(.delay_ms, value: 750)
+            setParameterValue(.delay_time, value: 750)
             setParameterValue(.feedback, value: 0.58)
             setParameterValue(.highpass, value: 180)
             setParameterValue(.lowpass, value: 8000)
             setParameterValue(.mix, value: 38)
             setParameterValue(.spread_amount, value: 0.8)
             setParameterValue(.diffusion_amount, value: 0.45) // More diffusion
-            setParameterValue(.tape_wear_macro, value: 0.1) // Low wear
+            setParameterValue(.tape_noise_macro, value: 0.1)  // Low wear
 
         default:
             // Unknown preset, defaults already applied
@@ -213,13 +213,13 @@ class PresetManager {
         // Use defaults defined in Parameters.swift
         setParameterValue(.spread_amount, value: 0.0)
         setParameterValue(.output_gain, value: 0.0)
-        setParameterValue(.delay_ms, value: 300.0)
+        setParameterValue(.delay_time, value: 300.0)
         setParameterValue(.feedback, value: 0.5)
         setParameterValue(.pitch_shift, value: 0.0)
         setParameterValue(.highpass, value: 250.0)
         setParameterValue(.lowpass, value: 10000.0)
         setParameterValue(.diffusion_amount, value: 0.0)
-        setParameterValue(.tape_wear_macro, value: 0.1) // Default from ParamSpec
+        setParameterValue(.tape_noise_macro, value: 0.1)  // Default from ParamSpec
         setParameterValue(.glitch_macro, value: 0.0)
         setParameterValue(.ducking_macro, value: 0.0)
         setParameterValue(.duck_attack, value: 10.0)

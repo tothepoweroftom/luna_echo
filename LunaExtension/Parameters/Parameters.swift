@@ -14,7 +14,7 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .spread_amount,
-            identifier: "spreadAmount",
+            identifier: "spread_amount",
             name: "Spread Amount",
             units: .percent, // Assuming 0-1 maps to 0-100%
             valueRange: 0.0 ... 1.0,
@@ -23,7 +23,7 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .output_gain,
-            identifier: "outputGain",
+            identifier: "output_gain",
             name: "Output Gain",
             units: .decibels,
             valueRange: -96.0 ... 12.0,
@@ -31,8 +31,8 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
         )
 
         ParameterSpec(
-            address: .delay_ms,
-            identifier: "delayTime", // Kept identifier for consistency
+            address: .delay_time,
+            identifier: "delay_time",  // Kept identifier for consistency
             name: "Delay Time",
             units: .milliseconds,
             valueRange: 1.0 ... 1000.0,
@@ -51,12 +51,22 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .pitch_shift,
-            identifier: "pitchShift",
+            identifier: "pitch_shift",
             name: "Pitch Shift",
             units: .generic, // Use generic units
             valueRange: -12.0 ... 12.0,
             defaultValue: 0.0,
             unitName: "st" // Specify unit name as semitones
+        )
+
+        ParameterSpec(
+            address: .pitch_shift2,
+            identifier: "pitch_shift2",
+            name: "Pitch Shift 2",
+            units: .generic,  // Use generic units
+            valueRange: -12.0...12.0,
+            defaultValue: 0.0,
+            unitName: "st"  // Specify unit name as semitones
         )
 
         ParameterSpec(
@@ -81,7 +91,7 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .diffusion_amount, // New
-            identifier: "diffusionAmount",
+            identifier: "diffusion_amount",
             name: "Diffusion",
             units: .percent, // Maps 0-0.7 in Faust to 0-100% UI
             valueRange: 0.0 ... 0.7,
@@ -89,9 +99,18 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
         )
 
         ParameterSpec(
-            address: .tape_wear_macro, // New Macro
-            identifier: "tapeWearMacro",
-            name: "Tape Wear",
+            address: .tape_noise_macro,  // New Macro
+            identifier: "tape_noise_macro",
+            name: "Tape Noise",
+            units: .percent,  // Maps 0-1 in Faust to 0-100% UI
+            valueRange: 0.0...1.0,
+            defaultValue: 0.1  // Default matches Faust
+        )
+
+        ParameterSpec(
+            address: .wow_flutter_macro,  // New Macro
+            identifier: "wow_flutter_macro",
+            name: "Wow & Flutter",
             units: .percent, // Maps 0-1 in Faust to 0-100% UI
             valueRange: 0.0 ... 1.0,
             defaultValue: 0.1 // Default matches Faust
@@ -99,7 +118,7 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .glitch_macro, // New Macro
-            identifier: "glitchMacro",
+            identifier: "glitch_macro",
             name: "Glitch",
             units: .percent, // Maps 0-1 in Faust to 0-100% UI
             valueRange: 0.0 ... 1.0,
@@ -108,7 +127,7 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .ducking_macro, // New Macro
-            identifier: "duckingMacro",
+            identifier: "ducking_macro",
             name: "Ducking Amount",
             units: .percent, // Maps 0-1 in Faust to 0-100% UI
             valueRange: 0.0 ... 1.0,
@@ -117,7 +136,7 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .duck_attack, // Renamed from 'attack'
-            identifier: "duckAttack",
+            identifier: "duck_attack",
             name: "Ducking Attack",
             units: .milliseconds,
             valueRange: 1.0 ... 100.0,
@@ -127,7 +146,7 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         ParameterSpec(
             address: .duck_release, // Renamed from 'release'
-            identifier: "duckRelease",
+            identifier: "duck_release",
             name: "Ducking Release",
             units: .milliseconds,
             valueRange: 50.0 ... 1000.0,
@@ -146,8 +165,8 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
 
         // Sync Parameters (New)
         ParameterSpec(
-            address: .delayTimeSync,
-            identifier: "delayTimeSync",
+            address: .delay_time_sync,
+            identifier: "delay_time_sync",
             name: "Time Sync",
             units: .indexed,
             valueRange: 0 ... 17,
@@ -156,8 +175,8 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
         )
 
         ParameterSpec(
-            address: .syncEnabled,
-            identifier: "syncEnabled",
+            address: .sync_enabled,
+            identifier: "sync_enabled",
             name: "Sync",
             units: .boolean,
             valueRange: 0 ... 1,
@@ -165,12 +184,21 @@ let LunaExtensionParameterSpecs = ParameterTreeSpec {
         )
 
         ParameterSpec(
-            address: .bitCrush,
-            identifier: "bitCrush",
+            address: .bit_crush,
+            identifier: "bit_crush",
             name: "Bit Crush",
             units: .boolean,
             valueRange: 0 ... 1,
             defaultValue: 0
+        )
+
+        ParameterSpec(
+            address: .phaser_depth,
+            identifier: "phaser_depth",
+            name: "Phaser Depth",
+            units: .percent,
+            valueRange: 0.0...1.0,
+            defaultValue: 0.0
         )
 
         // Removed ParameterSpecs for hidden parameters:

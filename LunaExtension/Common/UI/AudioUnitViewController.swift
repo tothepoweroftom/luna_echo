@@ -103,10 +103,38 @@ public class AudioUnitViewController: AUViewController, AUAudioUnitFactory {
 			host.view.removeFromSuperview()
 		}
 
-		guard let observableParameterTree = audioUnit.observableParameterTree else {
+		guard let observableParameterTree = audioUnit.observableParameterTree,
+			let lunaAU = audioUnit as? LunaExtensionAudioUnit
+		else {
 			return
 		}
-		let content = LunaExtensionMainView(parameterTree: observableParameterTree)
+
+		let onLoad: (AUAudioUnitPreset) -> Void = { preset in
+			lunaAU.currentPreset = preset
+		}
+
+		let onSave: (String) -> AUAudioUnitPreset? = { name in
+			lunaAU.saveUserPreset(name: name)
+		}
+
+		let onDelete: (AUAudioUnitPreset) -> Void = { preset in
+			lunaAU.deleteUserPreset(named: preset.name)
+		}
+
+		let onGetPresets: () -> [AUAudioUnitPreset] = {
+			return lunaAU.allPresets
+		}
+
+		let content = LunaExtensionMainView(
+			parameterTree: observableParameterTree,
+			initialPresets: lunaAU.allPresets,
+			currentPreset: lunaAU.currentPreset,
+			onLoad: onLoad,
+			onSave: onSave,
+			onDelete: onDelete,
+			onGetPresets: onGetPresets
+		)
+
 		let host = HostingController(rootView: content)
 		addChild(host)
 		host.view.frame = view.bounds

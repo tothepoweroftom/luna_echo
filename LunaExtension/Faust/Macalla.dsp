@@ -2,23 +2,21 @@ import("stdfaust.lib");
 declare name "Macalla ";
 declare category "Echo / Delay";
 
-import("stdfaust.lib");
-import("compressors.lib");
-import("analyzers.lib");
-
 // Global Parameters
 spread_amount = hslider("spread_amount", 0.0, 0.0, 1.0, 0.01): si.smoo;
 output_gain = hslider("output_gain", 0.0, -96.0, 12.0, 0.01): si.smoo;
 delMs = hslider("delay(ms)", 300, 1, 1000, 1);
 feedback = hslider("feedback", 0.5, 0, 1.0, 0.01):si.smoo;
 pitch_shift = hslider("pitch_shift", 0.0, -12, 12, 1.0);
+pitch_shift2 = hslider("pitch_shift2", 0.0, -12, 12, 1.0);
+
 hifr1 = hslider("highpass", 250, 20, 20000, 1) : si.smoo;
 lofr1 = hslider("lowpass", 10000, 20, 20000, 1) : si.smoo;
 diffusion_amount = hslider("diffusion", 0.0, 0.0, 1.0, 0.01) : * (0.95) : si.smoo;
 
 // Macro Controls
 tape_wear_macro = hslider("Tape Noise[unit:percent]", 0.1, 0.0, 1.0, 0.01) : si.smoo;
-wow_flutter_macro = hslider("Wow & Flutter[unit:percent]", 0.1, 0.0, 1.0, 0.01) : si.smoo;
+wow_flutter_macro = hslider("Wow & Flutter[unit:percent]", 0.1, 0.0, 1.0, 0.01) * 0.7 : si.smoo;
 glitch_macro = hslider("Glitch[unit:percent]", 0.0, 0.0, 1.0, 0.01) : si.smoo;
 ducking_macro = hslider("Ducking Amount[unit:percent]", 0.0, 0.0, 1.0, 0.01) : si.smoo;
 
@@ -63,10 +61,10 @@ derived_glitch_params = environment {
 
 derived_ducking_params = environment {
      macro = ducking_macro;
-     thresh = 0.0 - macro * 60.0;
+     thresh = 0.0 - macro * 50.0;
      ratio = 1.0 + macro * 19.0;
      attack = att;
-     release = rel;
+     release = rel; 
 };
 
 // Tape Modulation Helpers
@@ -91,9 +89,6 @@ with {
     delayProcessed = delayTotal;
 };
 
-// Wow and Flutter Effects
-tanh(x) = x * (27 + x * x) / (27 + 9 * x * x);
-saturator = ef.dryWetMixerConstantPower(drive, _ <: tanh * drive * 20 : co.limiter_1176_R4_mono : tanh);
 
 apply_wow_flutter(spread, x) = wowflutter(x)
 with {
@@ -130,11 +125,20 @@ gainReduction = co.peak_compression_gain_mono_db(co.ratio2strength(derived_ducki
 duckedGain(x) = ba.db2linear(gainReduction(x));
 ducker(x, effect) = x*dry + wet*((x : effect) * duckedGain(x));
 
+
+phaserParam  = 0.5;
+phaserDepth  = hslider("phaserDepth", 1, 0, 1, 0.01) : si.smoo;
+phaser = _ : pf.phaser2_mono(2, 0, 1000, 50, 1.25, 1000, phaserParam, phaserDepth, .23, 0);
+
+
 // Main delay processing
-dide(spread) = *(ba.db2linear(output_gain)) : ef.transpose(4096, 512, pitch_shift) : delx :  add_tape_noise : co.limiter_1176_R4_mono
+dide(spread) = *(ba.db2linear(output_gain)) <: pitch_shifter1, pitch_shifter2 :>  delx :  phaser : co.limiter_1176_R4_mono
 with {
+    pitch_shifter1 = select2(pitch_shift != 0.0, _, ef.transpose(4096, 512, pitch_shift));
+    pitch_shifter2 = select2(pitch_shift2 != 0.0, _, ef.transpose(4096, 512, pitch_shift2));
+    
     delx = digd;
-    add_tape_noise(x) = x + generate_tape_noise(x + 0.0001);
+    add_tape_noise(x) = x + generate_tape_noise(x) ;
 
     digd = (+:(delayed))~(fback)
     with {
@@ -164,7 +168,7 @@ with {
             processed_signal = tape_processed <: 
                                 select2(bitcrush_enable, 
                                     _,
-                                    bitcrusher(8) : sampleRedux(11000)
+                                    bitcrusher(8) : sampleRedux(12000)
                                 ) : co.limiter_1176_R4_mono 
                                 : add_tape_noise
                                 : fi.highpass(2, hifr1)

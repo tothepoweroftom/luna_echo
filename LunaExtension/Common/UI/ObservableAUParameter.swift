@@ -162,7 +162,7 @@ final class ObservableAUParameter: ObservableAUParameterNode, ObservableObject {
                 atHostTime: 0,
                 eventType: automationEventType
             )
-            print("Param was set \(value)")
+            print("Param \(self.displayName) was set \(value)")
         }
     }
 

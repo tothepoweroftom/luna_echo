@@ -39,16 +39,19 @@ class LunaExtensionDSPKernel
             mFaustWrapper->setParameter("delaytime", mDelayMs);
             mFaustWrapper->setParameter("feedback", mFeedback);
             mFaustWrapper->setParameter("pitch_shift", mPitchShift);
+            mFaustWrapper->setParameter("pitch_shift2", mPitchShift2);
             mFaustWrapper->setParameter("highpass", mHighpass);
             mFaustWrapper->setParameter("lowpass", mLowpass);
             mFaustWrapper->setParameter("diffusion", mDiffusionAmount);
-            mFaustWrapper->setParameter("tape_wear", mTapeWearMacro);
+            mFaustWrapper->setParameter("tape_noise", mTapeWearMacro);
+            mFaustWrapper->setParameter("wow_flutter", mWowFlutterMacro);
             mFaustWrapper->setParameter("glitch", mGlitchMacro);
             mFaustWrapper->setParameter("ducking_amount", mDuckingMacro);
-            mFaustWrapper->setParameter("att", mDuckAttack);
-            mFaustWrapper->setParameter("rel", mDuckRelease);
+            mFaustWrapper->setParameter("duck_attack", mDuckAttack);
+            mFaustWrapper->setParameter("duck_release", mDuckRelease);
             mFaustWrapper->setParameter("mix", mMix);
             mFaustWrapper->setParameter("bitcrush", mBitCrush);
+            mFaustWrapper->setParameter("phaser_depth", mPhaserDepth);
         }
     }
 
@@ -78,7 +81,7 @@ class LunaExtensionDSPKernel
                 updateFaustParameter("output_gain", value);
                 break;
 
-            case LunaExtensionParameterAddress::delay_ms:
+            case LunaExtensionParameterAddress::delay_time:
                 mDelayMs = value;
                 updateFaustParameter("delaytime", value);
                 break;
@@ -93,13 +96,18 @@ class LunaExtensionDSPKernel
                 updateFaustParameter("pitch_shift", value);
                 break;
 
+            case LunaExtensionParameterAddress::pitch_shift2:
+              mPitchShift2 = value;
+              updateFaustParameter("pitch_shift2", value);
+              break;
+
             case LunaExtensionParameterAddress::highpass:
-                mHighpass = value;
+                mHighpass = value < mSampleRate / 2.0 ? value : mSampleRate / 2.0;
                 updateFaustParameter("highpass", value);
                 break;
 
             case LunaExtensionParameterAddress::lowpass:
-                mLowpass = value;
+                mLowpass = value < mSampleRate / 2.0 ? value : mSampleRate / 2.0;
                 updateFaustParameter("lowpass", value);
                 break;
 
@@ -108,10 +116,15 @@ class LunaExtensionDSPKernel
                 updateFaustParameter("diffusion", value);
                 break;
 
-            case LunaExtensionParameterAddress::tape_wear_macro:
-                mTapeWearMacro = value;
-                updateFaustParameter("tape_wear", value);
-                break;
+            case LunaExtensionParameterAddress::tape_noise_macro:
+              mTapeWearMacro = value;
+              updateFaustParameter("tape_noise", value);
+              break;
+
+            case LunaExtensionParameterAddress::wow_flutter_macro:
+              mWowFlutterMacro = value;
+              updateFaustParameter("wow_flutter", value);
+              break;
 
             case LunaExtensionParameterAddress::glitch_macro:
                 mGlitchMacro = value;
@@ -125,12 +138,12 @@ class LunaExtensionDSPKernel
 
             case LunaExtensionParameterAddress::duck_attack:
                 mDuckAttack = value;
-                updateFaustParameter("att", value);
+                updateFaustParameter("duck_attack", value);
                 break;
 
             case LunaExtensionParameterAddress::duck_release:
                 mDuckRelease = value;
-                updateFaustParameter("rel", value);
+                updateFaustParameter("duck_release", value);
                 break;
 
             case LunaExtensionParameterAddress::mix:
@@ -139,23 +152,28 @@ class LunaExtensionDSPKernel
                 break;
 
             // --- Sync Parameters ---
-            case LunaExtensionParameterAddress::delayTimeSync:
-                mDelayTimeSync = static_cast<int>(value);
-                updateDelayTime(); // Update Faust delay when sync setting
-                                   // changes
-                break;
-            case LunaExtensionParameterAddress::syncEnabled:
-                mSyncEnabled = static_cast<bool>(value);
-                updateDelayTime(); // Update Faust delay when sync
-                                   // enabled/disabled
-                break;
+            case LunaExtensionParameterAddress::delay_time_sync:
+              mDelayTimeSync = static_cast<int>(value);
+              updateDelayTime(); // Update Faust delay when sync setting
+                                 // changes
+              break;
+            case LunaExtensionParameterAddress::sync_enabled:
+              mSyncEnabled = static_cast<bool>(value);
+              updateDelayTime(); // Update Faust delay when sync
+                                 // enabled/disabled
+              break;
 
-            case LunaExtensionParameterAddress::bitCrush:
-                mBitCrush = value;
-                updateFaustParameter("bitcrush", value);
-                break;
+            case LunaExtensionParameterAddress::bit_crush:
+              mBitCrush = value;
+              updateFaustParameter("bitcrush", value);
+              break;
 
-                // Note: Removed cases for hidden parameters
+            case LunaExtensionParameterAddress::phaser_depth:
+              mPhaserDepth = value;
+              updateFaustParameter("phaser_depth", value);
+              break;
+
+              // Note: Removed cases for hidden parameters
         }
     }
 
@@ -167,7 +185,7 @@ class LunaExtensionDSPKernel
                 return (AUValue)mSpreadAmount;
             case LunaExtensionParameterAddress::output_gain:
                 return (AUValue)mOutputGain;
-            case LunaExtensionParameterAddress::delay_ms:
+            case LunaExtensionParameterAddress::delay_time:
                 return (AUValue)mDelayMs;
             case LunaExtensionParameterAddress::feedback:
                 return (AUValue)mFeedback;
@@ -179,8 +197,10 @@ class LunaExtensionDSPKernel
                 return (AUValue)mLowpass;
             case LunaExtensionParameterAddress::diffusion_amount:
                 return (AUValue)mDiffusionAmount;
-            case LunaExtensionParameterAddress::tape_wear_macro:
-                return (AUValue)mTapeWearMacro;
+            case LunaExtensionParameterAddress::tape_noise_macro:
+              return (AUValue)mTapeWearMacro;
+            case LunaExtensionParameterAddress::wow_flutter_macro:
+              return (AUValue)mWowFlutterMacro;
             case LunaExtensionParameterAddress::glitch_macro:
                 return (AUValue)mGlitchMacro;
             case LunaExtensionParameterAddress::ducking_macro:
@@ -191,14 +211,18 @@ class LunaExtensionDSPKernel
                 return (AUValue)mDuckRelease;
             case LunaExtensionParameterAddress::mix:
                 return (AUValue)mMix;
-            case LunaExtensionParameterAddress::bitCrush:
-                return (AUValue)mBitCrush;
+            case LunaExtensionParameterAddress::bit_crush:
+              return (AUValue)mBitCrush;
+            case LunaExtensionParameterAddress::phaser_depth:
+              return (AUValue)mPhaserDepth;
+            case LunaExtensionParameterAddress::pitch_shift2:
+              return (AUValue)mPitchShift2;
 
             // --- Sync Parameters ---
-            case LunaExtensionParameterAddress::delayTimeSync:
-                return (AUValue)mDelayTimeSync;
-            case LunaExtensionParameterAddress::syncEnabled:
-                return (AUValue)mSyncEnabled;
+            case LunaExtensionParameterAddress::delay_time_sync:
+              return (AUValue)mDelayTimeSync;
+            case LunaExtensionParameterAddress::sync_enabled:
+              return (AUValue)mSyncEnabled;
 
             // Note: Removed cases for hidden parameters
             default:
@@ -390,6 +414,9 @@ class LunaExtensionDSPKernel
     double mDuckRelease     = 200.0;
     double mMix             = 50.0;
     double mBitCrush = 0.0;
+    double mPhaserDepth = 0.0;
+    double mPitchShift2 = 0.0;
+    double mWowFlutterMacro = 0.0;
 
     // --- Sync Parameters ---
     int mDelayTimeSync   = 4;     // Default matches Faust

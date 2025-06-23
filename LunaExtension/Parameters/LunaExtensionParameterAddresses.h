@@ -9,33 +9,28 @@
 
 #include <AudioToolbox/AUParameters.h>
 
-// Renamed delay(ms) to delay_ms as parentheses are not allowed in enum names.
-// Renamed hidden parameters with _orig suffix conceptually, but removed them
-// from the public enum. Added new macro and diffusion parameters.
-
 typedef NS_ENUM(AUParameterAddress, LunaExtensionParameterAddress) {
     // Visible Parameters from Macalla.dsp
     spread_amount = 0,
     output_gain = 1,
-    delay_ms = 2, // Original: 'delay(ms)'
+    delay_time = 2,
     feedback = 3,
     pitch_shift = 4,
-    highpass = 5,         // Original: 'highpass'
-    lowpass = 6,          // Original: 'lowpass'
-    diffusion_amount = 7, // New
-    tape_wear_macro = 8,  // New Macro
-    glitch_macro = 9,     // New Macro
-    ducking_macro = 10,   // New Macro
-    duck_attack = 11,     // Original: 'attack'
-    duck_release = 12,    // Original: 'release'
-    mix = 13,
-
-    // Sync Parameters (New)
-    delayTimeSync = 14,
-    syncEnabled = 15,
-
-    // BitCrush Parameters (New)
-    bitCrush = 16,
+    pitch_shift2 = 5,
+    highpass = 6,
+    lowpass = 7,
+    diffusion_amount = 8,
+    tape_noise_macro = 9,
+    wow_flutter_macro = 10,
+    glitch_macro = 11,
+    ducking_macro = 12,
+    duck_attack = 13,
+    duck_release = 14,
+    mix = 15,
+    delay_time_sync = 16,
+    sync_enabled = 17,
+    bit_crush = 18,
+    phaser_depth = 19,
 
     // Count must be the last element
     ParameterAddressCount
