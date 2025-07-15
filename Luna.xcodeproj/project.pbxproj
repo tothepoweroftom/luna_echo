@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8831611A2DC7C69900531064 /* LunaExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 883161192DC7C69900531064 /* LunaExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8842A4CA2DC8C8CA0075D44A /* Sliders in Frameworks */ = {isa = PBXBuildFile; productRef = 8842A4C92DC8C8CA0075D44A /* Sliders */; };
 		88D434A62DC8C7E7004D9C6D /* Controls in Frameworks */ = {isa = PBXBuildFile; productRef = 88D434A52DC8C7E7004D9C6D /* Controls */; };
+		E28E0E222E0B287C00A4844B /* LunaExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 883161192DC7C69900531064 /* LunaExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		8831611B2DC7C69900531064 /* PBXContainerItemProxy */ = {
+		E28E0E232E0B287C00A4844B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 883160EB2DC7C69800531064 /* Project object */;
 			proxyType = 1;
@@ -23,13 +23,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		8831614B2DC7C69900531064 /* Embed Foundation Extensions */ = {
+		E28E0E252E0B287D00A4844B /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				8831611A2DC7C69900531064 /* LunaExtension.appex in Embed Foundation Extensions */,
+				E28E0E222E0B287C00A4844B /* LunaExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -105,6 +105,7 @@
 			children = (
 				883160F52DC7C69800531064 /* Luna */,
 				8831611D2DC7C69900531064 /* LunaExtension */,
+				E28E0E212E0B287C00A4844B /* Frameworks */,
 				883160F42DC7C69800531064 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -118,6 +119,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		E28E0E212E0B287C00A4844B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -128,12 +136,12 @@
 				883160EF2DC7C69800531064 /* Sources */,
 				883160F02DC7C69800531064 /* Frameworks */,
 				883160F12DC7C69800531064 /* Resources */,
-				8831614B2DC7C69900531064 /* Embed Foundation Extensions */,
+				E28E0E252E0B287D00A4844B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				8831611C2DC7C69900531064 /* PBXTargetDependency */,
+				E28E0E242E0B287C00A4844B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				883160F52DC7C69800531064 /* Luna */,
@@ -246,10 +254,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		8831611C2DC7C69900531064 /* PBXTargetDependency */ = {
+		E28E0E242E0B287C00A4844B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 883161182DC7C69900531064 /* LunaExtension */;
-			targetProxy = 8831611B2DC7C69900531064 /* PBXContainerItemProxy */;
+			targetProxy = E28E0E232E0B287C00A4844B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -486,6 +494,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INSTALL_PATH = /Users/tom/Developer/Luna;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";

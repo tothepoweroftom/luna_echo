@@ -37,5 +37,11 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).AudioUnitViewController</string>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Fonts/Archivo_Black/ArchivoBlack-Regular.ttf</string>
+		<string>Fonts/Azeret_Mono/static/AzeretMono-Light.ttf</string>
+		<string></string>
+	</array>
 </dict>
 </plist>

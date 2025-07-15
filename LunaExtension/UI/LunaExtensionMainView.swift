@@ -9,12 +9,7 @@ struct LunaExtensionMainView: View {
 
     init(
         parameterTree: ObservableAUParameterGroup,
-        initialPresets: [AUAudioUnitPreset],
-        currentPreset: AUAudioUnitPreset?,
-        onLoad: @escaping (AUAudioUnitPreset) -> Void,
-        onSave: @escaping (String) -> AUAudioUnitPreset?,
-        onDelete: @escaping (AUAudioUnitPreset) -> Void,
-        onGetPresets: @escaping () -> [AUAudioUnitPreset]
+        audioUnit: LunaExtensionAudioUnit
     ) {
         self.parameterTree = parameterTree
         tabs = [
@@ -32,12 +27,7 @@ struct LunaExtensionMainView: View {
                 content: AnyView(
                     PresetsSection(
                         parameterTree: parameterTree,
-                        initialPresets: initialPresets,
-                        currentPreset: currentPreset,
-                        onLoad: onLoad,
-                        onSave: onSave,
-                        onDelete: onDelete,
-                        onGetPresets: onGetPresets
+                        audioUnit: audioUnit
                     )))
         ]
     }

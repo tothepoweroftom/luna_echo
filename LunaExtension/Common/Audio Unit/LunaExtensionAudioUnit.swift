@@ -19,9 +19,10 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
 
     // For parameter persistence
     private var _parameterValues = [AUParameterAddress: AUValue]()
+    private var defaultParameterValues = [AUParameterAddress: AUValue]()
 
-    // Preset management
-    private lazy var presetManager = PresetManager(parameterTree: parameterTree)
+    // Private storage for current preset
+    private var _currentPreset: AUAudioUnitPreset?
 
     @objc override init(componentDescription: AudioComponentDescription, options: AudioComponentInstantiationOptions) throws {
         let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!
@@ -43,27 +44,6 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
 
     // MARK: - Class Info
 
-    override public var factoryPresets: [AUAudioUnitPreset]? {
-        // Ensure preset names are initialized before returning
-        return presetManager.factoryPresets.map { preset in
-            if preset.name.isEmpty {
-                // This logic should ideally be in PresetManager, but ensure it runs
-                switch preset.number {
-                case 0: preset.name = "Default"
-                case 1: preset.name = "Vintage Tape"
-                case 2: preset.name = "Glitchy Repeat"
-                case 3: preset.name = "Ambience"
-                default: preset.name = "Preset \(preset.number)"
-                }
-            }
-            return preset
-        }
-    }
-
-    override public var supportsUserPresets: Bool {
-        return true
-    }
-
     override public var componentName: String {
         return "Luna Delay"
     }
@@ -76,34 +56,119 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
         return "Wild Surmise"
     }
 
-    // MARK: - Preset Support
+    // MARK: - Factory Presets
+
+    override public var factoryPresets: [AUAudioUnitPreset]? {
+        return [
+            AUAudioUnitPreset(number: 0, name: "Default"),
+            AUAudioUnitPreset(number: 1, name: "Vintage Tape"),
+            AUAudioUnitPreset(number: 2, name: "Glitchy Repeat"),
+            AUAudioUnitPreset(number: 3, name: "Ambience")
+        ]
+    }
+
+    // Define the parameter values for each factory preset
+    private let factoryPresetValues: [[(LunaExtensionParameterAddress, AUValue)]] = [
+        // Default (preset 0) - will be handled by default parameter values
+        [],
+        // Vintage Tape (preset 1)
+        [
+            (LunaExtensionParameterAddress.tape_noise_macro, 0.65),
+            (LunaExtensionParameterAddress.feedback, 0.68),
+            (LunaExtensionParameterAddress.highpass, 320),
+            (LunaExtensionParameterAddress.lowpass, 6500),
+            (LunaExtensionParameterAddress.delay_time, 350),
+            (LunaExtensionParameterAddress.mix, 45),
+            (LunaExtensionParameterAddress.diffusion_amount, 0.1)
+        ],
+        // Glitchy Repeat (preset 2)
+        [
+            (LunaExtensionParameterAddress.glitch_macro, 0.70),
+            (LunaExtensionParameterAddress.tape_noise_macro, 0.15),
+            (LunaExtensionParameterAddress.delay_time, 220),
+            (LunaExtensionParameterAddress.pitch_shift, -3),
+            (LunaExtensionParameterAddress.feedback, 0.72),
+            (LunaExtensionParameterAddress.mix, 55)
+        ],
+        // Ambience (preset 3)
+        [
+            (LunaExtensionParameterAddress.delay_time, 750),
+            (LunaExtensionParameterAddress.feedback, 0.58),
+            (LunaExtensionParameterAddress.highpass, 180),
+            (LunaExtensionParameterAddress.lowpass, 8000),
+            (LunaExtensionParameterAddress.mix, 38),
+            (LunaExtensionParameterAddress.spread_amount, 0.8),
+            (LunaExtensionParameterAddress.diffusion_amount, 0.45),
+            (LunaExtensionParameterAddress.tape_noise_macro, 0.1)
+        ]
+    ]
+
+    // MARK: - User Preset Support
+
+    override public var supportsUserPresets: Bool {
+        return true
+    }
+
+    // MARK: - Current Preset Handling
 
     override public var currentPreset: AUAudioUnitPreset? {
         get {
-            return presetManager.currentPreset
+            return _currentPreset
         }
         set {
-            presetManager.setPreset(newValue)
+            // If the newValue is nil, return.
+            guard let preset = newValue else {
+                _currentPreset = nil
+                return
+            }
+            
+            // Factory presets have a number >= 0
+            if preset.number >= 0 {
+                applyFactoryPreset(preset.number)
+                _currentPreset = preset
+            }
+            // User presets have a number < 0
+            else {
+                // Attempt to restore the archived state for this user preset
+                do {
+                    fullStateForDocument = try presetState(for: preset)
+                    // Set the currentPreset after successfully restoring the state
+                    _currentPreset = preset
+                } catch {
+                    print("Unable to restore preset \(preset.name): \(error)")
+                }
+            }
         }
     }
 
-    /// All available presets (factory and user)
-    public var allPresets: [AUAudioUnitPreset] {
-        return presetManager.allPresets
+    // MARK: - Factory Preset Application
+
+    private func applyFactoryPreset(_ presetNumber: Int) {
+        guard let parameterTree = parameterTree else { return }
+        
+        // First, reset all parameters to their default values
+        for param in parameterTree.allParameters {
+            if let defaultValue = defaultParameterValues[param.address] {
+                param.value = defaultValue
+                kernel.setParameter(param.address, defaultValue)
+                _parameterValues[param.address] = defaultValue
+            }
+        }
+        
+        // Apply preset-specific values if available
+        if presetNumber > 0 && presetNumber < factoryPresetValues.count {
+            let presetParams = factoryPresetValues[presetNumber]
+            for (paramAddress, value) in presetParams {
+                if let param = parameterTree.parameter(withAddress: paramAddress.rawValue) {
+                    param.value = value
+                    kernel.setParameter(param.address, value)
+                    _parameterValues[param.address] = value
+                }
+            }
+        }
     }
 
-    /// Save the current parameter state as a user preset
-    /// - Parameter name: The name for the preset
-    /// - Returns: The created preset if successful
-    public func saveUserPreset(name: String) -> AUAudioUnitPreset? {
-        return presetManager.saveUserPreset(name: name)
-    }
-
-    /// Delete a user preset
-    /// - Parameter presetName: The name of the preset to delete
-    public func deleteUserPreset(named presetName: String) {
-        presetManager.deleteUserPreset(named: presetName)
-    }
+    // MARK: - Bus Configuration
 
     override public var inputBusses: AUAudioUnitBusArray {
         return _inputBusses
@@ -183,17 +248,15 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
         for param in parameterTree.allParameters {
             kernel.setParameter(param.address, param.value)
             // Store default values
+            defaultParameterValues[param.address] = param.value
             _parameterValues[param.address] = param.value
         }
 
         setupParameterCallbacks()
 
-        // Initialize the preset manager with the parameter tree
-        presetManager = PresetManager(parameterTree: parameterTree)
-
-        // Ensure the current preset is set to the first factory preset
+        // Set the default preset to the first factory preset
         if currentPreset == nil {
-            currentPreset = presetManager.factoryPresets.first
+            currentPreset = factoryPresets?.first
         }
     }
 
@@ -243,13 +306,16 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
             }
             fullStateDict["parameters"] = paramValues
 
-            // Add preset information using the PresetManager
-            // Make sure keys here don't clash unexpectedly with super.fullState keys
-            let presetState = presetManager.addStateData(to: [:]) // Get only preset state
-            fullStateDict.merge(presetState) { _, new in new } // Merge preset state in
+            // Add current preset information for proper state restoration
+            if let currentPreset = _currentPreset {
+                if currentPreset.number >= 0 {
+                    fullStateDict["factoryPreset"] = currentPreset.number
+                } else {
+                    fullStateDict["userPreset"] = currentPreset.name
+                }
+            }
 
-            // Ensure the 'type' key expected by auval is present, derived from componentDescription
-            // This might be redundant if super.fullState provides it, but safe to ensure.
+            // Ensure required keys for auval validation
             if fullStateDict["type"] == nil {
                 fullStateDict["type"] = componentDescription.componentType
             }
@@ -263,14 +329,12 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
             return fullStateDict
         }
         set {
-            // When setting state, pass the relevant parts to the superclass if necessary,
-            // although the default AUAudioUnit setter might handle this.
-            // For now, we focus on restoring our custom state.
-            super.fullState = newValue // Let superclass handle its part
+            // Let superclass handle its part
+            super.fullState = newValue
 
             guard let newFullState = newValue else { return }
 
-            // Restore parameters (as before)
+            // Restore parameters
             if let paramValues = newFullState["parameters"] as? [String: Double] {
                 _parameterValues.removeAll()
                 for (addressStr, value) in paramValues {
@@ -282,22 +346,15 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
                 }
             }
 
-            // Restore preset information using the PresetManager (as before)
-            presetManager.restoreStateData(from: newFullState)
-
-            // Update the currentPreset property based on restored state
-            // This ensures the getter for currentPreset reflects the restored state
+            // Restore current preset information
             if let factoryPresetNumber = newFullState["factoryPreset"] as? NSNumber {
-                currentPreset = presetManager.getFactoryPreset(number: factoryPresetNumber.intValue)
+                _currentPreset = factoryPresets?.first { $0.number == factoryPresetNumber.intValue }
             } else if let userPresetName = newFullState["userPreset"] as? String {
-                // Need a way to get/create user preset object from name
-                // For now, setting via presetManager should update internal state
-                // self.currentPreset = ??? // How to get the AUAudioUnitPreset object?
-                // Relying on presetManager.restoreStateData to have set the internal currentPreset
-                currentPreset = presetManager.currentPreset // Update local property
+                // Create a temporary preset object for user presets
+                _currentPreset = AUAudioUnitPreset(number: -1, name: userPresetName)
             } else {
-                // If no preset info in state, maybe default?
-                currentPreset = presetManager.factoryPresets.first
+                // Default to first factory preset if no preset info in state
+                _currentPreset = factoryPresets?.first
             }
         }
     }
@@ -309,24 +366,5 @@ public class LunaExtensionAudioUnit: AUAudioUnit, @unchecked Sendable {
         set {
             fullState = newValue
         }
-    }
-
-    // MARK: - Factory Presets
-
-    /// Make sure factory presets have proper names for display
-    public func getPresets() -> [AUAudioUnitPreset] {
-        // Initialize preset names if they aren't already
-        for preset in presetManager.factoryPresets {
-            if preset.name.isEmpty {
-                switch preset.number {
-                case 0: preset.name = "Default"
-                case 1: preset.name = "Vintage Tape"
-                case 2: preset.name = "Glitchy Repeat"
-                case 3: preset.name = "Ambience"
-                default: preset.name = "Preset \(preset.number)"
-                }
-            }
-        }
-        return presetManager.factoryPresets
     }
 }

@@ -63,24 +63,26 @@ class AudioUnitHostModel {
     }
 
     private func loadAudioUnit() {
-        Task {
-            let viewController = await playEngine.initComponent(type: type, subType: subType, manufacturer: manufacturer)
-
-            if let audioUnit = playEngine.avAudioUnit {
-                Task { @MainActor in
-                    let (validationResult, validationData) = await validateAU(audioUnit: audioUnit)
-                    self.validationResult = validationResult
-                    self.currentValidationData = validationData
-                }
-            }
+        playEngine.initComponent(type: type,
+                                 subType: subType,
+                                 manufacturer: manufacturer) { [self] result, viewController in
+            switch result {
+            case .success(_):
                 self.viewModel = AudioUnitViewModel(showAudioControls: self.wantsAudio,
                                                     showMIDIContols: self.wantsMIDI,
                                                     title: self.auValString,
                                                     message: "Successfully loaded (\(self.auValString))",
                                                     viewController: viewController)
-                
+
                 if self.isFreeRunning {
                     self.playEngine.startPlaying()
+                }
+            case .failure(let error):
+                self.viewModel = AudioUnitViewModel(showAudioControls: false,
+                                                    showMIDIContols: false,
+                                                    title: self.auValString,
+                                                    message: "Failed to load Audio Unit with error: \(error.localizedDescription)",
+                                                    viewController: nil)
             }
         }
     }

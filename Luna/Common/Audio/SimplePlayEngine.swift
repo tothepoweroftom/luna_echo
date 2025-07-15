@@ -103,26 +103,66 @@ public class SimplePlayEngine {
         }
     }
     
-    func initComponent(type: String, subType: String, manufacturer: String) async -> ViewController? {
+    // func initComponent(type: String, subType: String, manufacturer: String) async -> ViewController? {
+    //     // Reset the engine to remove any configured audio units.
+    //     reset()
+
+    //     guard let component = AVAudioUnit.findComponent(type: type, subType: subType, manufacturer: manufacturer) else {
+    //         fatalError("Failed to find component with type: \(type), subtype: \(subType), manufacturer: \(manufacturer))" )
+    //     }
+
+    //     // Instantiate the audio unit.
+    //     do {
+    //         let audioUnit = try await AVAudioUnit.instantiate(
+    //             with: component.audioComponentDescription, options: AudioComponentInstantiationOptions.loadOutOfProcess)
+
+    //         self.avAudioUnit = audioUnit
+
+    //         self.connect(avAudioUnit: audioUnit)
+
+    //         return await audioUnit.loadAudioUnitViewController()
+    //     } catch {
+    //         return nil
+    //     }
+    // }
+    func initComponent(
+        type: String, subType: String, manufacturer: String,
+        completion: @escaping (Result<Bool, Error>, ViewController?) -> Void
+    ) {
         // Reset the engine to remove any configured audio units.
         reset()
         
         guard let component = AVAudioUnit.findComponent(type: type, subType: subType, manufacturer: manufacturer) else {
-            fatalError("Failed to find component with type: \(type), subtype: \(subType), manufacturer: \(manufacturer))" )
+            let error = NSError(
+                domain: "", code: 0,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "Failed to find component with type: \(type), subtype: \(subType), manufacturer: \(manufacturer)"
+                ])
+            completion(.failure(error), nil)
+            return
         }
         
         // Instantiate the audio unit.
-        do {
-            let audioUnit = try await AVAudioUnit.instantiate(
-                with: component.audioComponentDescription, options: AudioComponentInstantiationOptions.loadOutOfProcess)
+        AVAudioUnit.instantiate(
+            with: component.audioComponentDescription,
+            options: AudioComponentInstantiationOptions.loadOutOfProcess
+        ) { avAudioUnit, error in
+
+            guard let audioUnit = avAudioUnit, error == nil else {
+                completion(.failure(error!), nil)
+                return
+            }
             
             self.avAudioUnit = audioUnit
             
             self.connect(avAudioUnit: audioUnit)
             
-            return await audioUnit.loadAudioUnitViewController()
-        } catch {
-            return nil
+            // Load view controller and call completion handler
+            Task {
+                let viewController = await audioUnit.loadAudioUnitViewController()
+                completion(.success(true), viewController)
+            }
         }
     }
     
