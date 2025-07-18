@@ -1,52 +1,63 @@
-import SwiftUI
+import AudioPluginUI
 import AudioToolbox
+import SwiftUI
 
 struct LunaExtensionMainView: View {
-    var parameterTree: ObservableAUParameterGroup
+    var parameterTree: APParameterGroup
     @State private var selectedTabIndex: Int = 0
 
-    private let tabs: [TabData]
+    private let tabs: [APTabData]
 
     init(
-        parameterTree: ObservableAUParameterGroup,
+        parameterTree: APParameterGroup,
         audioUnit: LunaExtensionAudioUnit
     ) {
         self.parameterTree = parameterTree
         tabs = [
-            TabData(
+            APTabData(
                 id: 0, title: "Main", color: Color(hex: "#121420"),
-                content: AnyView(CoreToneSection(parameterTree: parameterTree))),
-            TabData(
+                textColor: Color(hex: "#ffffff"),
+                content: { CoreToneSection(parameterTree: parameterTree) }
+            ),
+            APTabData(
                 id: 1, title: "Character", color: Color(hex: "#1B2432"),
-                content: AnyView(CharacterSection(parameterTree: parameterTree))),
-            TabData(
+                textColor: Color(hex: "#ffffff"),
+                content: { CharacterSection(parameterTree: parameterTree) }
+            ),
+            APTabData(
                 id: 2, title: "Dynamics", color: Color(hex: "#242F42"),
-                content: AnyView(DynamicsOutputSection(parameterTree: parameterTree))),
-            TabData(
+                textColor: Color(hex: "#ffffff"),
+                content: { DynamicsOutputSection(parameterTree: parameterTree) }
+            ),
+            APTabData(
                 id: 3, title: "Presets", color: Color(hex: "#F0EFF4"),
-                content: AnyView(
+                textColor: Color(hex: "#000000"),
+                content: {
                     PresetsSection(
                         parameterTree: parameterTree,
                         audioUnit: audioUnit
-                    )))
+                    )
+                }
+            ),
         ]
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            if geometry.size.width > geometry.size.height {
-                HorizontalAccordionView(
-                    tabs: tabs,
-                    selectedTabIndex: $selectedTabIndex
-                )
-            } else {
-                VerticalAccordionView(
-                    tabs: tabs,
-                    selectedTabIndex: $selectedTabIndex
-                )
+        ThemeContext(theme: .lunaEcho) {
+            GeometryReader { geometry in
+                if geometry.size.width > geometry.size.height {
+                    APHorizontalAccordion(
+                        tabs: tabs,
+                        selectedTabIndex: $selectedTabIndex
+                    )
+                } else {
+                    APVerticalAccordion(
+                        tabs: tabs,
+                        selectedTabIndex: $selectedTabIndex
+                    )
+                }
             }
+            .frame(minWidth: 300, minHeight: 300)
         }
-        .frame(minWidth: 300, minHeight: 300)
-        .background(Color(hex: "#121420"))
     }
 }

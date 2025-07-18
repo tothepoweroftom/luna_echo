@@ -8,6 +8,7 @@
 import Combine
 import CoreAudioKit
 import os
+import AudioPluginUI
 import SwiftUI
 
 private let log = Logger(subsystem: "com.wildsurmisemusic.LunaExtension", category: "AudioUnitViewController")

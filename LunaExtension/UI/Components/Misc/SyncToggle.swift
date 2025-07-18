@@ -1,5 +1,6 @@
 import AVFoundation
 import SwiftUI
+import AudioPluginUI
 
 struct SyncToggle: View {
     @ObservedObject var synced: ObservableAUParameter

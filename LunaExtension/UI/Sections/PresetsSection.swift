@@ -1,19 +1,23 @@
 import SwiftUI
 import AudioToolbox
+import AudioPluginUI
 
 struct PresetsSection: View {
-    var parameterTree: ObservableAUParameterGroup
-    @StateObject private var audioUnitWrapper: AudioUnitWrapper
+    var parameterTree: APParameterGroup
+    @StateObject private var presetManager = APSimplePresetManager()
 
     init(
-        parameterTree: ObservableAUParameterGroup,
+        parameterTree: APParameterGroup,
         audioUnit: LunaExtensionAudioUnit
     ) {
         self.parameterTree = parameterTree
-        _audioUnitWrapper = StateObject(wrappedValue: AudioUnitWrapper(audioUnit: audioUnit))
     }
 
     var body: some View {
-        PresetView(audioUnitWrapper: audioUnitWrapper)
+        VStack {
+            // Use the new AudioPluginUI preset manager
+            APPresetManagerView(manager: presetManager)
+                .frame(maxHeight: .infinity)
+        }
     }
 } 
