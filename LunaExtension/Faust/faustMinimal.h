@@ -9,6 +9,6 @@
 
 << includeIntrinsic >>
 
-    << includeclass >>
+  << includeclass >>
 
-    // END-FAUSTDSP
+  // END-FAUSTDSP

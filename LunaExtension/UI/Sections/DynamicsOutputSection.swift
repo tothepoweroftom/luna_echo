@@ -37,15 +37,6 @@ struct DynamicsOutputSection: View {
 
                 APArcSlider(param: parameterTree.global.highpass)
                     .frame(width: sliderSize, height: sliderSize + 20)
-
-                // TwoHandledParameterSlider for filters
-                // TwoHandledParameterSlider(
-                //     lowParam: parameterTree.global.highpass,
-                //     highParam: parameterTree.global.lowpass,
-                //     horizontal: true,
-                //     range: 20...20000
-                // )
-                // .frame(height: 70)
             }
             .padding(.horizontal, 16)
         }

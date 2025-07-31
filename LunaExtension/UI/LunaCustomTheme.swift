@@ -11,7 +11,7 @@ extension AudioPluginTheme {
             primaryText: Color.white,
             secondaryText: Color.white.opacity(0.8),
             disabledText: Color.gray,
-            controlBackground: Color(hex: "#333333"),
+            controlBackground: Color(hex: "#ffffff").opacity(0.23),
             controlForeground: Color.white,
             controlBorder: Color.white,
             selected: Color.white,
@@ -25,14 +25,14 @@ extension AudioPluginTheme {
             shadow: Color.black.opacity(0.3)
         ),
         typography: AudioPluginTheme.Typography(
-            title: .custom("Archivo_Black", size: 20),
-            headline: .custom("Archivo_Black", size: 16),
-            body: .custom("Archivo_Black", size: 13),
-            caption: .custom("Archivo_Black", size: 11),
-            callout: .custom("Archivo_Black", size: 14),
-            footnote: .custom("Archivo_Black", size: 10),
-            parameterLabel: .custom("Azeret_Mono", size: 11),
-            parameterValue: .custom("Azeret_Mono", size: 11)
+            title: .custom("ArchivoBlack-Regular", size: 20),
+            headline: .custom("ArchivoBlack-Regular", size: 16),
+            body: .custom("ArchivoBlack-Regular", size: 13),
+            caption: .custom("ArchivoBlack-Regular", size: 11),
+            callout: .custom("ArchivoBlack-Regular", size: 14),
+            footnote: .custom("ArchivoBlack-Regular", size: 10),
+            parameterLabel: .custom("AzeretMono-Black", size: 11),
+            parameterValue: .custom("AzeretMono-Black", size: 11)
         ),
         controls: AudioPluginTheme.Controls(
             knobs: AudioPluginTheme.KnobStyle(
