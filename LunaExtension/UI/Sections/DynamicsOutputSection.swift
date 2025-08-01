@@ -1,45 +1,35 @@
-import SwiftUI
-import AudioToolbox
 import AudioPluginUI
+import AudioToolbox
+import SwiftUI
 
 struct DynamicsOutputSection: View {
     var parameterTree: APParameterGroup
 
-    let gridColumns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16),
-    ]
-
     var body: some View {
-        GeometryReader { geometry in
-            let sliderSize = min((geometry.size.width - 64) / 3, 100)  // Adaptive sizing with padding
-
-            LazyVGrid(columns: gridColumns, spacing: 16) {
-                // ArcSlider for ducking macro
-                APArcSlider(param: parameterTree.global.ducking_macro)
-                    .frame(width: sliderSize, height: sliderSize + 20)
-
-                // ArcSlider for duck attack
-                APArcSlider(param: parameterTree.global.duck_attack)
-                    .frame(width: sliderSize, height: sliderSize + 20)
-
-                // ArcSlider for duck release
-                APArcSlider(param: parameterTree.global.duck_release)
-                    .frame(width: sliderSize, height: sliderSize + 20)
-
-                // ArcSlider for output gain
-                APArcSlider(param: parameterTree.global.output_gain)
-                    .frame(width: sliderSize, height: sliderSize + 20)
-
-                APArcSlider(param: parameterTree.global.lowpass)
-                    .frame(width: sliderSize, height: sliderSize + 20)
-
-                APArcSlider(param: parameterTree.global.highpass)
-                    .frame(width: sliderSize, height: sliderSize + 20)
+        VStack {
+            HStack(spacing: 16) {
+                ArcKnob(
+                    param: parameterTree.global.ducking_macro,
+                    range: 0.0...1.0
+                )
+                .frame(maxWidth: .infinity)
+                ArcKnob(
+                    param: parameterTree.global.duck_attack,
+                    range: 1.0...100.0
+                )
+                .frame(maxWidth: .infinity)
+                ArcKnob(
+                    param: parameterTree.global.duck_release,
+                    range: 50.0...1000.0
+                )
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 16)
+            .frame(maxHeight: .infinity)
+            CustomParameterSlider(
+                param: parameterTree.global.output_gain
+            )
+            .frame(maxHeight: 60)
         }
-        .colorScheme(.dark)
+        .padding()
     }
-} 
+}

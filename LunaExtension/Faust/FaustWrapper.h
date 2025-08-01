@@ -4,7 +4,7 @@
 #include <memory>
 #include <span>
 #include <vector>
-
+#include <iostream>
 // Include Faust-generated header which contains all needed definitions
 #include "Macalla.h"
 
@@ -47,6 +47,14 @@ class FaustWrapper
 
         // Set up UI controls
         fDSP->buildUserInterface(fUI.get());
+
+        // Print all parameters
+        // Get map
+        auto map = fUI->getMap();
+        for (auto& [key, value] : map)
+        {
+            fprintf(stderr, "Parameter: %s = %f\n", key.c_str(), value);
+        }
 
         // Initialize DSP with sample rate
         fDSP->init(static_cast<int>(fSampleRate));

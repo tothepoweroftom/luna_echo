@@ -43,15 +43,15 @@ class LunaExtensionDSPKernel
             mFaustWrapper->setParameter("highpass", mHighpass);
             mFaustWrapper->setParameter("lowpass", mLowpass);
             mFaustWrapper->setParameter("diffusion", mDiffusionAmount);
-            mFaustWrapper->setParameter("tape_noise", mTapeWearMacro);
-            mFaustWrapper->setParameter("wow_flutter", mWowFlutterMacro);
-            mFaustWrapper->setParameter("glitch", mGlitchMacro);
-            mFaustWrapper->setParameter("ducking_amount", mDuckingMacro);
+            mFaustWrapper->setParameter("Tape Noise", mTapeWearMacro);
+            mFaustWrapper->setParameter("Wow & Flutter", mWowFlutterMacro);
+            mFaustWrapper->setParameter("Glitch", mGlitchMacro);
+            mFaustWrapper->setParameter("Ducking Amount", mDuckingMacro);
             mFaustWrapper->setParameter("duck_attack", mDuckAttack);
             mFaustWrapper->setParameter("duck_release", mDuckRelease);
             mFaustWrapper->setParameter("mix", mMix);
-            mFaustWrapper->setParameter("bitcrush", mBitCrush);
-            mFaustWrapper->setParameter("phaser_depth", mPhaserDepth);
+            mFaustWrapper->setParameter("BitCrush Enable", mBitCrush);
+            mFaustWrapper->setParameter("phaserDepth", mPhaserDepth);
         }
     }
 
@@ -83,7 +83,11 @@ class LunaExtensionDSPKernel
 
             case LunaExtensionParameterAddress::delay_time:
                 mDelayMs = value;
-                updateFaustParameter("delaytime", value);
+                if (!mSyncEnabled) {
+                    updateFaustParameter("delaytime", value);
+                } else {
+                    updateDelayTime(); // Recalculate synced delay
+                }
                 break;
 
             case LunaExtensionParameterAddress::feedback:
@@ -118,22 +122,22 @@ class LunaExtensionDSPKernel
 
             case LunaExtensionParameterAddress::tape_noise_macro:
               mTapeWearMacro = value;
-              updateFaustParameter("tape_noise", value);
+              updateFaustParameter("Tape Noise", value);
               break;
 
             case LunaExtensionParameterAddress::wow_flutter_macro:
               mWowFlutterMacro = value;
-              updateFaustParameter("wow_flutter", value);
+              updateFaustParameter("Wow & Flutter", value);
               break;
 
             case LunaExtensionParameterAddress::glitch_macro:
                 mGlitchMacro = value;
-                updateFaustParameter("glitch", value);
+                updateFaustParameter("Glitch", value);
                 break;
 
             case LunaExtensionParameterAddress::ducking_macro:
                 mDuckingMacro = value;
-                updateFaustParameter("ducking_amount", value);
+                updateFaustParameter("Ducking Amount", value);
                 break;
 
             case LunaExtensionParameterAddress::duck_attack:
@@ -165,12 +169,12 @@ class LunaExtensionDSPKernel
 
             case LunaExtensionParameterAddress::bit_crush:
               mBitCrush = value;
-              updateFaustParameter("bitcrush", value);
+              updateFaustParameter("BitCrush Enable", value);
               break;
 
             case LunaExtensionParameterAddress::phaser_depth:
               mPhaserDepth = value;
-              updateFaustParameter("phaser_depth", value);
+              updateFaustParameter("phaserDepth", value);
               break;
 
               // Note: Removed cases for hidden parameters
@@ -351,24 +355,24 @@ class LunaExtensionDSPKernel
             // Map mDelayTimeSync index (0-17) to note duration multipliers
             // Matches valueStrings in Parameters.swift
             double multipliers[] = {
-                1.0 / 24.0, // 1/64T (1/16 * 2/3)
-                1.0 / 16.0, // 1/64
-                1.0 / 16.0, // 1/32T (1/8 * 2/3)
-                1.0 / 8.0,  // 1/32
-                1.0 / 8.0,  // 1/16T (1/4 * 2/3)
-                1.0 / 4.0,  // 1/16
-                1.0 / 4.0,  // 1/8T (1/2 * 2/3)
-                1.0 / 2.0,  // 1/8
-                1.0 / 2.0,  // 1/4T (1 * 2/3)
-                1.0,        // 1/4
-                1.0 * 1.5,  // 1/2T (2 * 2/3)
-                2.0,        // 1/2
-                2.0 * 1.5,  // 1/1T (4 * 2/3)
-                4.0,        // 1/1
-                4.0 * 1.5,  // 2/1T (8 * 2/3)
-                8.0,        // 2/1
-                8.0 * 1.5,  // 4/1T (16 * 2/3)
-                16.0        // 4/1
+                1.0 / 64.0 * (2.0/3.0), // 1/64T (triplet)
+                1.0 / 64.0,             // 1/64
+                1.0 / 32.0 * (2.0/3.0), // 1/32T (triplet)
+                1.0 / 32.0,             // 1/32
+                1.0 / 16.0 * (2.0/3.0), // 1/16T (triplet)
+                1.0 / 16.0,             // 1/16
+                1.0 / 8.0 * (2.0/3.0),  // 1/8T (triplet)
+                1.0 / 8.0,              // 1/8
+                1.0 / 4.0 * (2.0/3.0),  // 1/4T (triplet)
+                1.0 / 4.0,              // 1/4
+                1.0 / 2.0 * (2.0/3.0),  // 1/2T (triplet)
+                1.0 / 2.0,              // 1/2
+                1.0 * (2.0/3.0),        // 1/1T (triplet)
+                1.0,                    // 1/1
+                2.0 * (2.0/3.0),        // 2/1T (triplet)
+                2.0,                    // 2/1
+                4.0 * (2.0/3.0),        // 4/1T (triplet)
+                4.0                     // 4/1
             };
 
             if (mDelayTimeSync >= 0 && mDelayTimeSync < std::size(multipliers))

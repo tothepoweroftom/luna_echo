@@ -4,7 +4,7 @@ import SwiftUI
 extension AudioPluginTheme {
     static let lunaEcho = AudioPluginTheme(
         colors: AudioPluginTheme.ColorScheme(
-            primary: Color(hex: "#ff0000"),
+            primary: Color(hex: "#ffffff"),
             secondary: Color(hex: "#cccccc"),
             accent: Color(hex: "#ffffff"),
             background: Color(hex: "#000000"),

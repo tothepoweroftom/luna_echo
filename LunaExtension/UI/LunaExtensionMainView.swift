@@ -25,12 +25,17 @@ struct LunaExtensionMainView: View {
                 content: { CharacterSection(parameterTree: parameterTree) }
             ),
             APTabData(
-                id: 2, title: "Dynamics", color: Color(hex: "#242F42"),
+                id: 2, title: "Pitch & Glitch", color: Color(hex: "#242F42"),
+                textColor: Color(hex: "#ffffff"),
+                content: { PitchAndGlitchSection(parameterTree: parameterTree) }
+            ),
+            APTabData(
+                id: 3, title: "Dynamics", color: Color(hex: "#2B384F"),
                 textColor: Color(hex: "#ffffff"),
                 content: { DynamicsOutputSection(parameterTree: parameterTree) }
             ),
             APTabData(
-                id: 3, title: "Presets", color: Color(hex: "#F0EFF4"),
+                id: 4, title: "Presets", color: Color(hex: "#C7D4E2"),
                 textColor: Color(hex: "#000000"),
                 content: {
                     PresetsSection(
