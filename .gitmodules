@@ -1,0 +1,3 @@
+[submodule "vendor/AudioPluginUI"]
+	path = vendor/AudioPluginUI
+	url = git@github.com:Wild-Surmise/AudioPluginUI.git
