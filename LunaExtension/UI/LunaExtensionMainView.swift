@@ -50,16 +50,26 @@ struct LunaExtensionMainView: View {
     var body: some View {
         ThemeContext(theme: .lunaEcho) {
             GeometryReader { geometry in
-                if geometry.size.width > geometry.size.height {
+                let w = geometry.size.width
+                let h = geometry.size.height
+                let isLandscape = w > h
+                let small = min(w, h) < 420
+                if isLandscape {
                     APHorizontalAccordion(
                         tabs: tabs,
                         selectedTabIndex: $selectedTabIndex
                     )
+                    .collapsedWidth(small ? 40 : 60)
+                    .titleFrameSize(CGSize(width: small ? 110 : 150, height: small ? 44 : 60))
+                    .contentAnimationDelay(0.05)
                 } else {
                     APVerticalAccordion(
                         tabs: tabs,
                         selectedTabIndex: $selectedTabIndex
                     )
+                    .headerHeight(small ? 40 : 60)
+                    .collapsedHeight(small ? 36 : 44)
+                    .contentAnimationDelay(0.05)
                 }
             }
             .frame(minWidth: 300, minHeight: 300)

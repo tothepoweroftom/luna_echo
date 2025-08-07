@@ -202,7 +202,7 @@
 			mainGroup = 883160EA2DC7C69800531064;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				8858A2E92E2A7317002F09F2 /* XCLocalSwiftPackageReference "AudioPluginUI" */,
+				E20AD3062E45370C0053CB85 /* XCLocalSwiftPackageReference "vendor/AudioPluginUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 883160F42DC7C69800531064 /* Products */;
@@ -598,9 +598,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		8858A2E92E2A7317002F09F2 /* XCLocalSwiftPackageReference "AudioPluginUI" */ = {
+		E20AD3062E45370C0053CB85 /* XCLocalSwiftPackageReference "vendor/AudioPluginUI" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = AudioPluginUI;
+			relativePath = vendor/AudioPluginUI;
 		};
 /* End XCLocalSwiftPackageReference section */
 
