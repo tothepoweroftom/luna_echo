@@ -1,8 +1,30 @@
 import AudioPluginUI
 import SwiftUI
 
+#if DEBUG
+// Debug helper to print available font families
+private func debugFonts() {
+    #if os(iOS)
+    print("=== Available Font Families ===")
+    for family in UIFont.familyNames.sorted() {
+        if family.lowercased().contains("archivo") || family.lowercased().contains("azeret") {
+            print("Family: \(family)")
+            for font in UIFont.fontNames(forFamilyName: family) {
+                print("  - \(font)")
+            }
+        }
+    }
+    #endif
+}
+#endif
+
 extension AudioPluginTheme {
-    static let lunaEcho = AudioPluginTheme(
+    static let lunaEcho: AudioPluginTheme = {
+        #if DEBUG
+        debugFonts()
+        #endif
+        
+        return AudioPluginTheme(
         colors: AudioPluginTheme.ColorScheme(
             primary: Color(hex: "#ffffff"),
             secondary: Color(hex: "#cccccc"),
@@ -25,14 +47,14 @@ extension AudioPluginTheme {
             shadow: Color.black.opacity(0.3)
         ),
         typography: AudioPluginTheme.Typography(
-            title: .custom("ArchivoBlack-Regular", size: 20),
-            headline: .custom("ArchivoBlack-Regular", size: 16),
-            body: .custom("ArchivoBlack-Regular", size: 13),
-            caption: .custom("ArchivoBlack-Regular", size: 11),
-            callout: .custom("ArchivoBlack-Regular", size: 14),
-            footnote: .custom("ArchivoBlack-Regular", size: 10),
-            parameterLabel: .custom("AzeretMono-Black", size: 11),
-            parameterValue: .custom("AzeretMono-Black", size: 11)
+            title: Font.custom("Archivo Black", size: 20),
+            headline: Font.custom("Archivo Black", size: 16),
+            body: Font.custom("Archivo Black", size: 13),
+            caption: Font.custom("Archivo Black", size: 11),
+            callout: Font.custom("Archivo Black", size: 14),
+            footnote: Font.custom("Archivo Black", size: 10),
+            parameterLabel: Font.custom("Azeret Mono Black", size: 11),
+            parameterValue: Font.custom("Azeret Mono Black", size: 11)
         ),
         controls: AudioPluginTheme.Controls(
             knobs: AudioPluginTheme.KnobStyle(
@@ -57,5 +79,6 @@ extension AudioPluginTheme {
         ),
         layout: AudioPluginTheme.Layout.default,
         animations: AudioPluginTheme.Animations.default
-    )
+        )
+    }()
 }

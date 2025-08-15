@@ -125,35 +125,12 @@ public class AudioUnitViewController: AUViewController, AUAudioUnitFactory {
 		host.view.translatesAutoresizingMaskIntoConstraints = false
         #if os(iOS)
         let isPad = UIDevice.current.userInterfaceIdiom == .pad
-        if isPad {
-            let maxWidth: CGFloat = 1000
-            let maxHeight: CGFloat = 500
-
-            let widthCap = host.view.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth)
-            widthCap.isActive = true
-            let heightCap = host.view.heightAnchor.constraint(lessThanOrEqualToConstant: maxHeight)
-            heightCap.isActive = true
-
-            let widthEqual = host.view.widthAnchor.constraint(equalTo: view.widthAnchor)
-            widthEqual.priority = UILayoutPriority(750)
-            widthEqual.isActive = true
-            let heightEqual = host.view.heightAnchor.constraint(equalTo: view.heightAnchor)
-            heightEqual.priority = UILayoutPriority(750)
-            heightEqual.isActive = true
-
-            host.view.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-            host.view.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-
-            host.view.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor).isActive = true
-            host.view.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor).isActive = true
-            host.view.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor).isActive = true
-            host.view.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor).isActive = true
-        } else {
+   
             host.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
             host.view.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
             host.view.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
             host.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        }
+   
         #else
         host.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         host.view.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true

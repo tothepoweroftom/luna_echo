@@ -29,10 +29,10 @@ struct ContentView: View {
                     ValidationView(hostModel: hostModel, isSheetPresented: $isSheetPresented)
                 } else {
                     VStack {
-                        Text("\(hostModel.viewModel.title)")
-                            .textSelection(.enabled)
-                            .bold()
-                        ValidationView(hostModel: hostModel, isSheetPresented: $isSheetPresented)
+//                        Text("\(hostModel.viewModel.title)")
+//                            .textSelection(.enabled)
+//                            .bold()
+//                        ValidationView(hostModel: hostModel, isSheetPresented: $isSheetPresented)
                         if let viewController = hostModel.viewModel.viewController {
                             AUViewControllerUI(viewController: viewController)
                                 .padding(margin)
