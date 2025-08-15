@@ -2,6 +2,52 @@ import AudioPluginUI
 import AudioToolbox
 import SwiftUI
 
+struct PluginBar: View {
+    @Environment(\.audioPluginTheme) private var theme
+    let isHorizontal: Bool
+    let collapsedWidth: CGFloat
+    let collapsedHeight: CGFloat
+    let titleFrameSize: CGSize
+    
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Color.black
+            
+            if isHorizontal {
+                // Horizontal accordion style - vertical title in collapsed width
+                VStack {
+                    Spacer()
+                    Text("Luna Echo")
+                        .font(theme.typography.headline)
+                        .rotationEffect(.degrees(theme.layout.accordion.titleRotation))
+                        .fixedSize()
+                        .frame(width: titleFrameSize.width, height: titleFrameSize.height)
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+                .frame(width: collapsedWidth)
+                .clipped()
+            } else {
+                // Vertical accordion style - horizontal title in collapsed height
+                HStack {
+                    Text("Luna Echo")
+                        .font(theme.typography.headline)
+                        .padding()
+                        .foregroundColor(.white)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: collapsedHeight)
+            }
+        }
+        .frame(
+            maxWidth: isHorizontal ? collapsedWidth : .infinity,
+            maxHeight: isHorizontal ? .infinity : collapsedHeight
+        )
+        .clipped()
+    }
+}
+
 struct LunaExtensionMainView: View {
     var parameterTree: APParameterGroup
     @State private var selectedTabIndex: Int = 0
@@ -54,22 +100,47 @@ struct LunaExtensionMainView: View {
                 let h = geometry.size.height
                 let isLandscape = w > h
                 let small = min(w, h) < 420
+                let collapsedWidth: CGFloat = small ? 40 : 60
+                let collapsedHeight: CGFloat = small ? 36 : 44
+                
                 if isLandscape {
-                    APHorizontalAccordion(
-                        tabs: tabs,
-                        selectedTabIndex: $selectedTabIndex
-                    )
-                    .collapsedWidth(small ? 40 : 60)
-                    .titleFrameSize(CGSize(width: small ? 110 : 150, height: small ? 44 : 60))
-                    .contentAnimationDelay(0.05)
+                    HStack(spacing: 0) {
+                        // Fixed Luna Echo bar on the left
+                        PluginBar(
+                            isHorizontal: true,
+                            collapsedWidth: collapsedWidth,
+                            collapsedHeight: collapsedHeight,
+                            titleFrameSize: CGSize(width: small ? 110 : 150, height: small ? 44 : 60)
+                        )
+                        
+                        // Accordion content
+                        APHorizontalAccordion(
+                            tabs: tabs,
+                            selectedTabIndex: $selectedTabIndex
+                        )
+                        .collapsedWidth(collapsedWidth)
+                        .titleFrameSize(CGSize(width: small ? 110 : 150, height: small ? 44 : 60))
+                        .contentAnimationDelay(0.05)
+                    }
                 } else {
-                    APVerticalAccordion(
-                        tabs: tabs,
-                        selectedTabIndex: $selectedTabIndex
-                    )
-                    .headerHeight(small ? 40 : 60)
-                    .collapsedHeight(small ? 36 : 44)
-                    .contentAnimationDelay(0.05)
+                    VStack(spacing: 0) {
+                        // Fixed Luna Echo bar on the top
+                        PluginBar(
+                            isHorizontal: false,
+                            collapsedWidth: collapsedWidth,
+                            collapsedHeight: collapsedHeight,
+                            titleFrameSize: CGSize(width: small ? 110 : 150, height: small ? 44 : 60)
+                        )
+                        
+                        // Accordion content
+                        APVerticalAccordion(
+                            tabs: tabs,
+                            selectedTabIndex: $selectedTabIndex
+                        )
+                        .headerHeight(small ? 40 : 60)
+                        .collapsedHeight(collapsedHeight)
+                        .contentAnimationDelay(0.05)
+                    }
                 }
             }
             .frame(minWidth: 300, minHeight: 300)
