@@ -182,23 +182,31 @@ with {
             bitcrusher(nbits,x) = x :abs: *(scaler(nbits)) : custom_round : /(scaler(nbits)) * (2*(x>0)-1.0);
 
             // Diffusion allpass network
-            diffusion_stage = fi.allpass_fcomb(max_d1, d1, g) : fi.allpass_fcomb(max_d2, d2, g*0.9)
+            diffusion_stage = fi.allpass_fcomb(max_d1, d1, g) : fi.allpass_fcomb(max_d2, d2, g*0.9) :fi.allpass_fcomb(max_d3, d3, g*0.8)
             with {
                 max_delay_ms = 50;
                 max_d1 = int(max_delay_ms * ma.SR / 1000) + 1;
                 max_d2 = int(max_delay_ms * ma.SR / 1000) + 1;
+                max_d3 = int(max_delay_ms * ma.SR / 1000) + 1;
+
 
                 base_d1_ms = 7 + spread * 0.5;
                 base_d2_ms = 11.3 + spread * 0.7;
+                base_d3_ms = 15.2 + spread * 0.9;
                 mod_rate1 = 0.15 + spread * 0.02;
                 mod_rate2 = 0.23 + spread * 0.03;
+                mod_rate3 = 0.31 + spread * 0.05;
                 mod_depth_ms = 1.5;
 
                 d1_raw = (base_d1_ms + os.lf_triangle(mod_rate1) * mod_depth_ms) * ma.SR / 1000;
                 d2_raw = (base_d2_ms + os.lf_triangle(mod_rate2) * mod_depth_ms) * ma.SR / 1000;
+                d3_raw = (base_d2_ms + os.lf_triangle(mod_rate3) * mod_depth_ms) * ma.SR / 1000;
+
 
                 d1 = max(0.0, min(float(max_d1 - 1), d1_raw));
                 d2 = max(0.0, min(float(max_d2 - 1), d2_raw));
+                d3 = max(0.0, min(float(max_d2 - 1), d2_raw));
+
 
                 g = diffusion_amount;
             };
